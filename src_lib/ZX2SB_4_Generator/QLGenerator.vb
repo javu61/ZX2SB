@@ -674,6 +674,9 @@ Public Module QLGenerator
         Dim Linea As String = ""
         Dim tipofuncion As Boolean
 
+        Dim id As TokenID = Nothing
+
+
         '+++  If ReservedFunctions.Contains(nombre) Then
         '+++   tipofuncion = True
         '+++   ElseIf ReservedProcedures.Contains(nombre) Then
