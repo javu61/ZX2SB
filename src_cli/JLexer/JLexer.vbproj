@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<AssemblyName>JLexer</AssemblyName>
+		<RootNamespace>CLI_Lexer</RootNamespace>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+
+		<OptionStrict>On</OptionStrict>
+		<OptionExplicit>On</OptionExplicit>
+
+		<!-- PUNTO DE ENTRADA EXPLÍCITO -->
+		<StartupObject>CLI_Lexer.Program_Lexer</StartupObject>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src_lib\ZX2SB_0_Common\ZX2SB_0_Common.vbproj" />
+		<ProjectReference Include="..\..\src_lib\ZX2SB_1_Lexer\ZX2SB_1_Lexer.vbproj" />
+	</ItemGroup>
+
+</Project>

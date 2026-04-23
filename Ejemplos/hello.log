@@ -1,0 +1,294 @@
+[JSemantic] Fichero C:\Proyectos\ZX2SB\ejemplos\hello.log borrado
+[JSemantic]  
+[JSemantic] - Entrada.: C:\Proyectos\ZX2SB\ejemplos\hello.irp
+[JSemantic] - Salida..: C:\Proyectos\ZX2SB\ejemplos\hello.irs
+[JSemantic] - Opciones: -nw -v 
+[JSemantic]  
+[JSemantic]  
+[JSemantic.1] IRP 1.0
+[JSemantic.1] 002: 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JSemantic.1] 003: 11 FOR J=1 to 10 : PRINT J
+[JSemantic.1] 004: 20 LET A=1: LET B=2: LET C=3
+[JSemantic.1] 005: 30 IF A=1 THEN GOTO 100
+[JSemantic.1] 006: 40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JSemantic.1] 007: 50 GOTO 9999 : REM salto inexistente, no error
+[JSemantic.1] 008: 60 PRINT "TAMPOCO DEBE VERSE"
+[JSemantic.1] 009: 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JSemantic.1] 010: 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JSemantic.1] 011: 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JSemantic.1] 012: 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JSemantic.1] 013: 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JSemantic.1] 014: 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JSemantic.1] 015: 200 FOR I=1 TO 3
+[JSemantic.1] 016: 210 PRINT "BUCLE I=";I
+[JSemantic.1] 017: 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JSemantic.1] 018: 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JSemantic.1] 019: 240 PRINT "DESPUES DEL IF EN FOR"
+[JSemantic.1] 020: 250 NEXT I
+[JSemantic.1] 021: 300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JSemantic.1] 022: 310 DATA 10,20,30
+[JSemantic.1] 023: 320 READ X
+[JSemantic.1] 024: 330 PRINT "X=";X
+[JSemantic.1] 025: 340 READ X
+[JSemantic.1] 026: 350 PRINT "X=";X
+[JSemantic.1] 027: 360 RESTORE 310
+[JSemantic.1] 028: 370 READ X
+[JSemantic.1] 029: 380 PRINT "X=";X
+[JSemantic.1] 030: 400 REM --- IF CON READ ---
+[JSemantic.1] 031: 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JSemantic.1] 032: 500 REM --- STOP INTERMEDIO ---
+[JSemantic.1] 033: 510 STOP
+[JSemantic.1] 034: 520 PRINT "NO DEBE EJECUTARSE"
+[JSemantic.1] 035: 600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JSemantic.1] 036: 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JSemantic.1] 037: 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )   AND b <> 0 THEN PRINT "OK"
+[JSemantic.1] 038: 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JSemantic.1] 039: 700 REM === FIN ===
+[JSemantic.2]      → IRS 1.0
+[JSemantic.2] IRP 1.0
+[JSemantic.2] 002: 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JSemantic.2]      → -- SRC:  10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JSemantic.2]      → 9902 10                                            ; TE_LINE
+[JSemantic.2]      → 2152 === PRUEBA COMPLETA GENERADOR ZX2SB ===       ; TK_REM
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 003: 11 FOR J=1 to 10 : PRINT J
+[JSemantic.2]      → -- SRC:  11 FOR J=1 to 10 : PRINT J
+[JSemantic.2]      → 9902 11                                            ; TE_LINE
+[JSemantic.2]      → 2136 J=1TO10                                       ; TK_FOR
+[JSemantic.2]      → 2150 J                                             ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 004: 20 LET A=1: LET B=2: LET C=3
+[JSemantic.2]      → -- SRC:  20 LET A=1: LET B=2: LET C=3
+[JSemantic.2]      → 9902 20                                            ; TE_LINE
+[JSemantic.2]      → 2142 A=1                                           ; TK_LET
+[JSemantic.2]      → 2142 B=2                                           ; TK_LET
+[JSemantic.2]      → 2142 C=3                                           ; TK_LET
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 005: 30 IF A=1 THEN GOTO 100
+[JSemantic.2]      → -- SRC:  30 IF A=1 THEN GOTO 100
+[JSemantic.2]      → 9902 30                                            ; TE_LINE
+[JSemantic.2]      → 2140 A=1                                           ; TK_IF
+[JSemantic.2]      → 1139 100                                           ; TK_GOTO
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 006: 40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JSemantic.2]      → -- SRC:  40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JSemantic.2]      → 9902 40                                            ; TE_LINE
+[JSemantic.2]      → 2150 "ESTO NO DEBE EJECUTARSE"                     ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 007: 50 GOTO 9999 : REM salto inexistente, no error
+[JSemantic.2]      → -- SRC:  50 GOTO 9999 : REM salto inexistente, no error
+[JSemantic.2]      → 9902 50                                            ; TE_LINE
+[JSemantic.2]      → 1139 9999                                          ; TK_GOTO
+[JSemantic.2]      → 2152 salto inexistente, no error                   ; TK_REM
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 008: 60 PRINT "TAMPOCO DEBE VERSE"
+[JSemantic.2]      → -- SRC:  60 PRINT "TAMPOCO DEBE VERSE"
+[JSemantic.2]      → 9902 60                                            ; TE_LINE
+[JSemantic.2]      → 2150 "TAMPOCO DEBE VERSE"                          ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 009: 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JSemantic.2]      → -- SRC:  100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JSemantic.2]      → 9902 100                                           ; TE_LINE
+[JSemantic.2]      → 2150 "ENTRA EN BLOQUE IF SIMPLE"                   ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 010: 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JSemantic.2]      → -- SRC:  110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JSemantic.2]      → 9902 110                                           ; TE_LINE
+[JSemantic.2]      → 2140 A=1                                           ; TK_IF
+[JSemantic.2]      → 2150 "IF SIMPLE CON PRINT"                         ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 011: 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JSemantic.2]      → -- SRC:  120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JSemantic.2]      → 9902 120                                           ; TE_LINE
+[JSemantic.2]      → 2140 A=1                                           ; TK_IF
+[JSemantic.2]      → 2150 "UNO"                                         ; TK_PRINT
+[JSemantic.2]      → 2150 "DOS"                                         ; TK_PRINT
+[JSemantic.2]      → 2150 "TRES"                                        ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 012: 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JSemantic.2]      → -- SRC:  130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JSemantic.2]      → 9902 130                                           ; TE_LINE
+[JSemantic.2]      → 2140 A=1                                           ; TK_IF
+[JSemantic.2]      → 2140 B=2                                           ; TK_IF
+[JSemantic.2]      → 2150 "IF DOBLE"                                    ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 013: 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JSemantic.2]      → -- SRC:  140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JSemantic.2]      → 9902 140                                           ; TE_LINE
+[JSemantic.2]      → 2140 A=1                                           ; TK_IF
+[JSemantic.2]      → 2140 B=2                                           ; TK_IF
+[JSemantic.2]      → 2140 C=3                                           ; TK_IF
+[JSemantic.2]      → 2150 "IF TRIPLE"                                   ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 014: 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JSemantic.2]      → -- SRC:  150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JSemantic.2]      → 9902 150                                           ; TE_LINE
+[JSemantic.2]      → 2140 A=1                                           ; TK_IF
+[JSemantic.2]      → 2140 B=2                                           ; TK_IF
+[JSemantic.2]      → 2140 C=3                                           ; TK_IF
+[JSemantic.2]      → 2150 "A"                                           ; TK_PRINT
+[JSemantic.2]      → 2150 "B"                                           ; TK_PRINT
+[JSemantic.2]      → 2150 "C"                                           ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 015: 200 FOR I=1 TO 3
+[JSemantic.2]      → -- SRC:  200 FOR I=1 TO 3
+[JSemantic.2]      → 9902 200                                           ; TE_LINE
+[JSemantic.2]      → 2136 I=1TO3                                        ; TK_FOR
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 016: 210 PRINT "BUCLE I=";I
+[JSemantic.2]      → -- SRC:  210 PRINT "BUCLE I=";I
+[JSemantic.2]      → 9902 210                                           ; TE_LINE
+[JSemantic.2]      → 2150 "BUCLE I=";I                                  ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 017: 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JSemantic.2]      → -- SRC:  220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JSemantic.2]      → 9902 220                                           ; TE_LINE
+[JSemantic.2]      → 2140 I=2                                           ; TK_IF
+[JSemantic.2]      → 2150 "IF DENTRO DEL FOR"                           ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 018: 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JSemantic.2]      → -- SRC:  230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JSemantic.2]      → 9902 230                                           ; TE_LINE
+[JSemantic.2]      → 2140 I=2                                           ; TK_IF
+[JSemantic.2]      → 2142 B=4                                           ; TK_LET
+[JSemantic.2]      → 1139 8888                                          ; TK_GOTO
+[JSemantic.2]      → 2142 A=9                                           ; TK_LET
+[JSemantic.2]      → 2152 código inalcanzable                           ; TK_REM
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 019: 240 PRINT "DESPUES DEL IF EN FOR"
+[JSemantic.2]      → -- SRC:  240 PRINT "DESPUES DEL IF EN FOR"
+[JSemantic.2]      → 9902 240                                           ; TE_LINE
+[JSemantic.2]      → 2150 "DESPUES DEL IF EN FOR"                       ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 020: 250 NEXT I
+[JSemantic.2]      → -- SRC:  250 NEXT I
+[JSemantic.2]      → 9902 250                                           ; TE_LINE
+[JSemantic.2]      → 2146 I                                             ; TK_NEXT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 021: 300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JSemantic.2]      → -- SRC:  300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JSemantic.2]      → 9902 300                                           ; TE_LINE
+[JSemantic.2]      → 2152 --- PRUEBA READ / DATA / RESTORE ---          ; TK_REM
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 022: 310 DATA 10,20,30
+[JSemantic.2]      → -- SRC:  310 DATA 10,20,30
+[JSemantic.2]      → 9902 310                                           ; TE_LINE
+[JSemantic.2]      → 1131 10,20,30                                      ; TK_DATA
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 023: 320 READ X
+[JSemantic.2]      → -- SRC:  320 READ X
+[JSemantic.2]      → 9902 320                                           ; TE_LINE
+[JSemantic.2]      → 1151 X                                             ; TK_READ
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 024: 330 PRINT "X=";X
+[JSemantic.2]      → -- SRC:  330 PRINT "X=";X
+[JSemantic.2]      → 9902 330                                           ; TE_LINE
+[JSemantic.2]      → 2150 "X=";X                                        ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 025: 340 READ X
+[JSemantic.2]      → -- SRC:  340 READ X
+[JSemantic.2]      → 9902 340                                           ; TE_LINE
+[JSemantic.2]      → 1151 X                                             ; TK_READ
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 026: 350 PRINT "X=";X
+[JSemantic.2]      → -- SRC:  350 PRINT "X=";X
+[JSemantic.2]      → 9902 350                                           ; TE_LINE
+[JSemantic.2]      → 2150 "X=";X                                        ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 027: 360 RESTORE 310
+[JSemantic.2]      → -- SRC:  360 RESTORE 310
+[JSemantic.2]      → 9902 360                                           ; TE_LINE
+[JSemantic.2]      → 1153 310                                           ; TK_RESTORE
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 028: 370 READ X
+[JSemantic.2]      → -- SRC:  370 READ X
+[JSemantic.2]      → 9902 370                                           ; TE_LINE
+[JSemantic.2]      → 1151 X                                             ; TK_READ
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 029: 380 PRINT "X=";X
+[JSemantic.2]      → -- SRC:  380 PRINT "X=";X
+[JSemantic.2]      → 9902 380                                           ; TE_LINE
+[JSemantic.2]      → 2150 "X=";X                                        ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 030: 400 REM --- IF CON READ ---
+[JSemantic.2]      → -- SRC:  400 REM --- IF CON READ ---
+[JSemantic.2]      → 9902 400                                           ; TE_LINE
+[JSemantic.2]      → 2152 --- IF CON READ ---                           ; TK_REM
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 031: 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JSemantic.2]      → -- SRC:  410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JSemantic.2]      → 9902 410                                           ; TE_LINE
+[JSemantic.2]      → 2140 A=1                                           ; TK_IF
+[JSemantic.2]      → 1151 X                                             ; TK_READ
+[JSemantic.2]      → 2150 "READ EN IF=";X                               ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 032: 500 REM --- STOP INTERMEDIO ---
+[JSemantic.2]      → -- SRC:  500 REM --- STOP INTERMEDIO ---
+[JSemantic.2]      → 9902 500                                           ; TE_LINE
+[JSemantic.2]      → 2152 --- STOP INTERMEDIO ---                       ; TK_REM
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 033: 510 STOP
+[JSemantic.2]      → -- SRC:  510 STOP
+[JSemantic.2]      → 9902 510                                           ; TE_LINE
+[JSemantic.2]      → 1160                                               ; TK_STOP
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 034: 520 PRINT "NO DEBE EJECUTARSE"
+[JSemantic.2]      → -- SRC:  520 PRINT "NO DEBE EJECUTARSE"
+[JSemantic.2]      → 9902 520                                           ; TE_LINE
+[JSemantic.2]      → 2150 "NO DEBE EJECUTARSE"                          ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 035: 600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JSemantic.2]      → -- SRC:  600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JSemantic.2]      → 9902 600                                           ; TE_LINE
+[JSemantic.2]      → 2152 --- IF MULTIPLE FINAL MALVADO ---             ; TK_REM
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 036: 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JSemantic.2]      → -- SRC:  610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JSemantic.2]      → 9902 610                                           ; TE_LINE
+[JSemantic.2]      → 2140 A=1                                           ; TK_IF
+[JSemantic.2]      → 2140 B>2                                           ; TK_IF
+[JSemantic.2]      → 2140 C<>3                                          ; TK_IF
+[JSemantic.2]      → 2150 "X"                                           ; TK_PRINT
+[JSemantic.2]      → 2140 A=1                                           ; TK_IF
+[JSemantic.2]      → 2150 "Y"                                           ; TK_PRINT
+[JSemantic.2]      → 2140 B=2                                           ; TK_IF
+[JSemantic.2]      → 2150 "Z"                                           ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 037: 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )   AND b <> 0 THEN PRINT "OK"
+[JSemantic.2]      → -- SRC:  650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )   AND b <> 0 THEN PRINT "OK"
+[JSemantic.2]      → 9902 650                                           ; TE_LINE
+[JSemantic.2]      → 2140 A(BX+C+5,Z*4+F)=C(t*4) AND b<>0               ; TK_IF
+[JSemantic.2]      → 2150 "OK"                                          ; TK_PRINT
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 038: 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JSemantic.2]      → -- SRC:  660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JSemantic.2]      → 9902 660                                           ; TE_LINE
+[JSemantic.2]      → 2142 A(BX+C+5,Z*4+F)=C(t*4)                        ; TK_LET
+[JSemantic.2]      → 2142 B=C^3                                         ; TK_LET
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2] 039: 700 REM === FIN ===
+[JSemantic.2]      → -- SRC:  700 REM === FIN ===
+[JSemantic.2]      → 9902 700                                           ; TE_LINE
+[JSemantic.2]      → 2152 === FIN ===                                   ; TK_REM
+[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2]      → VAR  VAR 1.0
+[JSemantic.2]      → VAR  
+[JSemantic.2]      → VAR  NUM A [A ]
+[JSemantic.2]      → VAR  NUM B [A ]
+[JSemantic.2]      → VAR  NUM C [AU]
+[JSemantic.2]      → VAR  NUM X [AU]
+[JSemantic.2]      → VAR  NUM TO [ U]
+[JSemantic.2]      → VAR  NUM J [ U]
+[JSemantic.2]      → VAR  NUM I [ U]
+[JSemantic.2]      → VAR  NUM T [ U]
+[JSemantic.2]      → VAR  
+[JSemantic.2]      → VAR  ENDVARS
+[JSemantic.2]      → VAR  
+[JSemantic.2]      → DATA  DATA 1.0
+[JSemantic.2]      → DATA  
+[JSemantic.2]      → DATA  NODE 310 ","
+[JSemantic.2]      → DATA  
+[JSemantic.2]      → DATA  ENDDATA
+[JSemantic.2]      → DATA  
+[JSemantic]  
+[JSemantic] Finalizado correctamente

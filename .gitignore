@@ -1,0 +1,8 @@
+# Visual Studio
+.vs/
+*.vsidx
+
+# Binarios y temporales (recomendado)
+bin/
+obj/
+

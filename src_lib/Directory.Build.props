@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <!-- Carpeta base de salida -->
+    <BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
+
+    <!-- Separar Debug / Release -->
+    <OutputPath>$(BaseOutputPath)$(Configuration)\</OutputPath>
+
+    <!-- Carpetas de obj -->
+    <BaseIntermediateOutputPath>$(SolutionDir)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

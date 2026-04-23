@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<AssemblyName>LJRenum</AssemblyName>
+		<TargetFramework>net8.0</TargetFramework>
+		<RootNamespace>ZX2SB.Renumerador</RootNamespace>
+		<OutputType>Library</OutputType>
+		<OptionStrict>On</OptionStrict>
+		<OptionExplicit>On</OptionExplicit>	
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\ZX2SB_0_Common\ZX2SB_0_Common.vbproj" />
+	</ItemGroup>
+</Project>

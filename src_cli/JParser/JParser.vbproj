@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<AssemblyName>JParser</AssemblyName>
+		<RootNamespace>CLI_Parser</RootNamespace>
+		<OutputType>EXE</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<OptionStrict>On</OptionStrict>
+		<OptionExplicit>On</OptionExplicit>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src_lib\ZX2SB_0_Common\ZX2SB_0_Common.vbproj" />
+		<ProjectReference Include="..\..\src_lib\ZX2SB_2_Parser\ZX2SB_2_Parser.vbproj" />
+	</ItemGroup>
+</Project>

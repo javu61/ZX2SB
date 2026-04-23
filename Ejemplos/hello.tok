@@ -1,0 +1,414 @@
+TOK 1.0
+-- SRC:  10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+9902 [1,1] 10                                      ; TE_LINE
+2152 [1,4]                                         ; TK_REM
+1006 [1,8] === PRUEBA COMPLETA GENERADOR ZX2SB === ; TE_STRING
+9901 [1,0]                                         ; TE_EOL
+-- SRC:  11 FOR J=1 to 10 : PRINT J
+9902 [2,1] 11                                      ; TE_LINE
+2136 [2,4]                                         ; TK_FOR
+1004 [2,8] J                                       ; TE_IDENT
+1412 [2,9]                                         ; TOP_EQ
+1005 [2,10] 1                                      ; TE_NUMBER
+1162 [2,12]                                        ; TK_TO
+1005 [2,15] 10                                     ; TE_NUMBER
+1522 [2,18]                                        ; TS_DOSPUNTOS
+2150 [2,20]                                        ; TK_PRINT
+1004 [2,26] J                                      ; TE_IDENT
+9901 [2,0]                                         ; TE_EOL
+-- SRC:  20 LET A=1: LET B=2: LET C=3
+9902 [3,1] 20                                      ; TE_LINE
+2142 [3,4]                                         ; TK_LET
+1004 [3,8] A                                       ; TE_IDENT
+1412 [3,9]                                         ; TOP_EQ
+1005 [3,10] 1                                      ; TE_NUMBER
+1522 [3,11]                                        ; TS_DOSPUNTOS
+2142 [3,13]                                        ; TK_LET
+1004 [3,17] B                                      ; TE_IDENT
+1412 [3,18]                                        ; TOP_EQ
+1005 [3,19] 2                                      ; TE_NUMBER
+1522 [3,20]                                        ; TS_DOSPUNTOS
+2142 [3,22]                                        ; TK_LET
+1004 [3,26] C                                      ; TE_IDENT
+1412 [3,27]                                        ; TOP_EQ
+1005 [3,28] 3                                      ; TE_NUMBER
+9901 [3,0]                                         ; TE_EOL
+-- SRC:  30 IF A=1 THEN GOTO 100
+9902 [4,1] 30                                      ; TE_LINE
+2140 [4,4]                                         ; TK_IF
+1004 [4,7] A                                       ; TE_IDENT
+1412 [4,8]                                         ; TOP_EQ
+1005 [4,9] 1                                       ; TE_NUMBER
+1161 [4,11]                                        ; TK_THEN
+1139 [4,16]                                        ; TK_GOTO
+1005 [4,21] 100                                    ; TE_NUMBER
+9901 [4,0]                                         ; TE_EOL
+-- SRC:  40 PRINT "ESTO NO DEBE EJECUTARSE"
+9902 [5,1] 40                                      ; TE_LINE
+2150 [5,4]                                         ; TK_PRINT
+1006 [5,10] ESTO NO DEBE EJECUTARSE                ; TE_STRING
+9901 [5,0]                                         ; TE_EOL
+-- SRC:  50 GOTO 9999 : REM salto inexistente, no error
+9902 [6,1] 50                                      ; TE_LINE
+1139 [6,4]                                         ; TK_GOTO
+1005 [6,9] 9999                                    ; TE_NUMBER
+1522 [6,14]                                        ; TS_DOSPUNTOS
+2152 [6,16]                                        ; TK_REM
+1006 [6,20] salto inexistente, no error            ; TE_STRING
+9901 [6,0]                                         ; TE_EOL
+-- SRC:  60 PRINT "TAMPOCO DEBE VERSE"
+9902 [7,1] 60                                      ; TE_LINE
+2150 [7,4]                                         ; TK_PRINT
+1006 [7,10] TAMPOCO DEBE VERSE                     ; TE_STRING
+9901 [7,0]                                         ; TE_EOL
+-- SRC:  100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+9902 [8,1] 100                                     ; TE_LINE
+2150 [8,5]                                         ; TK_PRINT
+1006 [8,11] ENTRA EN BLOQUE IF SIMPLE              ; TE_STRING
+9901 [8,0]                                         ; TE_EOL
+-- SRC:  110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+9902 [9,1] 110                                     ; TE_LINE
+2140 [9,5]                                         ; TK_IF
+1004 [9,8] A                                       ; TE_IDENT
+1412 [9,9]                                         ; TOP_EQ
+1005 [9,10] 1                                      ; TE_NUMBER
+1161 [9,12]                                        ; TK_THEN
+2150 [9,17]                                        ; TK_PRINT
+1006 [9,23] IF SIMPLE CON PRINT                    ; TE_STRING
+9901 [9,0]                                         ; TE_EOL
+-- SRC:  120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+9902 [10,1] 120                                    ; TE_LINE
+2140 [10,5]                                        ; TK_IF
+1004 [10,8] A                                      ; TE_IDENT
+1412 [10,9]                                        ; TOP_EQ
+1005 [10,10] 1                                     ; TE_NUMBER
+1161 [10,12]                                       ; TK_THEN
+2150 [10,17]                                       ; TK_PRINT
+1006 [10,23] UNO                                   ; TE_STRING
+1522 [10,29]                                       ; TS_DOSPUNTOS
+2150 [10,31]                                       ; TK_PRINT
+1006 [10,37] DOS                                   ; TE_STRING
+1522 [10,43]                                       ; TS_DOSPUNTOS
+2150 [10,45]                                       ; TK_PRINT
+1006 [10,51] TRES                                  ; TE_STRING
+9901 [10,0]                                        ; TE_EOL
+-- SRC:  130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+9902 [11,1] 130                                    ; TE_LINE
+2140 [11,5]                                        ; TK_IF
+1004 [11,8] A                                      ; TE_IDENT
+1412 [11,9]                                        ; TOP_EQ
+1005 [11,10] 1                                     ; TE_NUMBER
+1161 [11,12]                                       ; TK_THEN
+2140 [11,17]                                       ; TK_IF
+1004 [11,20] B                                     ; TE_IDENT
+1412 [11,21]                                       ; TOP_EQ
+1005 [11,22] 2                                     ; TE_NUMBER
+1161 [11,24]                                       ; TK_THEN
+2150 [11,29]                                       ; TK_PRINT
+1006 [11,35] IF DOBLE                              ; TE_STRING
+9901 [11,0]                                        ; TE_EOL
+-- SRC:  140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+9902 [12,1] 140                                    ; TE_LINE
+2140 [12,5]                                        ; TK_IF
+1004 [12,8] A                                      ; TE_IDENT
+1412 [12,9]                                        ; TOP_EQ
+1005 [12,10] 1                                     ; TE_NUMBER
+1161 [12,12]                                       ; TK_THEN
+2140 [12,17]                                       ; TK_IF
+1004 [12,20] B                                     ; TE_IDENT
+1412 [12,21]                                       ; TOP_EQ
+1005 [12,22] 2                                     ; TE_NUMBER
+1161 [12,24]                                       ; TK_THEN
+2140 [12,29]                                       ; TK_IF
+1004 [12,32] C                                     ; TE_IDENT
+1412 [12,33]                                       ; TOP_EQ
+1005 [12,34] 3                                     ; TE_NUMBER
+1161 [12,36]                                       ; TK_THEN
+2150 [12,41]                                       ; TK_PRINT
+1006 [12,47] IF TRIPLE                             ; TE_STRING
+9901 [12,0]                                        ; TE_EOL
+-- SRC:  150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+9902 [13,1] 150                                    ; TE_LINE
+2140 [13,5]                                        ; TK_IF
+1004 [13,8] A                                      ; TE_IDENT
+1412 [13,9]                                        ; TOP_EQ
+1005 [13,10] 1                                     ; TE_NUMBER
+1161 [13,12]                                       ; TK_THEN
+2140 [13,17]                                       ; TK_IF
+1004 [13,20] B                                     ; TE_IDENT
+1412 [13,21]                                       ; TOP_EQ
+1005 [13,22] 2                                     ; TE_NUMBER
+1161 [13,24]                                       ; TK_THEN
+2140 [13,29]                                       ; TK_IF
+1004 [13,32] C                                     ; TE_IDENT
+1412 [13,33]                                       ; TOP_EQ
+1005 [13,34] 3                                     ; TE_NUMBER
+1161 [13,36]                                       ; TK_THEN
+2150 [13,41]                                       ; TK_PRINT
+1006 [13,47] A                                     ; TE_STRING
+1522 [13,51]                                       ; TS_DOSPUNTOS
+2150 [13,53]                                       ; TK_PRINT
+1006 [13,59] B                                     ; TE_STRING
+1522 [13,63]                                       ; TS_DOSPUNTOS
+2150 [13,65]                                       ; TK_PRINT
+1006 [13,71] C                                     ; TE_STRING
+9901 [13,0]                                        ; TE_EOL
+-- SRC:  200 FOR I=1 TO 3
+9902 [14,1] 200                                    ; TE_LINE
+2136 [14,5]                                        ; TK_FOR
+1004 [14,9] I                                      ; TE_IDENT
+1412 [14,10]                                       ; TOP_EQ
+1005 [14,11] 1                                     ; TE_NUMBER
+1162 [14,13]                                       ; TK_TO
+1005 [14,16] 3                                     ; TE_NUMBER
+9901 [14,0]                                        ; TE_EOL
+-- SRC:  210 PRINT "BUCLE I=";I
+9902 [15,1] 210                                    ; TE_LINE
+2150 [15,5]                                        ; TK_PRINT
+1006 [15,11] BUCLE I=                              ; TE_STRING
+1521 [15,21]                                       ; TS_PUNTOYCOMA
+1004 [15,22] I                                     ; TE_IDENT
+9901 [15,0]                                        ; TE_EOL
+-- SRC:  220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+9902 [16,1] 220                                    ; TE_LINE
+2140 [16,5]                                        ; TK_IF
+1004 [16,8] I                                      ; TE_IDENT
+1412 [16,9]                                        ; TOP_EQ
+1005 [16,10] 2                                     ; TE_NUMBER
+1161 [16,12]                                       ; TK_THEN
+2150 [16,17]                                       ; TK_PRINT
+1006 [16,23] IF DENTRO DEL FOR                     ; TE_STRING
+9901 [16,0]                                        ; TE_EOL
+-- SRC:  230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+9902 [17,1] 230                                    ; TE_LINE
+2140 [17,5]                                        ; TK_IF
+1004 [17,8] I                                      ; TE_IDENT
+1412 [17,9]                                        ; TOP_EQ
+1005 [17,10] 2                                     ; TE_NUMBER
+1161 [17,12]                                       ; TK_THEN
+2142 [17,17]                                       ; TK_LET
+1004 [17,21] B                                     ; TE_IDENT
+1412 [17,22]                                       ; TOP_EQ
+1005 [17,23] 4                                     ; TE_NUMBER
+1522 [17,25]                                       ; TS_DOSPUNTOS
+1139 [17,27]                                       ; TK_GOTO
+1005 [17,32] 8888                                  ; TE_NUMBER
+1522 [17,37]                                       ; TS_DOSPUNTOS
+2142 [17,39]                                       ; TK_LET
+1004 [17,43] A                                     ; TE_IDENT
+1412 [17,44]                                       ; TOP_EQ
+1005 [17,45] 9                                     ; TE_NUMBER
+1522 [17,47]                                       ; TS_DOSPUNTOS
+2152 [17,49]                                       ; TK_REM
+1006 [17,53] código inalcanzable                   ; TE_STRING
+9901 [17,0]                                        ; TE_EOL
+-- SRC:  240 PRINT "DESPUES DEL IF EN FOR"
+9902 [18,1] 240                                    ; TE_LINE
+2150 [18,5]                                        ; TK_PRINT
+1006 [18,11] DESPUES DEL IF EN FOR                 ; TE_STRING
+9901 [18,0]                                        ; TE_EOL
+-- SRC:  250 NEXT I
+9902 [19,1] 250                                    ; TE_LINE
+2146 [19,5]                                        ; TK_NEXT
+1004 [19,10] I                                     ; TE_IDENT
+9901 [19,0]                                        ; TE_EOL
+-- SRC:  300 REM --- PRUEBA READ / DATA / RESTORE ---
+9902 [20,1] 300                                    ; TE_LINE
+2152 [20,5]                                        ; TK_REM
+1006 [20,9] --- PRUEBA READ / DATA / RESTORE ---   ; TE_STRING
+9901 [20,0]                                        ; TE_EOL
+-- SRC:  310 DATA 10,20,30
+9902 [21,1] 310                                    ; TE_LINE
+1131 [21,5]                                        ; TK_DATA
+1005 [21,10] 10                                    ; TE_NUMBER
+1520 [21,12]                                       ; TS_COMMA
+1005 [21,13] 20                                    ; TE_NUMBER
+1520 [21,15]                                       ; TS_COMMA
+1005 [21,16] 30                                    ; TE_NUMBER
+9901 [21,0]                                        ; TE_EOL
+-- SRC:  320 READ X
+9902 [22,1] 320                                    ; TE_LINE
+1151 [22,5]                                        ; TK_READ
+1004 [22,10] X                                     ; TE_IDENT
+9901 [22,0]                                        ; TE_EOL
+-- SRC:  330 PRINT "X=";X
+9902 [23,1] 330                                    ; TE_LINE
+2150 [23,5]                                        ; TK_PRINT
+1006 [23,11] X=                                    ; TE_STRING
+1521 [23,15]                                       ; TS_PUNTOYCOMA
+1004 [23,16] X                                     ; TE_IDENT
+9901 [23,0]                                        ; TE_EOL
+-- SRC:  340 READ X
+9902 [24,1] 340                                    ; TE_LINE
+1151 [24,5]                                        ; TK_READ
+1004 [24,10] X                                     ; TE_IDENT
+9901 [24,0]                                        ; TE_EOL
+-- SRC:  350 PRINT "X=";X
+9902 [25,1] 350                                    ; TE_LINE
+2150 [25,5]                                        ; TK_PRINT
+1006 [25,11] X=                                    ; TE_STRING
+1521 [25,15]                                       ; TS_PUNTOYCOMA
+1004 [25,16] X                                     ; TE_IDENT
+9901 [25,0]                                        ; TE_EOL
+-- SRC:  360 RESTORE 310
+9902 [26,1] 360                                    ; TE_LINE
+1153 [26,5]                                        ; TK_RESTORE
+1005 [26,13] 310                                   ; TE_NUMBER
+9901 [26,0]                                        ; TE_EOL
+-- SRC:  370 READ X
+9902 [27,1] 370                                    ; TE_LINE
+1151 [27,5]                                        ; TK_READ
+1004 [27,10] X                                     ; TE_IDENT
+9901 [27,0]                                        ; TE_EOL
+-- SRC:  380 PRINT "X=";X
+9902 [28,1] 380                                    ; TE_LINE
+2150 [28,5]                                        ; TK_PRINT
+1006 [28,11] X=                                    ; TE_STRING
+1521 [28,15]                                       ; TS_PUNTOYCOMA
+1004 [28,16] X                                     ; TE_IDENT
+9901 [28,0]                                        ; TE_EOL
+-- SRC:  400 REM --- IF CON READ ---
+9902 [29,1] 400                                    ; TE_LINE
+2152 [29,5]                                        ; TK_REM
+1006 [29,9] --- IF CON READ ---                    ; TE_STRING
+9901 [29,0]                                        ; TE_EOL
+-- SRC:  410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+9902 [30,1] 410                                    ; TE_LINE
+2140 [30,5]                                        ; TK_IF
+1004 [30,8] A                                      ; TE_IDENT
+1412 [30,9]                                        ; TOP_EQ
+1005 [30,10] 1                                     ; TE_NUMBER
+1161 [30,12]                                       ; TK_THEN
+1151 [30,17]                                       ; TK_READ
+1004 [30,22] X                                     ; TE_IDENT
+1522 [30,24]                                       ; TS_DOSPUNTOS
+2150 [30,26]                                       ; TK_PRINT
+1006 [30,32] READ EN IF=                           ; TE_STRING
+1521 [30,45]                                       ; TS_PUNTOYCOMA
+1004 [30,46] X                                     ; TE_IDENT
+9901 [30,0]                                        ; TE_EOL
+-- SRC:  500 REM --- STOP INTERMEDIO ---
+9902 [31,1] 500                                    ; TE_LINE
+2152 [31,5]                                        ; TK_REM
+1006 [31,9] --- STOP INTERMEDIO ---                ; TE_STRING
+9901 [31,0]                                        ; TE_EOL
+-- SRC:  510 STOP
+9902 [32,1] 510                                    ; TE_LINE
+1160 [32,5]                                        ; TK_STOP
+9901 [32,0]                                        ; TE_EOL
+-- SRC:  520 PRINT "NO DEBE EJECUTARSE"
+9902 [33,1] 520                                    ; TE_LINE
+2150 [33,5]                                        ; TK_PRINT
+1006 [33,11] NO DEBE EJECUTARSE                    ; TE_STRING
+9901 [33,0]                                        ; TE_EOL
+-- SRC:  600 REM --- IF MULTIPLE FINAL MALVADO ---
+9902 [34,1] 600                                    ; TE_LINE
+2152 [34,5]                                        ; TK_REM
+1006 [34,9] --- IF MULTIPLE FINAL MALVADO ---      ; TE_STRING
+9901 [34,0]                                        ; TE_EOL
+-- SRC:  610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+9902 [35,1] 610                                    ; TE_LINE
+2140 [35,5]                                        ; TK_IF
+1004 [35,8] A                                      ; TE_IDENT
+1412 [35,9]                                        ; TOP_EQ
+1005 [35,10] 1                                     ; TE_NUMBER
+1161 [35,12]                                       ; TK_THEN
+2140 [35,17]                                       ; TK_IF
+1004 [35,20] B                                     ; TE_IDENT
+1415 [35,21]                                       ; TOP_GT
+1005 [35,22] 2                                     ; TE_NUMBER
+1161 [35,24]                                       ; TK_THEN
+2140 [35,29]                                       ; TK_IF
+1004 [35,32] C                                     ; TE_IDENT
+1413 [35,33]                                       ; TOP_NE
+1005 [35,35] 3                                     ; TE_NUMBER
+1161 [35,37]                                       ; TK_THEN
+2150 [35,42]                                       ; TK_PRINT
+1006 [35,48] X                                     ; TE_STRING
+1522 [35,52]                                       ; TS_DOSPUNTOS
+2140 [35,54]                                       ; TK_IF
+1004 [35,57] A                                     ; TE_IDENT
+1412 [35,58]                                       ; TOP_EQ
+1005 [35,59] 1                                     ; TE_NUMBER
+1161 [35,61]                                       ; TK_THEN
+2150 [35,66]                                       ; TK_PRINT
+1006 [35,72] Y                                     ; TE_STRING
+1522 [35,76]                                       ; TS_DOSPUNTOS
+2140 [35,78]                                       ; TK_IF
+1004 [35,81] B                                     ; TE_IDENT
+1412 [35,82]                                       ; TOP_EQ
+1005 [35,83] 2                                     ; TE_NUMBER
+1161 [35,85]                                       ; TK_THEN
+2150 [35,90]                                       ; TK_PRINT
+1006 [35,96] Z                                     ; TE_STRING
+9901 [35,0]                                        ; TE_EOL
+-- SRC:  650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )   AND b <> 0 THEN PRINT "OK"
+9902 [36,1] 650                                    ; TE_LINE
+2140 [36,5]                                        ; TK_IF
+1004 [36,8] A                                      ; TE_IDENT
+1518 [36,10]                                       ; TS_PAR_ABIERTO
+1004 [36,12] BX                                    ; TE_IDENT
+1407 [36,15]                                       ; TOP_PLUS
+1004 [36,17] C                                     ; TE_IDENT
+1407 [36,19]                                       ; TOP_PLUS
+1005 [36,22] 5                                     ; TE_NUMBER
+1520 [36,26]                                       ; TS_COMMA
+1004 [36,28] Z                                     ; TE_IDENT
+1409 [36,30]                                       ; TOP_MUL
+1005 [36,32] 4                                     ; TE_NUMBER
+1407 [36,34]                                       ; TOP_PLUS
+1004 [36,36] F                                     ; TE_IDENT
+1519 [36,37]                                       ; TS_PAR_CERRADO
+1412 [36,39]                                       ; TOP_EQ
+1004 [36,41] C                                     ; TE_IDENT
+1518 [36,43]                                       ; TS_PAR_ABIERTO
+1004 [36,45] t                                     ; TE_IDENT
+1409 [36,47]                                       ; TOP_MUL
+1005 [36,49] 4                                     ; TE_NUMBER
+1519 [36,51]                                       ; TS_PAR_CERRADO
+1004 [36,55] AND                                   ; TE_IDENT
+1004 [36,59] b                                     ; TE_IDENT
+1413 [36,61]                                       ; TOP_NE
+1005 [36,64] 0                                     ; TE_NUMBER
+1161 [36,66]                                       ; TK_THEN
+2150 [36,71]                                       ; TK_PRINT
+1006 [36,77] OK                                    ; TE_STRING
+9901 [36,0]                                        ; TE_EOL
+-- SRC:  660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+9902 [37,1] 660                                    ; TE_LINE
+2142 [37,5]                                        ; TK_LET
+1004 [37,11] A                                     ; TE_IDENT
+1518 [37,14]                                       ; TS_PAR_ABIERTO
+1004 [37,16] BX                                    ; TE_IDENT
+1407 [37,18]                                       ; TOP_PLUS
+1004 [37,19] C                                     ; TE_IDENT
+1407 [37,21]                                       ; TOP_PLUS
+1005 [37,22] 5                                     ; TE_NUMBER
+1520 [37,23]                                       ; TS_COMMA
+1004 [37,25] Z                                     ; TE_IDENT
+1409 [37,27]                                       ; TOP_MUL
+1005 [37,29] 4                                     ; TE_NUMBER
+1407 [37,30]                                       ; TOP_PLUS
+1004 [37,31] F                                     ; TE_IDENT
+1519 [37,32]                                       ; TS_PAR_CERRADO
+1412 [37,33]                                       ; TOP_EQ
+1004 [37,34] C                                     ; TE_IDENT
+1518 [37,36]                                       ; TS_PAR_ABIERTO
+1004 [37,37] t                                     ; TE_IDENT
+1409 [37,39]                                       ; TOP_MUL
+1005 [37,40] 4                                     ; TE_NUMBER
+1519 [37,41]                                       ; TS_PAR_CERRADO
+1522 [37,43]                                       ; TS_DOSPUNTOS
+2142 [37,45]                                       ; TK_LET
+1004 [37,49] B                                     ; TE_IDENT
+1412 [37,50]                                       ; TOP_EQ
+1004 [37,51] C                                     ; TE_IDENT
+1411 [37,52]                                       ; TOP_POW
+1005 [37,54] 3                                     ; TE_NUMBER
+9901 [37,0]                                        ; TE_EOL
+-- SRC:  700 REM === FIN ===
+9902 [38,1] 700                                    ; TE_LINE
+2152 [38,5]                                        ; TK_REM
+1006 [38,9] === FIN ===                            ; TE_STRING
+9901 [38,0]                                        ; TE_EOL
+9900 [38,0]                                        ; TE_EOF
