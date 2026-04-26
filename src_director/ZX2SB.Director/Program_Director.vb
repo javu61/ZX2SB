@@ -18,7 +18,7 @@ Module Program_Director
     ' ===============================
     ' Punto de entrada del Director
     ' ===============================
-    Sub Main1(args As String())
+    Sub Main(args As String())
 
         ' --- UTF-8 siempre ---
         Console.OutputEncoding = Encoding.UTF8

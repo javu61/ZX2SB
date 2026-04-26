@@ -1,8 +1,8 @@
-' ============================================================
+' ==============================================================
 '  ZX2SB - QL Auxiliary Functions Generator
-'  Genera implementaciones SuperBasic para FN_xxx
+'  Genera implementaciones SuperBasic para funciones auxiliares
 '     MEJORABLES: VAL, BIN, CODE
-' ============================================================
+' ==============================================================
 
 Imports System.ComponentModel
 Imports System.Runtime.InteropServices.JavaScript.JSType
@@ -12,48 +12,47 @@ Public Class QLFnLibrary
 
 
     ' ------------------------------------------------------------
-    ' Genera el bloque completo DEFine PROC FN_xxx ...
+    ' Genera el bloque completo DEFine PROC ...
     ' ------------------------------------------------------------
-    Public Function GenerateFnProcedure(startLine As Integer, fnName As String, ManejoFunciones As Integer) As List(Of String)
+    Public Function GenerateFnProcedure(startLine As Integer, tk As Token, ManejoFunciones As Integer) As List(Of String)
 
         Dim lines As New List(Of String)
-        Dim name As String = fnName.ToUpper()
 
         ' ¿Devuelve valor?
-        Dim EsFuncion As Boolean = IsValueReturningFunction(name)
+        Dim EsFuncion As Boolean = If(Token.GetTipo(tk.ID) = TokenTipo.TT_FUNCION, True, False)
 
         ' Lista de parámetros
         Dim paramList As String = ""
 
-        Select Case fnName.ToUpper()
-            ' -------------------------------------------------
-            ' INIT es la rutina que inicializa el sistema
-            ' -------------------------------------------------
-            Case "INIT"
-                paramList = ""
-
+        Select Case tk.ID
                 ' -------------------------------------------------
                 ' Funciones SIN parámetros
                 ' -------------------------------------------------
-            Case "RND", "PI", "CLEAR", "CLEAR_VAR"
+            Case TokenID.TCO_INIT, TokenID.TK_RND, TokenID.TK_PI, TokenID.TK_CLEAR
                 paramList = ""
 
                  ' -------------------------------------------------
                 ' Funciones con UN parámetro NUMÉRICO
                 ' -------------------------------------------------
-            Case "CHR$", "LEN", "CODE", "BIN", "RANDOMIZE_USR", "PEEK"
+            Case TokenID.TK_CHR_S,
+                 TokenID.TK_LEN,
+                 TokenID.TK_CODE,
+                 TokenID.TK_BIN,
+                 TokenID.TK_RANDOMIZE_USR,
+                 TokenID.TK_PEEK,
+                 TokenID.TK_CLEAR_RAM
                 paramList = "(a)"     ' a es numérico
 
                 ' -------------------------------------------------
                 ' Funciones con UN parámetro CADENA
                 ' -------------------------------------------------
-            Case "VAL", "STR$", "SCREEN$"
+            Case TokenID.TK_VAL_S, TokenID.TK_STR_S, TokenID.TK_SCREEN_S
                 paramList = "(a$)"    ' a$ es cadena
 
                 ' -------------------------------------------------
                 ' Funciones con DOS parámetros NUMÉRICOS
                 ' -------------------------------------------------
-            Case "ATTR", "POINT", "POKE"
+            Case TokenID.TK_ATTR, TokenID.TK_POINT, TokenID.TK_POKE
                 paramList = "(a,b)"   ' ambos numéricos
 
                 ' -------------------------------------------------
@@ -64,94 +63,91 @@ Public Class QLFnLibrary
         End Select
 
         ' Cabecera
-        If name = "INIT" Then
+        If tk.ID = TokenID.TCO_INIT Then
             lines.Add($"{startLine} DEFine PROC " & Constantes.GQL_INIT)
         Else
             If EsFuncion Then
-                lines.Add($"{startLine} DEFine FuNction FN_{name}{paramList}")
+                lines.Add($"{startLine} DEFine Function {tk.FNMnemonic}{paramList}")
             Else
-                lines.Add($"{startLine} DEFine PROC FN_{name}{paramList}")
+                lines.Add($"{startLine} DEFine PROC {tk.FNMnemonic}{paramList}")
             End If
         End If
 
         startLine += 10
 
         ' Cuerpo
-        For Each bodyLine In GenerateFnBody(name, EsFuncion, ManejoFunciones)
+        For Each bodyLine In GenerateFnBody(tk, EsFuncion, ManejoFunciones)
             lines.Add($"{startLine} {bodyLine}")
             startLine += 10
         Next
 
         ' Cierre
-        If name = "INIT" Then
-            lines.Add($"{startLine} END DEFine " & Constantes.GQL_INIT)
+        If tk.ID = TokenID.TCO_INIT Then
+            lines.Add($"{startLine} End DEFine " & Constantes.GQL_INIT)
         Else
-            lines.Add($"{startLine} END DEFine FN_{name}")
+            lines.Add($"{startLine} End DEFine {tk.FNMnemonic}")
         End If
 
         Return lines
     End Function
 
-    Private Function IsValueReturningFunction(fnName As String) As Boolean
-        '+++ Return ReservedFunctions.Contains(fnName)
-    End Function
 
     ' ------------------------------------------------------------
-    ' Devuelve el cuerpo de la función FN_xxx en SuperBasic QL
+    ' Devuelve el cuerpo de la función auxiliar en SuperBasic QL
     ' ------------------------------------------------------------
-    Private Function GenerateFnBody(fnName As String, isFunction As Boolean, ManejoFunciones As Integer) As List(Of String)
+    Private Function GenerateFnBody(tk As Token, isFunction As Boolean, ManejoFunciones As Integer) As List(Of String)
 
-        Select Case fnName.ToUpper()
+        Select Case tk.ID
 
             ' ====================================================
             ' INIT es la rutina que inicializa el sistema
             ' ====================================================
-            Case "INIT"
+            Case TokenID.TCO_INIT
                 Return Generate_INIT()
 
             ' ====================================================
             ' B — Funciones ZX con comportamiento distinto en QL
             ' ====================================================
 
-            Case "STR$"   ' -> ZX BASIC antepone un espacio a positivos, QL no.
+            Case TokenID.TK_STR_S   ' -> ZX BASIC antepone un espacio a positivos, QL no.
                 Return Generate_Str()
-            Case "VAL"  'Retorna el valor numérico de una cadena -> QL lo hace al asignar una cadena a una numérica
+            Case TokenID.TK_VAL  'Retorna el valor numérico de una cadena -> QL lo hace al asignar una cadena a una numérica
                 Return Generate_Val()
 
-            Case "BIN"  'BIN: Convierte un número binario en decimal. -> No existe en el QL
+            Case TokenID.TK_BIN  'BIN: Convierte un número binario en decimal. -> No existe en el QL
                 Return Generate_BIN()
 
 
                 ' ====================================================
                 ' Atributos de pantalla
                 ' ====================================================
-            Case "INK"
+            Case TokenID.TK_INK
                 Return New List(Of String) From {
                         "  REM ZX attribute INK aproximado",
                         "  INK a"
                     }
-            Case "PAPER"
+            Case TokenID.TK_PAPER
                 Return New List(Of String) From {
                     "  REM ZX attribute PAPER aproximado",
                     "  PAPER a"
                     }
-            Case "BRIGHT"
+            Case TokenID.TK_BRIGHT
                 Return New List(Of String) From {
                     "  REM ZX attribute BRIGHT"
                     }
-            Case "FLASH"
+            Case TokenID.TK_FLASH
                 Return New List(Of String) From {
                     "  REM ZX attribute FLASH"
                     }
-            Case "OVER"
+            Case TokenID.TK_OVER
                 Return New List(Of String) From {
                     "  REM ZX attribute OVER"
                     }
-            Case "INVERSE"
+            Case TokenID.TK_INVERSE
                 Return New List(Of String) From {
                     "  REM ZX attribute INVERSE"
                     }
-            Case "CLEAR_VAR"
+            Case TokenID.TK_CLEAR_RAM
                 Return New List(Of String) From {
                     "  CLEAR"
                     }
@@ -161,7 +157,7 @@ Public Class QLFnLibrary
                 ' ====================================================
             Case Else
                 Dim aux As New List(Of String)
-                Dim msg As String = Constantes.C_COMILLAS & "Función ZX_BASIC " & fnName & " no soportada en el QL" & Constantes.C_COMILLAS
+                Dim msg As String = Constantes.C_COMILLAS & "Función ZX_BASIC " & tk.Mnemonic & " no soportada en el QL" & Constantes.C_COMILLAS
                 Select Case ManejoFunciones
                     Case Constantes.opFuncion_Err
                         aux.Add($"  PRINT " & msg)
@@ -180,20 +176,18 @@ Public Class QLFnLibrary
 
         Dim Lineas As New List(Of String)
 
-        '           DEFine Function FN_STR$(a)
         Lineas.Add("  IF (a < 0) THEN")
         Lineas.Add("    RETurn STR$(a)")
         Lineas.Add("  ELSE")
         Lineas.Add("    RETurn " & Constantes.C_COMILLAS & " " & Constantes.C_COMILLAS & " STR$(a)")
         Lineas.Add("  END IF")
-        '           END DEFine")
+
         Return Lineas
     End Function
     Private Function Generate_Val() As List(Of String)
 
         Dim Lineas As New List(Of String)
 
-        '           DEFine Function FN_VAL(a$)
         Lineas.Add("  LOCal i, slen, sign, n, dec, div, d")
         Lineas.Add("  LOCal digitfound")
         Lineas.Add("  :")
@@ -263,16 +257,15 @@ Public Class QLFnLibrary
         Lineas.Add("  REM 6) Resultado final")
         Lineas.Add("  RETurn sign * (n + dec / div)")
         Lineas.Add("  :")
-        '           END DEFine")
 
         Return Lineas
     End Function
     Private Function Generate_BIN_Cadena() As List(Of String)
-        ' rem Esta función no se usa en ZX, pero la pongo por completar
+        ' rem Esta función no se usa en ZX, pero la pongo por completar, nunca se va a generar realmente
         Dim Lineas As New List(Of String)
 
         Lineas.Add(" REMark ======== FUNCIONES AUXILIARES ==========")
-        Lineas.Add(" DEFine FuNction FN_BIN$(n)")
+        Lineas.Add(" DEFine FuNction ZX2SB_BIN$(n)")
         Lineas.Add("  LOCal v, bit, pow10, res$")
         Lineas.Add("  v = ABS(INT(n))")
         Lineas.Add("  IF v = 0 THEN ")
@@ -296,7 +289,6 @@ Public Class QLFnLibrary
     Private Function Generate_BIN() As List(Of String)
         Dim Lineas As New List(Of String)
 
-        'Lineas.Add(" DEFine FuNction FN_BIN(a)")
         Lineas.Add("   LOCal nro, dec, bit, pot")
         Lineas.Add("   :")
         Lineas.Add("   nro = a")
@@ -308,7 +300,7 @@ Public Class QLFnLibrary
         Lineas.Add("     REMark QL guarda nros en notaci–n exponencial, cuidado al dividir")
         Lineas.Add("     bit = INT(((nro/10) - INT(nro/10))*10 + .1)")
         Lineas.Add("     IF (bit <> 0) AND (bit <> 1) THEN ")
-        Lineas.Add("       PRINT " & Constantes.C_COMILLAS & "Error en FN_BIN, el n™mero " &
+        Lineas.Add("       PRINT " & Constantes.C_COMILLAS & "Error en BIN, el nro " &
                            Constantes.C_COMILLAS & ";a;" & Constantes.C_COMILLAS & " no es binario " & Constantes.C_COMILLAS)
         Lineas.Add("       STOP")
         Lineas.Add("     END IF ")
@@ -318,7 +310,6 @@ Public Class QLFnLibrary
         Lineas.Add("   END REPeat loop")
         Lineas.Add("   :")
         Lineas.Add("   RETurn dec")
-        'Lineas.Add(" END DEFine ")
 
         Return Lineas
     End Function

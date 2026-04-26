@@ -323,6 +323,7 @@ Public Module ProcesosGenerales
     End Function
 
     Private Sub PrepararFicheros(ByRef opts As CmdOptions)
+
         If Not File.Exists(opts.FEntrada) Then
             Console.WriteLine("ERROR: No existe el fichero de entrada. Proceso finalizado")
             Environment.Exit(1)

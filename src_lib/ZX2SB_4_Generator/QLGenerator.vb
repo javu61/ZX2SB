@@ -22,13 +22,9 @@ Public Module QLGenerator
 
     ' --- Estado del IF ZX en curso ---
     Dim IFContador As Integer = 0       ' Cuantos IF tenemos abiertos
-    Dim IFMultiple As Boolean = False   ' El IF condiciona más de una sentencia
-    Dim IFCondicion As String = ""      ' "IF <condición> THEN"
-    Dim IFSentencia As String = ""      ' Primera sentencia condicionada (candidato a IF simple)
-
 
     ' Funciones FN usadas durante la traducción
-    Private ReadOnly FuncionesFNUsadas As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+    Private ReadOnly FuncionesFNUsadas As New List(Of Token)
 
     ' Pila de seguimiento de bucles FOR
     Private ForStack As New Stack(Of String)
@@ -40,7 +36,7 @@ Public Module QLGenerator
     ' Punto de entrada
     ' ============================================================
     Public Function Ejecutar(_Opts As CmdOptions) As Integer
-
+        Dim EncontradoEOF As Boolean = False
         opts = _Opts
         NroErrores = 0
 
@@ -55,66 +51,79 @@ Public Module QLGenerator
             GrabarFuncion(writer, startLine, AuxFN.GenerateProgramInit())
 
 
-            For Each linea As String In File.ReadLines(opts.FSalidaSem)
-                If String.IsNullOrWhiteSpace(linea) Then Continue For
+            For Each LineaLeida As String In File.ReadLines(opts.FSalidaSem)
+                If String.IsNullOrWhiteSpace(LineaLeida) Then Continue For
 
-                'Primera línea, contiene la versión del fichero
+                ' ----------------------------------------------------------
+                ' Primera línea, Debe contener tipo y versión del fichero
+                ' ----------------------------------------------------------
                 If PrimeraLinea Then
-                    If Not linea.StartsWith(Constantes.SEM_NOMBRE) Then
-                        EmitirError(writer, 0, "[ERROR] No es un fichero " & Constantes.SEM_NOMBRE & ": " & linea)
+                    If Not LineaLeida.StartsWith(Constantes.SEM_NOMBRE) Then
+                        EmitirError(writer, 0, "[ERROR] No es un fichero " & Constantes.SEM_NOMBRE & ": " & LineaLeida)
                         Return (1)
                     End If
 
-                    If Not linea.StartsWith(Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION) Then
-                        EmitirError(writer, 0, "[ERROR] Versión incorrecta del fichero " & Constantes.LEX_NOMBRE & ": " & linea)
+                    If Not LineaLeida.StartsWith(Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION) Then
+                        EmitirError(writer, 0, "[ERROR] Versión incorrecta del fichero " & Constantes.LEX_NOMBRE & ": " & LineaLeida)
                         Return (1)
                     End If
                     PrimeraLinea = False
                     Continue For
                 End If
 
-                ' -----------------------------------------
-                ' Cabecera / EOF
-                ' -----------------------------------------
-                If linea.StartsWith("IRS ") Then
-                    Continue For
-                End If
-
-                If linea = "EOF" Then
-                    CerrarIF(writer)
-                    Exit For
-                End If
-
                 ' --------------------------------------------
                 ' Línea fuente original (contexto de error)
                 ' --------------------------------------------
-                If linea.StartsWith(MarcaSRC) Then
+                If LineaLeida.StartsWith(MarcaSRC) Then
                     CerrarIF(writer)
 
                     ContadorLineaInterna = 0
-                    LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, LineaZXActual, linea)
+                    LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, LineaZXActual, LineaLeida)
 
-                    ' ⚠️ TODA sentencia debe llevar número de línea, pero estas las dejamos si nro para verlas en el
-                    '    fichero generado pero no en el QL, solo si estamos en modo debug
+                    ' ⚠️ TODA sentencia debe llevar número de línea, pero estas las dejamos sin nro para
+                    '    verlas en el fichero generado pero no en el QL, solo si estamos en modo debug
                     If (opts.ModoDebug) Then
                         GrabarSalida(writer, "REM --> " & LineaParaMostrar, False)
                     End If
                     Continue For
                 End If
 
-                ' -----------------------------------------
-                ' Sentencia ejecutable (IRS plano)
-                ' -----------------------------------------
-                If linea.StartsWith("STMT") Then
-                    linea = linea.Substring(5).Trim()
-                    GenerarSentenciaQL(writer, LineaZXActual, linea)
-                End If
+                ' ----------------------------------------------------------------------------
+                ' Línea del IR, montar Token auxliar para descomponer la línea correctamente
+                ' ----------------------------------------------------------------------------
+                Dim auxTok As New Token(LineaLeida)
+
+                Select Case auxTok.ID
+                    Case TokenID.TCO_EOL
+                        CerrarIF(writer)
+                    Case TokenID.TCO_EOF
+                        EncontradoEOF = True
+                        CerrarIF(writer)
+                    Case TokenID.TCO_LINE
+                        ' Nro de línea
+                        If Not Integer.TryParse(auxTok.Value, LineaZXActual) Then
+                            EmitirError(writer, 0, $"Número de línea ZX inválido: '{auxTok.Value}'")
+                            LineaZXActual = -1
+                        End If
+                    Case Else
+                        ' Sentencia ejecutable
+                        GenerarSentenciaQL(writer, LineaZXActual, auxTok)
+                End Select
+
             Next
 
             ' -----------------------------------------
-            ' Funciones auxiliares FN_
+            ' Funciones auxiliares FN
             ' -----------------------------------------
             EmitirFuncionesAuxiliares(writer)
+
+            ' -----------------------------------------
+            ' Cierre final
+            ' -----------------------------------------
+            If Not EncontradoEOF Then
+                EmitirError(writer, 0, "[ERROR GENERADOR] Fichero IRS incompleto: falta EOF, posible fichero truncado")
+                Return 1
+            End If
 
         End Using
 
@@ -133,78 +142,67 @@ Public Module QLGenerator
         Return $"{nroInterno} {codigo}"
     End Function
 
-    Private Sub GenerarSentenciaQL(writer As StreamWriter, numeroLineaActual As Integer, stmt As String)
+    Private Sub GenerarSentenciaQL(writer As StreamWriter, numeroLineaActual As Integer, tk As Token)
+        Dim cmd As String = tk.Mnemonic
+        Dim stmt As String = tk.Value
 
-        Dim cmd As String
-        Dim resto As String
-        Dim id As TokenID
-        Dim esp As Integer = stmt.IndexOf(" "c)
+        Select Case Token.GetFamily(tk.ID)
+            Case TokenFamily.TF_BLOQUES
+                GenerarConBloques(writer, tk, numeroLineaActual)
 
-        If esp >= 0 Then
-            cmd = stmt.Substring(0, esp).ToUpperInvariant()
-            resto = stmt.Substring(esp + 1).Trim()
-        Else
-            cmd = stmt.ToUpperInvariant()
-            resto = ""
-        End If
+            Case TokenFamily.TF_GENERAFN,
+                 TokenFamily.TF_NOSOPORTADO
+                EmitirLinea(writer, EmitirFN(tk), False)
 
-        '+++If GeneranBloques.Contains(cmd) Then
-        '+++    GenerarConBloques(writer, numeroLineaActual, cmd, resto)
-        '+++ElseIf GenerarFNPropia.Contains(cmd) Then
-        '+++    EmitirLinea(writer, EmitirFN(cmd, resto), False)
-        '+++ElseIf UnsupportedStatements.Contains(cmd) Then
-        '+++    EmitirLinea(writer, EmitirFN(cmd, resto), False)
-        '+++ElseIf ReservedWords.GetTokenID(cmd, id) Then
-        '+++    EmitirLinea(writer, $"{cmd} {resto}", False)
-        '+++Else
-        '+++    'No puede llegar nada, pero por si acaso me falta alguna en las listas
-        '+++    EmitirLinea(writer, $"REM [SIN TRADUCCION ==>] {cmd} {resto}", False)
-        '+++End If
+            Case TokenFamily.TF_GENERAL
+                GenerarDirecto(writer, tk)
 
-    End Sub
+            Case TokenFamily.TF_ESPECIALES
+                ' Esto son EOL, EOF, LINE, no generan nada aquí
 
-    Private Sub GenerarConBloques(writer As StreamWriter, numeroLineaActual As Integer, cmd As String, resto As String)
-
-        Select Case cmd
-            Case "REM"
-                GenerarRem(writer, resto)
-
-            Case "LET"
-                GenerarLet(writer, resto)
-
-            Case "PRINT"
-                GenerarPRINT(writer, numeroLineaActual, resto)
-
-            Case "IF"
-                GenerarIF(writer, resto)
-
-            Case "FOR"
-                GenerarFor(writer, resto)
-
-            Case "NEXT"
-                GenerarNext(writer, resto)
+            Case Else
+                'No puede llegar nada, pero por si acaso me falta alguna en las listas
+                EmitirError(writer, 0, $"REM [SIN TRADUCCION ==>] {cmd} {stmt}")
         End Select
     End Sub
 
-    Private Function NoTratadas(stmt As String, f As String, ByRef res As String) As Boolean
+    Private Sub GenerarDirecto(writer As StreamWriter, tk As Token)
+        Dim cmd As String = tk.Mnemonic
+        Dim resto As String = tk.Value
 
-        ' No reprocesar llamadas ya convertidas
-        If stmt.StartsWith("FN_", StringComparison.OrdinalIgnoreCase) Then
-            Return False
+        If (tk.ID = TokenID.TK_GOTO) OrElse (tk.ID = TokenID.TK_GOSUB) Then
+            If IsNumeric(resto) Then
+                resto = resto & "00"
+            End If
         End If
-
-        If stmt = f Then
-            res = EmitirFN(f, "")
-            Return True
+        If resto = "" Then
+            EmitirLinea(writer, cmd, False)
+        Else
+            EmitirLinea(writer, $"{cmd} {resto}", False)
         End If
+    End Sub
 
-        If stmt.StartsWith(f & " ", StringComparison.OrdinalIgnoreCase) Then
-            res = EmitirFN(f, stmt)
-            Return True
-        End If
+    Private Sub GenerarConBloques(writer As StreamWriter, tk As Token, numeroLineaActual As Integer)
+        Select Case tk.ID
+            Case TokenID.TK_REM
+                GenerarRem(writer, tk)
 
-        Return False
-    End Function
+            Case TokenID.TK_LET
+                GenerarLet(writer, tk)
+
+            Case TokenID.TK_PRINT
+                GenerarPRINT(writer, numeroLineaActual, tk)
+
+            Case TokenID.TK_IF
+                GenerarIF(writer, tk)
+
+            Case TokenID.TK_FOR
+                GenerarFor(writer, tk)
+
+            Case TokenID.TK_NEXT
+                GenerarNext(writer, tk)
+        End Select
+    End Sub
 
     Private Function LeerNumeroLiteral(texto As String) As Integer
         Dim n As Integer = 0
@@ -251,10 +249,14 @@ Public Module QLGenerator
     ' stmt Print G
     ' =========================================================
 
-    Private Sub GenerarIF(writer As StreamWriter, stmt As String)
+    Private Sub GenerarIF(writer As StreamWriter, tkIF As Token)
+        'Dim cmd As String = tkIF.Mnemonic
+        'Dim stmt As String = tkIF.Value
+        Dim tkThen As New Token(TokenID.TK_THEN)
+
         ' stmt llega como: "A = 1"
 
-        Dim lineaIF As String = "IF " & stmt & " THEN"
+        Dim lineaIF As String = $"{tkIF.Mnemonic} {tkIF.Value} {tkThen.Mnemonic}"
 
         EmitirLinea(writer, lineaIF, True)
 
@@ -267,11 +269,10 @@ Public Module QLGenerator
     Private Sub CerrarIF(writer As StreamWriter)
 
         While IFContador > 0
-            EmitirLinea(writer, "END IF", True)
+            EmitirLinea(writer, "End If", True)  'No es un token, solo es del QL
             IFContador -= 1
         End While
 
-        IFCondicion = ""
     End Sub
 
 
@@ -301,24 +302,23 @@ Public Module QLGenerator
     ' =========================================================
     ' Emisión de FOR/NEXT
     ' =========================================================
-    Private Sub GenerarFor(writer As StreamWriter, stmt As String)
-        Dim varName As String = stmt.Split("="c)(0).Trim().ToUpperInvariant()
-
+    Private Sub GenerarFor(writer As StreamWriter, tkFOR As Token)
         ' Seguimiento del bucle
+        Dim varName As String = tkFOR.Value.Split("="c)(0).Trim().ToUpperInvariant()
         ForStack.Push(varName)
 
         ' Emitir FOR QL provisional
-        EmitirLinea(writer, $"FOR {stmt}", False)
+        EmitirLinea(writer, $"{tkFOR.Mnemonic} {tkFOR.Value}", False)
     End Sub
 
-    Private Sub GenerarNext(writer As StreamWriter, stmt As String)
-        Dim varName As String = stmt
+    Private Sub GenerarNext(writer As StreamWriter, tk As Token)
+        Dim varName As String = tk.Value
 
         ' Comprobación estructural (NO bloqueante)
         If ForStack.Count = 0 Then
-            EmitirWarning(writer, $"NEXT {varName} sin FOR previo")
+            EmitirWarning(writer, $"Next {varName} sin For previo")
         ElseIf ForStack.Peek() <> varName Then
-            EmitirWarning(writer, $"FOR/NEXT no estructurado: se cierra {varName}, " & $"pero el último For abierto era {ForStack.Peek()}")
+            EmitirWarning(writer, $"For/Next no estructurado: se cierra {varName}, " & $"pero el último For abierto era {ForStack.Peek()}")
             ' Buscar y eliminar el FOR correspondiente si quieres
             EliminarForDePila(varName)
         Else
@@ -327,7 +327,7 @@ Public Module QLGenerator
 
         ' 👉 Aquí está la clave:
         ' siempre respetar la variable del ZX
-        EmitirLinea(writer, $"End For {varName}", False)
+        EmitirLinea(writer, $"End For {varName}", False) 'No es un token, es comando propio del QL
 
     End Sub
 
@@ -364,21 +364,25 @@ Public Module QLGenerator
     ' =========================================================
     ' Emisión de LET (ZX → SuperBASIC QL)
     ' =========================================================
-    Private Sub GenerarRem(writer As StreamWriter, stmt As String)
+    Private Sub GenerarRem(writer As StreamWriter, tk As Token)
         If opts.SinComentarios Then
             Exit Sub
         End If
 
-        If Left(stmt, 1) = Constantes.C_COMILLAS And Right(stmt, 1) = Constantes.C_COMILLAS Then
-            stmt = Mid(stmt, 2, Len(stmt) - 2)
+        Dim comentario As String = tk.Value
+        If Left(comentario, 1) = Constantes.C_COMILLAS And Right(comentario, 1) = Constantes.C_COMILLAS Then
+            comentario = Mid(comentario, 2, Len(comentario) - 2)
         End If
-        EmitirLinea(writer, "REM " & stmt, False)
+        EmitirLinea(writer, $"{tk.Mnemonic} {comentario}", False)
 
     End Sub
 
-    Private Sub GenerarLet(writer As StreamWriter, stmt As String)
-        ' Separar por el primer espacio que esté fuera de los paréntesis
-        Dim p1 As Integer = BuscarEspacioTrasParentesis(stmt)
+    Private Sub GenerarLet(writer As StreamWriter, tk As Token)
+        Dim cmd As String = tk.Mnemonic
+        Dim stmt As String = tk.Value
+
+        ' Separar por el primer igual que esté fuera de los paréntesis
+        Dim p1 As Integer = BuscarIgualDelLet(stmt)
         If p1 < 0 Then
             ' Caso degenerado: LET A
             EmitirLinea(writer, stmt, False)
@@ -386,14 +390,16 @@ Public Module QLGenerator
 
         Dim lhs As String = stmt.Substring(0, p1).Trim()
         Dim rhs As String = stmt.Substring(p1 + 1).Trim()
-        rhs = ReescribirExpresion(rhs, True)
+        'rhs = ReescribirExpresion(rhs, True)
         ' 🔑 El '=' SE INSERTA AQUÍ SIEMPRE
-        EmitirLinea(writer, $"{lhs}={rhs}", False)
+        EmitirLinea(writer, $"{lhs}={rhs}", False) 'En el QL no hace falta el LET
     End Sub
 
-    Private Function BuscarEspacioTrasParentesis(texto As String) As Integer
+    Private Function BuscarIgualDelLet(texto As String) As Integer
         Dim nivel As Integer = 0
 
+        'Inicialmente no pasábamos el igual, se separaba por un espacio, pero como pueden haber espacios
+        'dentro de los paréntesis se vigila, pero se mantiene por si acaso se vuelve a quitar el igual
         For i As Integer = 0 To texto.Length - 1
             Dim ch As Char = texto(i)
 
@@ -404,9 +410,9 @@ Public Module QLGenerator
                 Case ")"c
                     If nivel > 0 Then nivel -= 1
 
-                Case " "c
+                Case "="c
                     If nivel = 0 Then
-                        Return i   ' ✅ espacio separador LHS / RHS
+                        Return i   ' ✅ igual separador LHS / RHS
                     End If
             End Select
         Next
@@ -418,186 +424,63 @@ Public Module QLGenerator
     ' =========================================================
     ' Emisión de PRINT (ZX → SuperBASIC QL)
     ' =========================================================
-    Private Sub GenerarPRINT(writer As StreamWriter, numeroLineaActual As Integer, stmt As String)
+    Private Sub GenerarPRINT(writer As StreamWriter, numeroLineaActual As Integer, tk As Token)
+        Dim item As New PrintItem(tk.Value)
+        Dim sb As New StringBuilder
+        Dim Comando As String = "PRINT "
 
-        Dim contenido As String = stmt
+        sb.Clear()
 
-        Dim buffer As New List(Of String)
-        Dim prefijoSep As String = ""
-        Dim sufijoSep As String = ""
+        'El AT ahora ya no va dentro del PRINT, lo trato por separado
+        If item.ItemType = TokenID.TK_AT Then
+            sb.Append(EmitirAT(writer, item.Value))
+            EmitirLinea(writer, sb.ToString(), False)
 
-        Dim partes = SplitConSeparadores(contenido)
-
-        For Each p In partes
-
-            Dim item As String = p.Text.Trim()
-            Dim sepPosterior As String = p.SepPosterior
-            Dim sepAnterior As String = p.SepAnterior
-
-            If item = "" Then Continue For
-
-            Dim u As String = item.ToUpperInvariant()
-
-            ' --- ATRIBUTOS QUE CORTAN PRINT ---
-            If u.StartsWith("AT ") Then
-                EmitirPrintPendiente(writer, numeroLineaActual, buffer, prefijoSep, sufijoSep)
-                prefijoSep = "" : sufijoSep = ""
-                EmitirLinea(writer, NormalizarAT(item), False)
-                Continue For
+            'El AT solo necesita separador si es coma
+            If item.Separator = PrintSeparator.C Then
+                EmitirLinea(writer, Comando & ",", False)
             End If
+        Else
+            sb.Append(Comando)
 
-            If u.StartsWith("INK ") OrElse
-               u.StartsWith("PAPER ") OrElse
-               u.StartsWith("BRIGHT ") OrElse
-               u.StartsWith("FLASH ") OrElse
-               u.StartsWith("INVERSE ") OrElse
-               u.StartsWith("OVER ") Then
-
-                EmitirPrintPendiente(writer, numeroLineaActual, buffer, prefijoSep, sufijoSep)
-                prefijoSep = "" : sufijoSep = ""
-                EmitirLinea(writer, item, False)
-                Continue For
-            End If
-
-            ' --- EXPRESIÓN IMPRIMIBLE ---
-
-            If u.StartsWith("TAB ") OrElse u.StartsWith("TAB(") Then
-
-                ' prefijo ,
-                If buffer.Count = 0 AndAlso sepAnterior = "," Then
-                    prefijoSep = ","
-                End If
-
-                buffer.Add(ConvertirTABaTO(item))
-
-                ' sufijo
-                If sepPosterior = "," OrElse sepPosterior = ";" Then
-                    sufijoSep = sepPosterior
-                Else
-                    sufijoSep = ""
-                End If
-
-                Continue For
-            End If
-
-            If buffer.Count = 0 AndAlso sepAnterior = "," Then
-                prefijoSep = ","
-            End If
-
-            item = ReescribirExpresion(item, False)
-            buffer.Add(item)
-
-            If sepPosterior = "," OrElse sepPosterior = ";" Then
-                sufijoSep = sepPosterior
+            'TAB debe cambiarse en el QL
+            If item.ItemType = TokenID.TK_TAB Then
+                sb.Append(EmitirTAB(writer, item.Value))
             Else
-                sufijoSep = ""
+                'El resto van directas
+                sb.Append(item.Value)
             End If
 
-        Next
+            ' Aplicar separador
+            Select Case item.Separator
+                Case PrintSeparator.P
+                    sb.Append(";")
+                Case PrintSeparator.C
+                    sb.Append(",")
+                Case PrintSeparator.N
+                    ' nada
+            End Select
 
-        EmitirPrintPendiente(writer, numeroLineaActual, buffer, prefijoSep, sufijoSep)
+            EmitirLinea(writer, sb.ToString(), False)
+
+        End If
+
     End Sub
 
-
-    ' --- Divide la sentencia PRINT por los separadores de impresión ; y ,
-    Private Function SplitConSeparadores(texto As String) _
-                     As List(Of (Text As String, SepAnterior As String, SepPosterior As String))
-
-        Dim res As New List(Of (String, String, String))
-
-        Dim actual As String = ""
-        Dim inString As Boolean = False
-        Dim lastSep As String = ""
-        Dim i As Integer = 0
-
-        While i < texto.Length
-
-            Dim c As Char = texto(i)
-
-            ' --- Manejo de strings ---
-            If c = Constantes.C_COMILLAS Then
-                inString = Not inString
-                actual &= c
-                i += 1
-                Continue While
-            End If
-
-            ' --- AT es atómico: consumir expr,expr completo ---
-            If Not inString AndAlso
-               i + 2 < texto.Length AndAlso
-               texto.Substring(i).TrimStart().ToUpperInvariant().StartsWith("AT ") Then
-
-                ' copiar "AT "
-                actual &= "AT "
-                i += texto.Substring(i).IndexOf("AT ") + 3
-
-                ' copiar hasta la coma
-                While i < texto.Length AndAlso texto(i) <> ","c
-                    actual &= texto(i)
-                    i += 1
-                End While
-
-                ' copiar coma
-                If i < texto.Length AndAlso texto(i) = ","c Then
-                    actual &= ","
-                    i += 1
-                End If
-
-                ' copiar segunda expresión
-                While i < texto.Length AndAlso texto(i) <> ";"c AndAlso texto(i) <> ","c
-                    actual &= texto(i)
-                    i += 1
-                End While
-
-                Continue While
-            End If
-
-            ' --- Separadores normales ---
-            If Not inString AndAlso (c = ";"c OrElse c = ","c) Then
-                res.Add((actual, lastSep, c.ToString()))
-                lastSep = c.ToString()
-                actual = ""
-                i += 1
-                Continue While
-            End If
-
-            actual &= c
-            i += 1
-
-        End While
-
-        res.Add((actual, lastSep, ""))
-
-        Return res
+    Private Function EmitirAT(writer As StreamWriter, value As String) As String
+        Return ("AT " & value)
     End Function
 
+    Private Function EmitirTAB(writer As StreamWriter, value As String) As String
+        Dim v = value.Trim()
 
-
-
-    Private Sub EmitirPrintPendiente(writer As StreamWriter, numeroLineaActual As Integer, buffer As List(Of String), prefijo As String, sufijo As String)
-        ' Eliminar PRINT neutro
-        If buffer.Count = 0 AndAlso prefijo = "" AndAlso sufijo = ";" Then Exit Sub
-        If buffer.Count = 0 AndAlso prefijo = "" AndAlso sufijo = "" Then Exit Sub
-
-        Dim linea As String = "PRINT "
-
-        ' Prefijo (, o ;)
-        If prefijo = "," Then linea &= ","
-        ' Prefijo ";" se ignora
-
-        ' Contenido
-        If buffer.Count > 0 Then
-            linea &= String.Join(",", buffer)
+        ' Quitar paréntesis si existen
+        If v.StartsWith("("c) AndAlso v.EndsWith(")"c) Then
+            v = v.Substring(1, v.Length - 2)
         End If
 
-        ' Sufijo
-        If sufijo = "," OrElse sufijo = ";" Then
-            linea &= sufijo
-        End If
-
-        EmitirLinea(writer, linea, False)
-        buffer.Clear()
-    End Sub
+        Return ("TO " & v)
+    End Function
 
     Private Function NormalizarAT(texto As String) As String
         Dim t As String = texto.Trim()
@@ -621,34 +504,34 @@ Public Module QLGenerator
     End Function
 
     ' --- Reescribir la parde derecha de la expresión
-    Private Function ReescribirExpresion(expr As String, isLet As Boolean) As String
+    'Private Function ReescribirExpresion(expr As String, isLet As Boolean) As String
 
-        ' Seguridad: aquí no debe haber asignaciones
-        If (Not isLet) AndAlso ContieneIgualFueraDeCadena(expr) Then
-            Throw New InvalidOperationException("ReescribirExpresion recibió una expresión con '=' fuera de cadena: " & expr)
-        End If
+    '    ' Seguridad: aquí no debe haber asignaciones
+    '    If (Not isLet) AndAlso ContieneIgualFueraDeCadena(expr) Then
+    '        Throw New InvalidOperationException("ReescribirExpresion recibió una expresión con '=' fuera de cadena: " & expr)
+    '    End If
 
-        expr = expr.Trim()
-        If expr = "" Then Return expr
+    '    expr = expr.Trim()
+    '    If expr = "" Then Return expr
 
-        ' Separar en tokens por espacios
-        Dim partes() As String = expr.Split(New Char() {" "c}, StringSplitOptions.RemoveEmptyEntries)
+    '    ' Separar en tokens por espacios
+    '    Dim partes() As String = expr.Split(New Char() {" "c}, StringSplitOptions.RemoveEmptyEntries)
 
-        ' Caso: BIN 1110011, PEEK 45, IN 7, USR 1234, etc.
-        Dim nombre As String = partes(0).ToUpperInvariant()
+    '    ' Caso: BIN 1110011, PEEK 45, IN 7, USR 1234, etc.
+    '    Dim nombre As String = partes(0).ToUpperInvariant()
 
-        '+++If ReservedFunctions.Contains(nombre) Then
+    '    If ReservedFunctions.Contains(nombre) Then
 
-        '+++ ' Reconstruir parámetros (todo lo que sigue)
-        '+++  Dim parametros As String = String.Join(",", partes.Skip(1))
+    '        ' Reconstruir parámetros (todo lo que sigue)
+    '        Dim parametros As String = String.Join(",", partes.Skip(1))
 
-        '+++   Return EmitirFN(nombre, parametros)
+    '        Return EmitirFN(nombre, parametros)
 
-        '+++   End If
+    '    End If
 
-        ' No es función reservada → dejar tal cual
-        Return expr
-    End Function
+    '    ' No es función reservada → dejar tal cual
+    '    Return expr
+    'End Function
 
     Private Function ContieneIgualFueraDeCadena(expr As String) As Boolean
         Dim enCadena As Boolean = False
@@ -667,45 +550,27 @@ Public Module QLGenerator
     ' =========================================================
     ' Emisión de funciones auxiliares ZX → QL
     ' =========================================================
-    Private Function EmitirFN(nombre As String, parametros As String) As String
-
-        nombre = nombre.ToUpperInvariant()
-        parametros = parametros.Replace(" ", "")
+    Private Function EmitirFN(tk As Token) As String
+        Dim stmt As String = tk.Value
+        'stmt = stmt.Replace(" ", "")
         Dim Linea As String = ""
-        Dim tipofuncion As Boolean
-
-        Dim id As TokenID = Nothing
-
-
-        '+++  If ReservedFunctions.Contains(nombre) Then
-        '+++   tipofuncion = True
-        '+++   ElseIf ReservedProcedures.Contains(nombre) Then
-        '+++   tipofuncion = False
-        '+++    ElseIf ReservedStatements.Contains(nombre) Then
-        '+++   tipofuncion = False
-        '+++ ElseIf nombre = "CLEAR_VAR" Or nombre = "RANDOMIZE_USR" Then
-        '+++   tipofuncion = False
-        '+++   Else
-        '+++   Throw New ApplicationException("ERROR: FN_{nombre} no se reconoce")
-        '+++   End If
-
 
         ' ✅ REGISTRAR SIEMPRE EL USO DE LA FN
-        FuncionesFNUsadas.Add(nombre)
+        FuncionesFNUsadas.Add(tk)
 
-        If tipofuncion Then
+        If tk.IsFunction Then
             ' FUNCIÓN
-            If parametros <> "" Then
-                Linea = $"FN_{nombre}({parametros})"
+            If stmt <> "" Then
+                Linea = $"{tk.FNMnemonic}({stmt})"
             Else
-                Linea = $"FN_{nombre}"
+                Linea = $"{tk.FNMnemonic}"
             End If
         Else
             ' PROCEDIMIENTO o SENTENCIA
-            If parametros <> "" Then
-                Linea = $"FN_{nombre} {parametros}"
+            If stmt <> "" Then
+                Linea = $"{tk.FNMnemonic} {stmt}"
             Else
-                Linea = $"FN_{nombre}"
+                Linea = $"{tk.FNMnemonic}"
             End If
         End If
 
@@ -725,10 +590,11 @@ Public Module QLGenerator
         GrabarSeparador(writer, startLine)
 
         'Añadimos la rutina de inicialización siempre
-        GrabarFuncion(writer, startLine, AuxFN.GenerateFnProcedure(startLine, "INIT", opts.Funciones))
+        Dim fInit As New Token(TokenID.TCO_INIT)
+        GrabarFuncion(writer, startLine, AuxFN.GenerateFnProcedure(startLine, fInit, opts.Funciones))
 
         If FuncionesFNUsadas.Count <> 0 Then
-            For Each fn In FuncionesFNUsadas.OrderBy(Function(s) s)
+            For Each fn In FuncionesFNUsadas
                 GrabarFuncion(writer, startLine, AuxFN.GenerateFnProcedure(startLine, fn, opts.Funciones))
             Next
         End If

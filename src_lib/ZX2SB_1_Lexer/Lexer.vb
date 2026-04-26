@@ -36,7 +36,7 @@ Public Module Lexer
                 AnalizarLinea(linea, NroLineaFichero, writer)
             Next
 
-            Dim eofToken As New Token(TokenID.TE_EOF, "", NroLineaFichero, 0)
+            Dim eofToken As New Token(TokenID.TCO_EOF, "", NroLineaFichero, 0)
             GuardaSalida(writer, eofToken.TokToLine())
 
         End Using
@@ -95,6 +95,14 @@ Public Module Lexer
                 Continue While
             End If
 
+
+            If c = Constantes.C_PAR_APE Then
+                Dim col = pos + 1
+                Dim tok = ConsumirGrexpr(writer, col, LineaAnalizar)
+                GuardaSalida(writer, tok.TokToLine())
+                Continue While
+            End If
+
             Dim colOp = pos + 1
             Dim tokOp = ConsumirOperadorOSimbolo(writer, colOp, LineaAnalizar)
             GuardaSalida(writer, tokOp.TokToLine())
@@ -146,7 +154,7 @@ Public Module Lexer
         End If
 
         ' Emitir token LINE
-        Dim tLinea As New Token(TokenID.TE_LINE, NroLineaPrograma.ToString(), NroLineaFichero, 1)
+        Dim tLinea As New Token(TokenID.TCO_LINE, NroLineaPrograma.ToString(), NroLineaFichero, 1)
         GuardaSalida(writer, tLinea.TokToLine())
 
         ' Consumir espacios / tabs tras el número
@@ -219,7 +227,7 @@ Public Module Lexer
             End If
         End While
 
-        Return New Token(TokenID.TE_NUMBER, sb.ToString(), NroLineaFichero, col)
+        Return New Token(TokenID.TES_NUMBER, sb.ToString(), NroLineaFichero, col)
 
     End Function
 
@@ -248,7 +256,7 @@ Public Module Lexer
         End If
 
         ' Identificador normal (con payload)
-        Return New Token(TokenID.TE_IDENT, lexema, NroLineaFichero, col)
+        Return New Token(TokenID.TES_IDENT, lexema, NroLineaFichero, col)
     End Function
 
 
@@ -288,10 +296,76 @@ Public Module Lexer
         ' Cadena sin cerrar (comillas desbalanceadas)
         If Not cerrado Then
             ErrorLexico(writer, col, "Cadena sin cerrar (comillas desbalanceadas)")
+            Return New Token(TokenID.TCO_UNKNOWN, "", -1, -1)
+        End If
+
+        Return New Token(TokenID.TES_STRING, sb.ToString(), NroLineaFichero, col)
+
+    End Function
+
+    Private Function ConsumirGrexpr(writer As StreamWriter, col As Integer, LineaAnalizar As String) As Token
+
+        ' Consumimos el paréntesis inicial '('
+        Avanzar()
+
+        Dim sb As New StringBuilder()
+        Dim nivel As Integer = 1
+        Dim cerrado As Boolean = False
+
+        While pos < LineaAnalizar.Length
+
+            Dim ch = LineaAnalizar(pos)
+
+            ' Subnivel de paréntesis
+            If ch = "("c Then
+                nivel += 1
+                sb.Append(ch)
+                Avanzar()
+                Continue While
+            End If
+
+            ' Cierre de paréntesis
+            If ch = ")"c Then
+                nivel -= 1
+                If nivel = 0 Then
+                    Avanzar() ' consumir ')'
+                    cerrado = True
+                    Exit While
+                End If
+                sb.Append(ch)
+                Avanzar()
+                Continue While
+            End If
+
+            ' Cadena dentro de paréntesis
+            If ch = Constantes.C_COMILLAS Then
+                Dim t As Token = ConsumirStringLiteral(writer, col + pos, LineaAnalizar)
+
+                If t.ID = TokenID.TCO_UNKNOWN Then
+                    Return New Token(TokenID.TCO_UNKNOWN, "", -1, -1)
+                End If
+
+                sb.Append(Constantes.C_COMILLAS)
+                sb.Append(t.Value)
+                sb.Append(Constantes.C_COMILLAS)
+                Continue While
+            End If
+
+            ' Cualquier otro carácter
+            sb.Append(ch)
+            Avanzar()
+        End While
+
+        ' Paréntesis sin cerrar
+        If Not cerrado Then
+            ErrorLexico(writer, col, "Paréntesis sin cerrar (desbalanceados)")
             Return Nothing
         End If
 
-        Return New Token(TokenID.TE_STRING, sb.ToString(), NroLineaFichero, col)
+        Return New Token(TokenID.TES_GREXPR,
+                     sb.ToString().Trim(),
+                     NroLineaFichero,
+                     col)
 
     End Function
 
@@ -315,7 +389,7 @@ Public Module Lexer
         Dim tRem As New Token(TokenID.TK_REM, "", NroLineaFichero, col)
 
         ' Token STRING con el texto del comentario
-        Dim tCom As New Token(TokenID.TE_STRING, texto, NroLineaFichero, pos + 1)
+        Dim tCom As New Token(TokenID.TES_STRING, texto, NroLineaFichero, pos + 1)
 
         GuardaSalida(writer, tRem.TokToLine())
         GuardaSalida(writer, tCom.TokToLine())
@@ -365,16 +439,16 @@ Public Module Lexer
             Case "<"c : Return New Token(TokenID.TOP_LT, "", NroLineaFichero, col)
             Case ">"c : Return New Token(TokenID.TOP_GT, "", NroLineaFichero, col)
 
-            Case "("c : Return New Token(TokenID.TS_PAR_ABIERTO, "", NroLineaFichero, col)
-            Case ")"c : Return New Token(TokenID.TS_PAR_CERRADO, "", NroLineaFichero, col)
+            Case "("c : Return New Token(TokenID.TSP_PAR_ABIERTO, "", NroLineaFichero, col)
+            Case ")"c : Return New Token(TokenID.TSP_PAR_CERRADO, "", NroLineaFichero, col)
 
-            Case ","c : Return New Token(TokenID.TS_COMMA, "", NroLineaFichero, col)
-            Case ";"c : Return New Token(TokenID.TS_PUNTOYCOMA, "", NroLineaFichero, col)
-            Case ":"c : Return New Token(TokenID.TS_DOSPUNTOS, "", NroLineaFichero, col)
+            Case ","c : Return New Token(TokenID.TSP_COMA, "", NroLineaFichero, col)
+            Case ";"c : Return New Token(TokenID.TSP_PUNTOYCOMA, "", NroLineaFichero, col)
+            Case ":"c : Return New Token(TokenID.TSP_DOSPUNTOS, "", NroLineaFichero, col)
 
             Case Else
                 ErrorLexico(writer, col, "Carácter no válido: '" & c & "'")
-                Return New Token(TokenID.TE_UNKNOWN, c.ToString(), NroLineaFichero, col)
+                Return New Token(TokenID.TCO_UNKNOWN, c.ToString(), NroLineaFichero, col)
         End Select
 
     End Function
@@ -404,7 +478,7 @@ Public Module Lexer
     End Sub
 
     Private Sub AddTokenEOL(writer As StreamWriter)
-        Dim tEOL As New Token(TokenID.TE_EOL, "", NroLineaFichero, 0)
+        Dim tEOL As New Token(TokenID.TCO_EOL, "", NroLineaFichero, 0)
         GuardaSalida(writer, tEOL.TokToLine)
     End Sub
 End Module

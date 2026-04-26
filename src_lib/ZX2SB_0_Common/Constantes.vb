@@ -17,6 +17,8 @@ Public Module Constantes
     Public Const C_COMA As Char = ","c                                ' Coma
     Public Const C_PUNTOYCOMA As Char = ";"c                          ' Punto y Coma
     Public Const C_DOSPUNTOS As Char = ":"c                           ' Dos Puntos
+    Public Const C_PAR_APE As Char = "("c                             ' (
+    Public Const C_PAR_CIE As Char = ")"c                             ' )
 
     Public Const S_VACIA As String = C_COMILLAS & C_COMILLAS          ' Entre comillas vacía
     Public Const S_ESPACIO As String = C_COMILLAS & " " & C_COMILLAS  ' Entre comillas un espacio
@@ -31,7 +33,9 @@ Public Module Constantes
     'Public Const VER_PROG As String ="0.0" & ChrW(&H3B2)            ' Versión del programa Beta
     Public Const MarcaAST As String = ChrW(&H2192)                   ' Marca para imprimir el AST  
     Public Const MarcaWarning As String = ChrW(&H21D2)               ' Marca para imprimir los Warnings 
-    Public Const MarcaSRC = "-- SRC: "
+    Public Const MarcaSRC = "-- SRC: "                               ' MArca de la línea original del fuente
+    Public Const Sep_Comentario = ";"                                ' Separador inicial del comentario
+    Public Const MarcaComentario = " " & Sep_Comentario & " -- "     ' Marcas para los comentarios
     Public Const MarcaGen = ChrW(&H21D2)                             ' Marca para el programa generado ⇒
 
     Public Const LOG_EXTENSION As String = ".log"

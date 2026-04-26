@@ -1,190 +1,224 @@
 IRP 1.0
 -- SRC:  10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
-9902 10                                            ; TE_LINE
-2152 === PRUEBA COMPLETA GENERADOR ZX2SB ===       ; TK_REM
-9901                                               ; TE_EOL
--- SRC:  11 FOR J=1 to 10 : PRINT J
-9902 11                                            ; TE_LINE
-2136 J = 1 TO 10                                   ; TK_FOR
-2150 J                                             ; TK_PRINT
-9901                                               ; TE_EOL
+9902 10                                            ; --  TCO_LINE
+2152 "=== PRUEBA COMPLETA GENERADOR ZX2SB ==="     ; --  TK_REM
+9901                                               ; --  TCO_EOL
+-- SRC:  11 PRINT BIN 11100110
+9902 11                                            ; --  TCO_LINE
+2150 3217,N,11100110                               ; --  TK_PRINT TK_BIN
+9901                                               ; --  TCO_EOL
+-- SRC:  15 FOR J=1 to 10 : PRINT J : NEXT J
+9902 15                                            ; --  TCO_LINE
+2136 J = 1 TO 10                                   ; --  TK_FOR
+2150 1700,N,J                                      ; --  TK_PRINT TES_IDENT
+2146 J                                             ; --  TK_NEXT
+9901                                               ; --  TCO_EOL
 -- SRC:  20 LET A=1: LET B=2: LET C=3
-9902 20                                            ; TE_LINE
-2142 A = 1                                         ; TK_LET
-2142 B = 2                                         ; TK_LET
-2142 C = 3                                         ; TK_LET
-9901                                               ; TE_EOL
--- SRC:  30 IF A=1 THEN GOTO 100
-9902 30                                            ; TE_LINE
-2140 A = 1                                         ; TK_IF
-1139 100                                           ; TK_GOTO
-9901                                               ; TE_EOL
+9902 20                                            ; --  TCO_LINE
+2142 A = 1                                         ; --  TK_LET
+2142 B = 2                                         ; --  TK_LET
+2142 C = 3                                         ; --  TK_LET
+9901                                               ; --  TCO_EOL
+-- SRC:  25 GO SUB 750
+9902 25                                            ; --  TCO_LINE
+1138 750                                           ; --  TK_GOSUB
+9901                                               ; --  TCO_EOL
+-- SRC:  30 IF A=1 THEN GO TO 100
+9902 30                                            ; --  TCO_LINE
+2140 A = 1                                         ; --  TK_IF
+1139 100                                           ; --  TK_GOTO
+9901                                               ; --  TCO_EOL
 -- SRC:  40 PRINT "ESTO NO DEBE EJECUTARSE"
-9902 40                                            ; TE_LINE
-2150 "ESTO NO DEBE EJECUTARSE"                     ; TK_PRINT
-9901                                               ; TE_EOL
+9902 40                                            ; --  TCO_LINE
+2150 1702,N,"ESTO NO DEBE EJECUTARSE"              ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  50 GOTO 9999 : REM salto inexistente, no error
-9902 50                                            ; TE_LINE
-1139 9999                                          ; TK_GOTO
-2152 salto inexistente, no error                   ; TK_REM
-9901                                               ; TE_EOL
+9902 50                                            ; --  TCO_LINE
+1139 9999                                          ; --  TK_GOTO
+2152 "salto inexistente, no error"                 ; --  TK_REM
+9901                                               ; --  TCO_EOL
 -- SRC:  60 PRINT "TAMPOCO DEBE VERSE"
-9902 60                                            ; TE_LINE
-2150 "TAMPOCO DEBE VERSE"                          ; TK_PRINT
-9901                                               ; TE_EOL
+9902 60                                            ; --  TCO_LINE
+2150 1702,N,"TAMPOCO DEBE VERSE"                   ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
-9902 100                                           ; TE_LINE
-2150 "ENTRA EN BLOQUE IF SIMPLE"                   ; TK_PRINT
-9901                                               ; TE_EOL
+9902 100                                           ; --  TCO_LINE
+2150 1702,N,"ENTRA EN BLOQUE IF SIMPLE"            ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
-9902 110                                           ; TE_LINE
-2140 A = 1                                         ; TK_IF
-2150 "IF SIMPLE CON PRINT"                         ; TK_PRINT
-9901                                               ; TE_EOL
+9902 110                                           ; --  TCO_LINE
+2140 A = 1                                         ; --  TK_IF
+2150 1702,N,"IF SIMPLE CON PRINT"                  ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
-9902 120                                           ; TE_LINE
-2140 A = 1                                         ; TK_IF
-2150 "UNO"                                         ; TK_PRINT
-2150 "DOS"                                         ; TK_PRINT
-2150 "TRES"                                        ; TK_PRINT
-9901                                               ; TE_EOL
+9902 120                                           ; --  TCO_LINE
+2140 A = 1                                         ; --  TK_IF
+2150 1702,N,"UNO"                                  ; --  TK_PRINT TES_STRING
+2150 1702,N,"DOS"                                  ; --  TK_PRINT TES_STRING
+2150 1702,N,"TRES"                                 ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
-9902 130                                           ; TE_LINE
-2140 A = 1                                         ; TK_IF
-2140 B = 2                                         ; TK_IF
-2150 "IF DOBLE"                                    ; TK_PRINT
-9901                                               ; TE_EOL
+9902 130                                           ; --  TCO_LINE
+2140 A = 1                                         ; --  TK_IF
+2140 B = 2                                         ; --  TK_IF
+2150 1702,N,"IF DOBLE"                             ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
-9902 140                                           ; TE_LINE
-2140 A = 1                                         ; TK_IF
-2140 B = 2                                         ; TK_IF
-2140 C = 3                                         ; TK_IF
-2150 "IF TRIPLE"                                   ; TK_PRINT
-9901                                               ; TE_EOL
+9902 140                                           ; --  TCO_LINE
+2140 A = 1                                         ; --  TK_IF
+2140 B = 2                                         ; --  TK_IF
+2140 C = 3                                         ; --  TK_IF
+2150 1702,N,"IF TRIPLE"                            ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
-9902 150                                           ; TE_LINE
-2140 A = 1                                         ; TK_IF
-2140 B = 2                                         ; TK_IF
-2140 C = 3                                         ; TK_IF
-2150 "A"                                           ; TK_PRINT
-2150 "B"                                           ; TK_PRINT
-2150 "C"                                           ; TK_PRINT
-9901                                               ; TE_EOL
+9902 150                                           ; --  TCO_LINE
+2140 A = 1                                         ; --  TK_IF
+2140 B = 2                                         ; --  TK_IF
+2140 C = 3                                         ; --  TK_IF
+2150 1702,N,"A"                                    ; --  TK_PRINT TES_STRING
+2150 1702,N,"B"                                    ; --  TK_PRINT TES_STRING
+2150 1702,N,"C"                                    ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  200 FOR I=1 TO 3
-9902 200                                           ; TE_LINE
-2136 I = 1 TO 3                                    ; TK_FOR
-9901                                               ; TE_EOL
+9902 200                                           ; --  TCO_LINE
+2136 I = 1 TO 3                                    ; --  TK_FOR
+9901                                               ; --  TCO_EOL
 -- SRC:  210 PRINT "BUCLE I=";I
-9902 210                                           ; TE_LINE
-2150 "BUCLE I=" ; I                                ; TK_PRINT
-9901                                               ; TE_EOL
+9902 210                                           ; --  TCO_LINE
+2150 1702,P,"BUCLE I="                             ; --  TK_PRINT TES_STRING
+2150 1700,N,I                                      ; --  TK_PRINT TES_IDENT
+9901                                               ; --  TCO_EOL
 -- SRC:  220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
-9902 220                                           ; TE_LINE
-2140 I = 2                                         ; TK_IF
-2150 "IF DENTRO DEL FOR"                           ; TK_PRINT
-9901                                               ; TE_EOL
+9902 220                                           ; --  TCO_LINE
+2140 I = 2                                         ; --  TK_IF
+2150 1702,N,"IF DENTRO DEL FOR"                    ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
-9902 230                                           ; TE_LINE
-2140 I = 2                                         ; TK_IF
-2142 B = 4                                         ; TK_LET
-1139 8888                                          ; TK_GOTO
-2142 A = 9                                         ; TK_LET
-2152 código inalcanzable                           ; TK_REM
-9901                                               ; TE_EOL
+9902 230                                           ; --  TCO_LINE
+2140 I = 2                                         ; --  TK_IF
+2142 B = 4                                         ; --  TK_LET
+1139 8888                                          ; --  TK_GOTO
+2142 A = 9                                         ; --  TK_LET
+2152 "código inalcanzable"                         ; --  TK_REM
+9901                                               ; --  TCO_EOL
 -- SRC:  240 PRINT "DESPUES DEL IF EN FOR"
-9902 240                                           ; TE_LINE
-2150 "DESPUES DEL IF EN FOR"                       ; TK_PRINT
-9901                                               ; TE_EOL
+9902 240                                           ; --  TCO_LINE
+2150 1702,N,"DESPUES DEL IF EN FOR"                ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  250 NEXT I
-9902 250                                           ; TE_LINE
-2146 I                                             ; TK_NEXT
-9901                                               ; TE_EOL
+9902 250                                           ; --  TCO_LINE
+2146 I                                             ; --  TK_NEXT
+9901                                               ; --  TCO_EOL
 -- SRC:  300 REM --- PRUEBA READ / DATA / RESTORE ---
-9902 300                                           ; TE_LINE
-2152 --- PRUEBA READ / DATA / RESTORE ---          ; TK_REM
-9901                                               ; TE_EOL
+9902 300                                           ; --  TCO_LINE
+2152 "--- PRUEBA READ / DATA / RESTORE ---"        ; --  TK_REM
+9901                                               ; --  TCO_EOL
 -- SRC:  310 DATA 10,20,30
-9902 310                                           ; TE_LINE
-1131 10 , 20 , 30                                  ; TK_DATA
-9901                                               ; TE_EOL
+9902 310                                           ; --  TCO_LINE
+1131 10 , 20 , 30                                  ; --  TK_DATA
+9901                                               ; --  TCO_EOL
 -- SRC:  320 READ X
-9902 320                                           ; TE_LINE
-1151 X                                             ; TK_READ
-9901                                               ; TE_EOL
+9902 320                                           ; --  TCO_LINE
+1151 X                                             ; --  TK_READ
+9901                                               ; --  TCO_EOL
 -- SRC:  330 PRINT "X=";X
-9902 330                                           ; TE_LINE
-2150 "X=" ; X                                      ; TK_PRINT
-9901                                               ; TE_EOL
+9902 330                                           ; --  TCO_LINE
+2150 1702,P,"X="                                   ; --  TK_PRINT TES_STRING
+2150 1700,N,X                                      ; --  TK_PRINT TES_IDENT
+9901                                               ; --  TCO_EOL
 -- SRC:  340 READ X
-9902 340                                           ; TE_LINE
-1151 X                                             ; TK_READ
-9901                                               ; TE_EOL
--- SRC:  350 PRINT "X=";X
-9902 350                                           ; TE_LINE
-2150 "X=" ; X                                      ; TK_PRINT
-9901                                               ; TE_EOL
+9902 340                                           ; --  TCO_LINE
+1151 X                                             ; --  TK_READ
+9901                                               ; --  TCO_EOL
+-- SRC:  350 PRINT "X=",X
+9902 350                                           ; --  TCO_LINE
+2150 1702,C,"X="                                   ; --  TK_PRINT TES_STRING
+2150 1700,N,X                                      ; --  TK_PRINT TES_IDENT
+9901                                               ; --  TCO_EOL
 -- SRC:  360 RESTORE 310
-9902 360                                           ; TE_LINE
-1153 310                                           ; TK_RESTORE
-9901                                               ; TE_EOL
+9902 360                                           ; --  TCO_LINE
+1153 310                                           ; --  TK_RESTORE
+9901                                               ; --  TCO_EOL
 -- SRC:  370 READ X
-9902 370                                           ; TE_LINE
-1151 X                                             ; TK_READ
-9901                                               ; TE_EOL
+9902 370                                           ; --  TCO_LINE
+1151 X                                             ; --  TK_READ
+9901                                               ; --  TCO_EOL
 -- SRC:  380 PRINT "X=";X
-9902 380                                           ; TE_LINE
-2150 "X=" ; X                                      ; TK_PRINT
-9901                                               ; TE_EOL
+9902 380                                           ; --  TCO_LINE
+2150 1702,P,"X="                                   ; --  TK_PRINT TES_STRING
+2150 1700,N,X                                      ; --  TK_PRINT TES_IDENT
+9901                                               ; --  TCO_EOL
 -- SRC:  400 REM --- IF CON READ ---
-9902 400                                           ; TE_LINE
-2152 --- IF CON READ ---                           ; TK_REM
-9901                                               ; TE_EOL
+9902 400                                           ; --  TCO_LINE
+2152 "--- IF CON READ ---"                         ; --  TK_REM
+9901                                               ; --  TCO_EOL
 -- SRC:  410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
-9902 410                                           ; TE_LINE
-2140 A = 1                                         ; TK_IF
-1151 X                                             ; TK_READ
-2150 "READ EN IF=" ; X                             ; TK_PRINT
-9901                                               ; TE_EOL
+9902 410                                           ; --  TCO_LINE
+2140 A = 1                                         ; --  TK_IF
+1151 X                                             ; --  TK_READ
+2150 1702,P,"READ EN IF="                          ; --  TK_PRINT TES_STRING
+2150 1700,N,X                                      ; --  TK_PRINT TES_IDENT
+9901                                               ; --  TCO_EOL
 -- SRC:  500 REM --- STOP INTERMEDIO ---
-9902 500                                           ; TE_LINE
-2152 --- STOP INTERMEDIO ---                       ; TK_REM
-9901                                               ; TE_EOL
+9902 500                                           ; --  TCO_LINE
+2152 "--- STOP INTERMEDIO ---"                     ; --  TK_REM
+9901                                               ; --  TCO_EOL
 -- SRC:  510 STOP
-9902 510                                           ; TE_LINE
-1160                                               ; TK_STOP
-9901                                               ; TE_EOL
+9902 510                                           ; --  TCO_LINE
+1160                                               ; --  TK_STOP
+9901                                               ; --  TCO_EOL
 -- SRC:  520 PRINT "NO DEBE EJECUTARSE"
-9902 520                                           ; TE_LINE
-2150 "NO DEBE EJECUTARSE"                          ; TK_PRINT
-9901                                               ; TE_EOL
+9902 520                                           ; --  TCO_LINE
+2150 1702,N,"NO DEBE EJECUTARSE"                   ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  600 REM --- IF MULTIPLE FINAL MALVADO ---
-9902 600                                           ; TE_LINE
-2152 --- IF MULTIPLE FINAL MALVADO ---             ; TK_REM
-9901                                               ; TE_EOL
+9902 600                                           ; --  TCO_LINE
+2152 "--- IF MULTIPLE FINAL MALVADO ---"           ; --  TK_REM
+9901                                               ; --  TCO_EOL
 -- SRC:  610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
-9902 610                                           ; TE_LINE
-2140 A = 1                                         ; TK_IF
-2140 B > 2                                         ; TK_IF
-2140 C <> 3                                        ; TK_IF
-2150 "X"                                           ; TK_PRINT
-2140 A = 1                                         ; TK_IF
-2150 "Y"                                           ; TK_PRINT
-2140 B = 2                                         ; TK_IF
-2150 "Z"                                           ; TK_PRINT
-9901                                               ; TE_EOL
--- SRC:  650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )   AND b <> 0 THEN PRINT "OK"
-9902 650                                           ; TE_LINE
-2140 A ( BX + C + 5 , Z * 4 + F ) = C ( t * 4 ) AND b <> 0
-                                                   ; TK_IF
-2150 "OK"                                          ; TK_PRINT
-9901                                               ; TE_EOL
+9902 610                                           ; --  TCO_LINE
+2140 A = 1                                         ; --  TK_IF
+2140 B > 2                                         ; --  TK_IF
+2140 C <> 3                                        ; --  TK_IF
+2150 1702,N,"X"                                    ; --  TK_PRINT TES_STRING
+2140 A = 1                                         ; --  TK_IF
+2150 1702,N,"Y"                                    ; --  TK_PRINT TES_STRING
+2140 B = 2                                         ; --  TK_IF
+2150 1702,N,"Z"                                    ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
+-- SRC:  650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+9902 650                                           ; --  TCO_LINE
+2140 A (BX + C +  5   , Z * 4 + F) = C (t * 4) + u AND b <> 0
+                                                   ; --  TK_IF
+2150 1702,N,"OK"                                   ; --  TK_PRINT TES_STRING
+9901                                               ; --  TCO_EOL
 -- SRC:  660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
-9902 660                                           ; TE_LINE
-2142 A(BX + C + 5,Z * 4 + F) = C ( t * 4 )         ; TK_LET
-2142 B = C ^ 3                                     ; TK_LET
-9901                                               ; TE_EOL
+9902 660                                           ; --  TCO_LINE
+2142 A(BX+C +5, Z * 4+F) = C (t *4)                ; --  TK_LET
+2142 B = C ^ 3                                     ; --  TK_LET
+9901                                               ; --  TCO_EOL
 -- SRC:  700 REM === FIN ===
-9902 700                                           ; TE_LINE
-2152 === FIN ===                                   ; TK_REM
-9901                                               ; TE_EOL
-9900                                               ; TE_EOF
+9902 700                                           ; --  TCO_LINE
+2152 "=== FIN ==="                                 ; --  TK_REM
+9901                                               ; --  TCO_EOL
+-- SRC:  800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+9902 800                                           ; --  TCO_LINE
+2150 1600,P,10,2                                   ; --  TK_PRINT TK_AT
+2150 1702,P,"K"                                    ; --  TK_PRINT TES_STRING
+2150 1600,C,G (10),2                               ; --  TK_PRINT TK_AT
+2150 1702,P,"L"                                    ; --  TK_PRINT TES_STRING
+2150 1206,P,4                                      ; --  TK_PRINT TK_INK
+2150 1211,P,3                                      ; --  TK_PRINT TK_PAPER
+2150 1701,P,45                                     ; --  TK_PRINT TES_NUMBER
+2150 1700,C,A(bc+4, C*4)                           ; --  TK_PRINT TES_IDENT
+2150 1700,N,B                                      ; --  TK_PRINT TES_IDENT
+9901                                               ; --  TCO_EOL
+-- SRC:  810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+9902 810                                           ; --  TCO_LINE
+2150 1601,P,10                                     ; --  TK_PRINT TK_TAB
+2150 1702,P,"A"                                    ; --  TK_PRINT TES_STRING
+2150 1601,P,(20)                                   ; --  TK_PRINT TK_TAB
+2150 1702,P,"B"                                    ; --  TK_PRINT TES_STRING
+2150 1600,N,1,4                                    ; --  TK_PRINT TK_AT
+9901                                               ; --  TCO_EOL
+9900                                               ; --  TCO_EOF

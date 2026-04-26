@@ -27,9 +27,49 @@ Public Structure Token
         Me.Col = 0
     End Sub
 
+    Public Sub New(id As TokenID)
+        Me.ID = id
+        Me.Value = ""
+        Me.Line = 0
+        Me.Col = 0
+    End Sub
+
     Public Sub New(linea As String)
         LineToTok(linea)
     End Sub
+
+    ReadOnly Property Mnemonic As String
+        Get
+            Return GetNombreSentencia().ToUpperInvariant()
+        End Get
+    End Property
+
+    ReadOnly Property FNMnemonic As String
+        Get
+            Return ("ZX2SB_" & Mnemonic).ToUpperInvariant()
+        End Get
+    End Property
+
+    ReadOnly Property EsModificadorPrint As Boolean
+        Get
+            Return GetEsModificadorPrint()
+        End Get
+    End Property
+
+    ReadOnly Property GetValor As String
+        Get
+            Select Case Me.ID
+                Case TokenID.TES_STRING
+                    Return ($"{Constantes.C_COMILLAS}{Me.Value}{Constantes.C_COMILLAS}")
+
+                Case TokenID.TES_GREXPR
+                    Return ($"{Constantes.C_PAR_APE}{Me.Value}{Constantes.C_PAR_CIE}")
+
+                Case Else
+                    Return Me.Value
+            End Select
+        End Get
+    End Property
 
     ' ---------------------------------------------------
     '  Serialización EXACTA al fichero .tok
@@ -43,45 +83,71 @@ Public Structure Token
             aux &= " " & Value
         End If
 
-        If Me.ID <> TokenID.TE_UNKNOWN Then
-            aux = aux & Space(50 - Len(aux)) & " ; " & Me.ID.ToString
+        If Me.ID <> TokenID.TCO_UNKNOWN Then
+            aux = aux & Space(50 - Len(aux)) & Constantes.MarcaComentario & Me.ID.ToString
         End If
 
         Return aux
     End Function
 
-    Private Function LineToTok(linea As String) As Token
-        ' Ejemplo esperado:
-        ' 1012 [12,5] PRINT
+    Private Sub LineToTok(linea As String)
+        ' Ejemplos esperados:
+        ' 1012 [12,5] A$    ; -- TK_PRINT
+        ' 1012 A$           ; -- TK_PRINT
 
-        ' Quitar comentario desde el ; hasta el final
-        If linea.Contains(" ; ") Then
+        Me.ID = TokenID.TCO_NONE  'Si no hay nada, es vacío
+        Me.Line = -1
+        Me.Col = -1
+        Me.Value = ""
+
+        ' Quitar comentario desde el último ; hasta el final
+        If linea.Contains(Constantes.MarcaComentario) Then
             For i As Integer = linea.Length - 1 To 0 Step -1
-                If linea(i) = ";"c Then
+                If linea(i) = Constantes.Sep_Comentario Then
                     linea = linea.Substring(0, i).TrimEnd()
                     Exit For
                 End If
             Next
         End If
 
+        If String.IsNullOrEmpty(linea) Then
+            Exit Sub
+        End If
 
-        Dim parts = linea.Split(" "c, 3)
-
+        Dim parts = linea.Split(" "c, 2)
         Dim id As TokenID = CType(Integer.Parse(parts(0)), TokenID)
-
-        Dim pos = parts(1).Trim("["c, "]"c).Split(","c)
-        Dim line As Integer = Integer.Parse(pos(0))
-        Dim col As Integer = Integer.Parse(pos(1))
-
+        Dim line As Integer = -1
+        Dim col As Integer = -1
         Dim value As String = ""
-        If parts.Length = 3 Then value = parts(2)
+
+
+        If parts.Length = 2 Then
+            Dim rest As String = parts(1).Trim()
+
+            ' ¿Empieza por [l,c]?
+            If rest.StartsWith("[") Then
+                Dim endPos = rest.IndexOf("]"c)
+                If endPos > 0 Then
+                    Dim pos = rest.Substring(1, endPos - 1).Split(","c)
+                    If pos.Length = 2 Then
+                        Integer.TryParse(pos(0), line)
+                        Integer.TryParse(pos(1), col)
+                    End If
+                    value = rest.Substring(endPos + 1).Trim()
+                Else
+                    ' No contiene linea y columna
+                    value = rest
+                End If
+            Else
+                value = rest
+            End If
+        End If
 
         Me.ID = id
         Me.Line = line
         Me.Col = col
         Me.Value = value
-
-    End Function
+    End Sub
 
     ' ---------------------------------------------------
     '  Representación legible para depuración (VERBOSE)
@@ -138,7 +204,7 @@ Public Structure Token
 
     ' Obtener el tipo
     <MethodImpl(MethodImplOptions.AggressiveInlining)>
-    Public Function GetTipo(id As TokenID) As TokenTipo
+    Public Shared Function GetTipo(id As TokenID) As TokenTipo
         Return CType(((CInt(id) \ 100) Mod 10) * 100, TokenTipo)
     End Function
 
@@ -203,10 +269,16 @@ Public Structure Token
         If Me.IsFunction() Then Return True
 
         ' Literales, variables, números y operadores
-        If Me.ID = TokenID.TE_STRING OrElse
-           Me.ID = TokenID.TE_IDENT OrElse
-           Me.ID = TokenID.TE_NUMBER OrElse
+        If Me.ID = TokenID.TES_STRING OrElse
+           Me.ID = TokenID.TES_IDENT OrElse
+           Me.ID = TokenID.TES_NUMBER OrElse
            Me.IsOperator() Then
+            Return True
+        End If
+
+        ' Paréntesis para variables y funciones
+        If Me.ID = TokenID.TSP_PAR_ABIERTO OrElse
+           Me.ID = TokenID.TSP_PAR_CERRADO Then
             Return True
         End If
 
@@ -246,6 +318,46 @@ Public Structure Token
         End If
 
         Return Keywords.Contains(name.Trim())
+    End Function
+
+
+    Private Function GetNombreSentencia() As String
+        'Dos excepciones porque la misma sentencia se trata de dos maneras
+        Select Case Me.ID
+            Case TokenID.TK_CLEAR_RAM
+                Return "CLEAR"
+            Case TokenID.TK_RANDOMIZE_USR
+                Return "RANDOMIZE USR"
+        End Select
+
+        Dim s As String = Me.ID.ToString()
+
+        ' Regla general: solo tokens TK_ generan sentencia
+        If s.StartsWith("TK_", StringComparison.Ordinal) Then
+            s = s.Substring(3)
+            'Si terminan por _S son de cadena, cambio por $
+            If s.EndsWith("_S", StringComparison.Ordinal) Then
+                s = s.Substring(0, s.Length - 2) & "$"
+            End If
+            Return s
+        End If
+        ' No es una sentencia emitible
+        Return ""
+    End Function
+
+    ' Indica si pueden aparecer dentro de un PRINT
+    ' TAB y AT se tratan como casos especiales, esto generan una sentencia independiente
+    Private Function GetEsModificadorPrint() As Boolean
+        Select Case Me.ID
+            Case TokenID.TK_INK,
+                 TokenID.TK_PAPER,
+                 TokenID.TK_BRIGHT,
+                 TokenID.TK_FLASH,
+                 TokenID.TK_OVER,
+                 TokenID.TK_INVERSE
+                Return True
+        End Select
+        Return False
     End Function
 
 End Structure

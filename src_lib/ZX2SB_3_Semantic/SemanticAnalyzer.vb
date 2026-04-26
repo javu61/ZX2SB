@@ -64,6 +64,7 @@ Public Module SemanticAnalyzer
             If NroErrores <> 0 Then
                 Return 1
             End If
+            GuardarSalida(writer, TokenID.TCO_EOF, "")
             GuardarVarAndData()
         End Using
 
@@ -111,22 +112,22 @@ Public Module SemanticAnalyzer
         Dim EOFRecibido As Boolean = False
         NroLineaFichero = 0
 
-        For Each linea As String In File.ReadLines(opts.FSalidaPar)
+        For Each LineaLeida As String In File.ReadLines(opts.FSalidaPar)
 
-            If String.IsNullOrWhiteSpace(linea) Then Continue For
+            If String.IsNullOrWhiteSpace(LineaLeida) Then Continue For
 
             ' ---------------------------------------------
             ' Cabecera IRP
             ' ---------------------------------------------
             If primeralinea Then
-                MostrarMensaje(opts, linea)
-                If Not linea.StartsWith(Constantes.PAR_NOMBRE) Then
-                    ErrorSintactico(writer, 0, "[ERROR] No es un fichero " & Constantes.PAR_NOMBRE & ": " & linea)
+                MostrarMensaje(opts, LineaLeida)
+                If Not LineaLeida.StartsWith(Constantes.PAR_NOMBRE) Then
+                    ErrorSemantico(writer, 0, "[ERROR] No es un fichero " & Constantes.PAR_NOMBRE & ": " & LineaLeida)
                     Exit Sub
                 End If
 
-                If Not linea.StartsWith(Constantes.PAR_NOMBRE & " " & Constantes.PAR_VERSION) Then
-                    ErrorSintactico(writer, 0, "[ERROR] Versión incorrecta del fichero " & Constantes.PAR_NOMBRE & ": " & linea)
+                If Not LineaLeida.StartsWith(Constantes.PAR_NOMBRE & " " & Constantes.PAR_VERSION) Then
+                    ErrorSemantico(writer, 0, "[ERROR] Versión incorrecta del fichero " & Constantes.PAR_NOMBRE & ": " & LineaLeida)
                     Exit Sub
                 End If
                 primeralinea = False
@@ -136,53 +137,50 @@ Public Module SemanticAnalyzer
             ' ---------------------------------------------
             ' Línea fuente original (contexto de error)
             ' ---------------------------------------------
-            If linea.StartsWith(MarcaSRC) Then
-                LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, linea)
+            If LineaLeida.StartsWith(MarcaSRC) Then
+                LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, LineaLeida)
                 If opts.Pasada = 2 Then
                     GuardarSalida(writer, $"{Constantes.MarcaSRC} {LineaParaMostrar}", TipoLinea.SRC)
                 End If
                 Continue For
             End If
 
-                ' ---------------------------------------------
-                ' Línea del IR, montar Token
-                ' ---------------------------------------------
-                Dim idToken As TokenID
-            Dim atributos As String = ""
+            ' ----------------------------------------------------------------------------
+            ' Línea del IR, montar Token auxliar para descomponer la línea correctamente
+            ' ----------------------------------------------------------------------------
+            Dim auxTok As New Token(LineaLeida)
 
-            If Not LeerLineaIR(linea, idToken, atributos) Then
-                Continue For
-            End If
-
-            Select Case idToken
-                Case TokenID.TE_EOF
+            Select Case auxTok.ID
+                Case TokenID.TCO_NONE
+                    'Línea en blanco, no haemos nada
+                Case TokenID.TCO_EOF
                     ' fin del fichero
                     EOFRecibido = True
-                Case TokenID.TE_LINE
+                Case TokenID.TCO_LINE
                     ' LINE n
                     Select Case opts.Pasada
                         Case 1
                             Dim n As Integer
-                            If Integer.TryParse(atributos.Trim(), n) Then
+                            If Integer.TryParse(auxTok.Value, n) Then
                                 If opts.Pasada = 1 Then
                                     ' Validación de numeración correlativa en ZX BASIC
                                     If n <= UltimaLineaZX Then
-                                        ErrorSintactico(Nothing, 0, $"Numeración de líneas no válida: la línea {n} aparece después de {UltimaLineaZX}")
+                                        ErrorSemantico(Nothing, 0, $"Numeración de líneas no válida: la línea {n} aparece después de {UltimaLineaZX}")
                                     End If
                                     UltimaLineaZX = n
                                 End If
                             Else
-                                ErrorSintactico(Nothing, 0, $"LINE inválido en IRP: {linea}")
+                                ErrorSemantico(Nothing, 0, $"LINE inválido en IRP: {LineaLeida}")
                             End If
                         Case 2
-                            P2_AnalizarYEmitirStmt(idToken, atributos, LineaParaMostrar, writer)
+                            P2_AnalizarYEmitirStmt(auxTok.ID, auxTok.Value, LineaParaMostrar, writer)
                     End Select
                 Case Else
                     Select Case opts.Pasada
                         Case 1
-                            P1_RecolectarDesdeStmt(idToken, atributos)
+                            P1_RecolectarDesdeStmt(auxTok.ID, auxTok.Value)
                         Case 2
-                            P2_AnalizarYEmitirStmt(idToken, atributos, LineaParaMostrar, writer)
+                            P2_AnalizarYEmitirStmt(auxTok.ID, auxTok.Value, LineaParaMostrar, writer)
                         Case Else
                             Throw New InvalidOperationException("Pasada semántica desconocida")
                     End Select
@@ -190,9 +188,8 @@ Public Module SemanticAnalyzer
         Next
 
         If Not EOFRecibido Then
-            ErrorSintactico(Nothing, 0, $"El contenido no termina por un EOF, posible fichero inválido")
+            ErrorSemantico(Nothing, 0, $"El contenido no termina por un EOF, posible fichero inválido")
         End If
-
     End Sub
 
     ' ============================================================
@@ -314,7 +311,7 @@ Public Module SemanticAnalyzer
         End If
 
         ' Si no se reconoce, dejarlo como string
-        WarningSintactico(Nothing, 0, $"Literal DATA no reconocido: {text}")
+        WarningSemantico(Nothing, 0, $"Literal DATA no reconocido: {text}")
         Return text
 
     End Function
@@ -342,26 +339,26 @@ Public Module SemanticAnalyzer
     ' -----------------------------------------------------------------------------------------------------
 
     Private Sub P2_AnalizarYEmitirStmt(IDToken As TokenID, stmt As String, lineaSRC As String, writer As StreamWriter)
-        If IDToken = TokenID.TE_LINE Then
+        If IDToken = TokenID.TCO_LINE Then
             GuardarSalida(writer, IDToken, stmt)
             Return
         End If
-        If IDToken = TokenID.TE_EOL Then
+        If IDToken = TokenID.TCO_EOL Then
             GuardarSalida(writer, IDToken, stmt)
             Return
         End If
 
-        If IDToken = TokenID.TE_UNKNOWN Then
-            ErrorSintactico(Nothing, 0, $"Sentencia desconocida en '{lineaSRC}': {IDToken}")
+        If IDToken = TokenID.TCO_UNKNOWN Then
+            ErrorSemantico(Nothing, 0, $"Sentencia desconocida en '{lineaSRC}': {IDToken}")
             Return
         End If
 
         ' Avisos antes de generar
         Select Case Token.GetFamily(IDToken)
             Case TokenFamily.TF_NOSOPORTADO   ' No soportadas
-                WarningSintactico(writer, 0, $"Sentencia no soportada: {IDToken}")
+                WarningSemantico(writer, 0, $"Sentencia no soportada: {IDToken}")
             Case TokenFamily.TF_ESPECIALES   ' La especiales no se tratan
-                ErrorSintactico(writer, 0, $"Token especial no soportado: {IDToken}")
+                ErrorSemantico(writer, 0, $"Token especial no soportado: {IDToken}")
         End Select
 
         Try
@@ -414,7 +411,7 @@ Public Module SemanticAnalyzer
             ' CLEAR
 
             If IDToken = TokenID.TK_CLEAR_RAM Then
-                WarningSintactico(Nothing, 0, $"CLEAR con parámetro no soportado directamente en SuperBASIC")
+                WarningSemantico(Nothing, 0, $"CLEAR con parámetro no soportado directamente en SuperBASIC")
                 GuardarSalida(writer, IDToken, stmt)
                 Return
             End If
@@ -433,7 +430,7 @@ Public Module SemanticAnalyzer
 
             ' RANDOMIZE USR (ZX-only)
             If IDToken = TokenID.TK_RANDOMIZE_USR Then
-                WarningSintactico(writer, 0, $"RANDOMIZE USR no soportado directamente en QL")
+                WarningSemantico(writer, 0, $"RANDOMIZE USR no soportado directamente en QL")
                 GuardarSalida(writer, IDToken, stmt)
                 Return
             End If
@@ -444,7 +441,7 @@ Public Module SemanticAnalyzer
             Return
 
         Catch ex As Exception
-            ErrorSintactico(Nothing, 0, $"Error semántico en '{lineaSRC}': {ex.Message}")
+            ErrorSemantico(Nothing, 0, $"Error semántico en '{lineaSRC}': {ex.Message}")
         End Try
 
     End Sub
@@ -559,12 +556,12 @@ Public Module SemanticAnalyzer
         Dim exprType As VarType = ExprTypeEvaluator.GetExprType(rvalue, ctx)
 
         If varType = VarType.Numeric AndAlso exprType = VarType.StringType Then
-            WarningSintactico(Nothing, 0, $"Posible asignación inválida num <- str: {lineaSRC}")
+            WarningSemantico(Nothing, 0, $"Posible asignación inválida num <- str: {lineaSRC}")
             Exit Sub
         End If
 
         If varType = VarType.StringType AndAlso exprType = VarType.Numeric Then
-            WarningSintactico(Nothing, 0, $"Posible asignación inválida str <- num: {lineaSRC}")
+            WarningSemantico(Nothing, 0, $"Posible asignación inválida str <- num: {lineaSRC}")
             Exit Sub
         End If
 
@@ -655,7 +652,7 @@ Public Module SemanticAnalyzer
         Dim vm As VariableMatch = Nothing
 
         If Not TryMatchVariable(stmt, VarCheckContext.ForControl, vm) Then
-            ErrorSintactico(writer, 0, "Variable de control FOR inválida")
+            ErrorSemantico(writer, 0, "Variable de control FOR inválida")
             Exit Sub
         End If
 
@@ -684,29 +681,27 @@ Public Module SemanticAnalyzer
 
         ' NEXT sin variable
         If varName = "" Then
-            ErrorSintactico(writer, 0, "NEXT debe indicar la variable de control del FOR")
+            ErrorSemantico(writer, 0, "NEXT debe indicar la variable de control del FOR")
             Exit Sub
         End If
 
         ' Variable debe tener nombre correcto
         If Not TryMatchVariable(varName, VarCheckContext.ForControl, vm) Then
-            ErrorSintactico(writer, 0, "Variable de control NEXT inválida")
+            ErrorSemantico(writer, 0, "Variable de control NEXT inválida")
             Exit Sub
         End If
 
         'Next debe estar tras un for
         If ForStack.Count = 0 Then
-            ErrorSintactico(Nothing, 0, $"NEXT {stmt} sin FOR previo")
+            ErrorSemantico(Nothing, 0, $"NEXT {stmt} sin FOR previo")
             Exit Sub
         End If
 
         Dim esperado = ForStack.Pop()
 
         If varName <> "" AndAlso varName <> esperado Then
-            WarningSintactico(Nothing, 0, $"NEXT {varName} no coincide con FOR {esperado}")
+            WarningSemantico(Nothing, 0, $"NEXT {varName} no coincide con FOR {esperado}")
         End If
-
-        Console.WriteLine($"::4: {stmt}")
 
         GuardarSalida(writer, TokenID.TK_NEXT, stmt)
 
@@ -724,7 +719,7 @@ Public Module SemanticAnalyzer
     Private Sub AnalizarRETURN(stmt As String, lineaSRC As String, writer As StreamWriter)
 
         If GosubStack.Count = 0 Then
-            WarningSintactico(Nothing, 0, $"RETURN sin GOSUB previo: {lineaSRC}")
+            WarningSemantico(Nothing, 0, $"RETURN sin GOSUB previo: {lineaSRC}")
         Else
             GosubStack.Pop()
         End If
@@ -844,11 +839,11 @@ Public Module SemanticAnalyzer
 
         linea = $"{idNum} {linea}"
         If Len(linea) < 49 Then
-            linea &= Space(50 - Len(linea)) & $" ; {idName}"
+            linea &= Space(50 - Len(linea)) & $"{Constantes.MarcaComentario} {idName}"
             GuardarSalida(writer, linea, TipoLinea.STMT)
         Else
             GuardarSalida(writer, linea, TipoLinea.STMT)
-            linea = Space(50) & $" ; {idName}"
+            linea = Space(50) & $"{Constantes.MarcaComentario} {idName}"
             GuardarSalida(writer, linea, TipoLinea.STMT)
         End If
     End Sub
@@ -902,35 +897,80 @@ Public Module SemanticAnalyzer
                 Continue While
             End If
 
-            ' ---- AND ----
-            If i + 2 < expr.Length AndAlso
-           String.Compare(expr, i, "AND", 0, 3, True) = 0 AndAlso
-           EsLimiteIzquierdo(expr, i) Then
+            Dim lista As New List(Of String)
+            lista.Add("AND")
+            lista.Add("OR")
+            lista.Add("NOT")
+            lista.Add("TO")
 
-                sb.Append(" AND ")
-                i += 3
-                Continue While
-            End If
+            For Each palabra In lista
+                If AjustarPalabras(expr, palabra, i, sb, True) Then
+                    Continue While
+                End If
+            Next
 
-            ' ---- OR ----
-            If i + 1 < expr.Length AndAlso
-           String.Compare(expr, i, "OR", 0, 2, True) = 0 AndAlso
-           EsLimiteIzquierdo(expr, i) Then
+            lista.Clear()
+            lista.Add("AT")
+            lista.Add("INK")
+            lista.Add("PAPER")
+            lista.Add("BRIGHT")
+            lista.Add("FLASH")
+            lista.Add("OVER")
+            lista.Add("INVERSE")
 
-                sb.Append(" OR ")
-                i += 2
-                Continue While
-            End If
+            For Each palabra In lista
+                If AjustarPalabras(expr, palabra, i, sb, False) Then
+                    Continue While
+                End If
+            Next
 
-            ' ---- NOT ----
-            If i + 2 < expr.Length AndAlso
-           String.Compare(expr, i, "NOT", 0, 3, True) = 0 AndAlso
-           EsLimiteIzquierdo(expr, i) Then
 
-                sb.Append(" NOT ")
-                i += 3
-                Continue While
-            End If
+            '' ---- AND ----
+            'If i + 2 < expr.Length AndAlso
+            '   String.Compare(expr, i, "AND", 0, 3, True) = 0 AndAlso
+            '   EsLimiteIzquierdo(expr, i) Then
+
+            '    sb.Append(" AND ")
+            '    i += 3
+            '    Continue While
+            'End If
+
+            '' ---- OR ----
+            'If i + 1 < expr.Length AndAlso
+            '   String.Compare(expr, i, "OR", 0, 2, True) = 0 AndAlso
+            '   EsLimiteIzquierdo(expr, i) Then
+
+            '    sb.Append(" OR ")
+            '    i += 2
+            '    Continue While
+            'End If
+
+            '' ---- NOT ----
+            'If i + 2 < expr.Length AndAlso
+            '   String.Compare(expr, i, "NOT", 0, 3, True) = 0 AndAlso
+            '   EsLimiteIzquierdo(expr, i) Then
+
+            '    sb.Append(" NOT ")
+            '    i += 3
+            '    Continue While
+            'End If
+
+            '' ---- TO ----
+            'If i + 1 < expr.Length AndAlso
+            '   String.Compare(expr, i, "TO", 0, 2, True) = 0 AndAlso
+            '   EsLimiteIzquierdo(expr, i) Then
+
+            '    sb.Append(" TO ")
+            '    i += 2
+            '    Continue While
+            'End If
+
+
+            '' ---- AT ----
+            'If AjustarPalabras(expr, "AT", i, sb, False) Then
+            '    Continue While
+            'End If
+
 
             ' ---- Carácter normal ----
             sb.Append(ch)
@@ -940,11 +980,57 @@ Public Module SemanticAnalyzer
         Return sb.ToString().Trim()
     End Function
 
-    Private Function EsLimiteIzquierdo(text As String, pos As Integer) As Boolean
-        If pos = 0 Then Return True
+    Private Function AjustarPalabras(expr As String,
+                                     palabra As String,
+                                     ByRef i As Integer,
+                                     sb As StringBuilder,
+                                     inicio As Boolean) As Boolean
 
-        Dim ch = text(pos - 1)
-        Return Not (Char.IsLetterOrDigit(ch) OrElse ch = "$"c)
+        ' ¿Cabe la palabra?
+        If i + palabra.Length > expr.Length Then
+            Return False
+        End If
+
+        ' Extraer posible coincidencia
+        Dim aux As String = expr.Substring(i, palabra.Length)
+
+        ' Comparar exactamente
+        If String.Compare(aux, palabra, StringComparison.OrdinalIgnoreCase) <> 0 Then
+            Return False
+        End If
+
+        ' Comprobar límites léxicos
+        If Not EsLimiteIzquierdo(expr, i) OrElse
+           Not EsLimiteDerecho(expr, i + palabra.Length - 1) Then
+            Return False
+        End If
+
+        ' Espacio canónico antes (si no es inicio y no hay ya espacio)
+        If Not inicio AndAlso sb.Length > 0 AndAlso sb(sb.Length - 1) <> " "c Then
+            sb.Append(" ")
+        End If
+
+        ' Añadir palabra
+        sb.Append(palabra)
+
+        ' Espacio canónico después
+        sb.Append(" ")
+
+        ' Avanzar índice
+        i += palabra.Length
+        Return True
+    End Function
+
+
+
+    Private Function EsLimiteIzquierdo(expr As String, i As Integer) As Boolean
+        If i = 0 Then Return True
+        Return Not Char.IsLetterOrDigit(expr(i - 1)) AndAlso expr(i - 1) <> "_"c
+    End Function
+
+    Private Function EsLimiteDerecho(expr As String, i As Integer) As Boolean
+        If i >= expr.Length - 1 Then Return True
+        Return Not Char.IsLetterOrDigit(expr(i + 1)) AndAlso expr(i + 1) <> "_"c
     End Function
 
 
@@ -1001,8 +1087,8 @@ Public Module SemanticAnalyzer
             If v.WasUsed AndAlso Not v.WasAssigned Then
                 WarningVariables($"Variable '{v.Name}' usada pero nunca asignada.")
 
-                ' 🔍 Posible confusión entre variable numérica y string ($)
-                Dim base = NombreBase(v.Name)
+            ' 🔍 Posible confusión entre variable numérica y string ($)
+            Dim base = NombreBase(v.Name)
 
                 For Each kv2 In ctx.Variables
                     Dim other = kv2.Value
@@ -1032,7 +1118,7 @@ Public Module SemanticAnalyzer
         Return varName
     End Function
 
-    Private Sub ErrorSintactico(writer As StreamWriter, columna As Integer, descripcion As String)
+    Private Sub ErrorSemantico(writer As StreamWriter, columna As Integer, descripcion As String)
         NroErrores += 1
         If (columna <> 0) Then
             columna = columna - 1
@@ -1040,7 +1126,7 @@ Public Module SemanticAnalyzer
         MensajeError(opts, writer, False, NroLineaFichero, columna, LineaParaMostrar,
                      New String(" "c, columna) & "^ " & descripcion)
     End Sub
-    Private Sub WarningSintactico(writer As StreamWriter, columna As Integer, descripcion As String)
+    Private Sub WarningSemantico(writer As StreamWriter, columna As Integer, descripcion As String)
         NroWarnings += 1
         If opts.NoPararPorError Or opts.SinWarnings Then
             Exit Sub

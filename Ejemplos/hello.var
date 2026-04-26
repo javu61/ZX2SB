@@ -1,13 +1,17 @@
 VAR  VAR 1.0
 VAR  
-VAR  NUM A [A ]
-VAR  NUM B [A ]
+VAR  NUM A [AU]
+VAR  NUM B [AU]
 VAR  NUM C [AU]
 VAR  NUM X [AU]
+VAR  NUM N [ U]
 VAR  NUM TO [ U]
 VAR  NUM J [ U]
+VAR  NUM P [ U]
 VAR  NUM I [ U]
 VAR  NUM T [ U]
+VAR  NUM G [ U]
+VAR  NUM BC [ U]
 VAR  
 VAR  ENDVARS
 VAR  

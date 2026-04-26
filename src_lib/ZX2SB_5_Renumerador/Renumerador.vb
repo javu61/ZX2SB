@@ -107,7 +107,7 @@ Public Module Renumerador
     ' Helpers
     ' ==========================================================
     Private Function CalcularNuevo(numero As Integer) As Integer
-        Return (opts.Ren_Base + ((numero - 1) * opts.Ren_Paso))
+        Return (opts.Ren_Base + ((numero - 1 + 1) * opts.Ren_Paso))
     End Function
 
     Private Function BuscarEquivalencia(NroAntiguo As Integer) As Integer

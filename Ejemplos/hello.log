@@ -1,286 +1,1090 @@
-[JSemantic] Fichero C:\Proyectos\ZX2SB\ejemplos\hello.log borrado
-[JSemantic]  
-[JSemantic] - Entrada.: C:\Proyectos\ZX2SB\ejemplos\hello.irp
-[JSemantic] - Salida..: C:\Proyectos\ZX2SB\ejemplos\hello.irs
-[JSemantic] - Opciones: -nw -v 
-[JSemantic]  
-[JSemantic]  
+[ZX2SB] Fichero C:\Proyectos\ZX2SB\ejemplos\hello.log borrado
+[ZX2SB]  
+[ZX2SB] - Entrada.: C:\Proyectos\ZX2SB\ejemplos\hello.bas
+[ZX2SB] - Salida..: C:\Users\JoseAntonio\Desktop\mdv1\output
+[ZX2SB] - Opciones: -d -v -nw 
+[ZX2SB]  
+[ZX2SB]  
+[JLexer] 002: 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JLexer]      → -- SRC:  10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JLexer]      → 9902 [1,1] 10                                      ; -- TCO_LINE
+[JLexer]      → 2152 [1,4]                                         ; -- TK_REM
+[JLexer]      → 1702 [1,8] === PRUEBA COMPLETA GENERADOR ZX2SB === ; -- TES_STRING
+[JLexer]      → 9901 [1,0]                                         ; -- TCO_EOL
+[JLexer] 003: 11 PRINT BIN 11100110
+[JLexer]      → -- SRC:  11 PRINT BIN 11100110
+[JLexer]      → 9902 [2,1] 11                                      ; -- TCO_LINE
+[JLexer]      → 2150 [2,4]                                         ; -- TK_PRINT
+[JLexer]      → 3217 [2,10]                                        ; -- TK_BIN
+[JLexer]      → 1701 [2,14] 11100110                               ; -- TES_NUMBER
+[JLexer]      → 9901 [2,0]                                         ; -- TCO_EOL
+[JLexer] 004: 15 FOR J=1 to 10 : PRINT J : NEXT J
+[JLexer]      → -- SRC:  15 FOR J=1 to 10 : PRINT J : NEXT J
+[JLexer]      → 9902 [3,1] 15                                      ; -- TCO_LINE
+[JLexer]      → 2136 [3,4]                                         ; -- TK_FOR
+[JLexer]      → 1700 [3,8] J                                       ; -- TES_IDENT
+[JLexer]      → 1405 [3,9]                                         ; -- TOP_EQ
+[JLexer]      → 1701 [3,10] 1                                      ; -- TES_NUMBER
+[JLexer]      → 1162 [3,12]                                        ; -- TK_TO
+[JLexer]      → 1701 [3,15] 10                                     ; -- TES_NUMBER
+[JLexer]      → 1518 [3,18]                                        ; -- TSP_DOSPUNTOS
+[JLexer]      → 2150 [3,20]                                        ; -- TK_PRINT
+[JLexer]      → 1700 [3,26] J                                      ; -- TES_IDENT
+[JLexer]      → 1518 [3,28]                                        ; -- TSP_DOSPUNTOS
+[JLexer]      → 2146 [3,30]                                        ; -- TK_NEXT
+[JLexer]      → 1700 [3,35] J                                      ; -- TES_IDENT
+[JLexer]      → 9901 [3,0]                                         ; -- TCO_EOL
+[JLexer] 005: 20 LET A=1: LET B=2: LET C=3
+[JLexer]      → -- SRC:  20 LET A=1: LET B=2: LET C=3
+[JLexer]      → 9902 [4,1] 20                                      ; -- TCO_LINE
+[JLexer]      → 2142 [4,4]                                         ; -- TK_LET
+[JLexer]      → 1700 [4,8] A                                       ; -- TES_IDENT
+[JLexer]      → 1405 [4,9]                                         ; -- TOP_EQ
+[JLexer]      → 1701 [4,10] 1                                      ; -- TES_NUMBER
+[JLexer]      → 1518 [4,11]                                        ; -- TSP_DOSPUNTOS
+[JLexer]      → 2142 [4,13]                                        ; -- TK_LET
+[JLexer]      → 1700 [4,17] B                                      ; -- TES_IDENT
+[JLexer]      → 1405 [4,18]                                        ; -- TOP_EQ
+[JLexer]      → 1701 [4,19] 2                                      ; -- TES_NUMBER
+[JLexer]      → 1518 [4,20]                                        ; -- TSP_DOSPUNTOS
+[JLexer]      → 2142 [4,22]                                        ; -- TK_LET
+[JLexer]      → 1700 [4,26] C                                      ; -- TES_IDENT
+[JLexer]      → 1405 [4,27]                                        ; -- TOP_EQ
+[JLexer]      → 1701 [4,28] 3                                      ; -- TES_NUMBER
+[JLexer]      → 9901 [4,0]                                         ; -- TCO_EOL
+[JLexer] 006: 25 GO SUB 750
+[JLexer]      → -- SRC:  25 GO SUB 750
+[JLexer]      → 9902 [5,1] 25                                      ; -- TCO_LINE
+[JLexer]      → 1137 [5,4]                                         ; -- TK_GO
+[JLexer]      → 1165 [5,7]                                         ; -- TK_SUB
+[JLexer]      → 1701 [5,11] 750                                    ; -- TES_NUMBER
+[JLexer]      → 9901 [5,0]                                         ; -- TCO_EOL
+[JLexer] 007: 30 IF A=1 THEN GO TO 100
+[JLexer]      → -- SRC:  30 IF A=1 THEN GO TO 100
+[JLexer]      → 9902 [6,1] 30                                      ; -- TCO_LINE
+[JLexer]      → 2140 [6,4]                                         ; -- TK_IF
+[JLexer]      → 1700 [6,7] A                                       ; -- TES_IDENT
+[JLexer]      → 1405 [6,8]                                         ; -- TOP_EQ
+[JLexer]      → 1701 [6,9] 1                                       ; -- TES_NUMBER
+[JLexer]      → 1161 [6,11]                                        ; -- TK_THEN
+[JLexer]      → 1137 [6,16]                                        ; -- TK_GO
+[JLexer]      → 1162 [6,19]                                        ; -- TK_TO
+[JLexer]      → 1701 [6,22] 100                                    ; -- TES_NUMBER
+[JLexer]      → 9901 [6,0]                                         ; -- TCO_EOL
+[JLexer] 008: 40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JLexer]      → -- SRC:  40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JLexer]      → 9902 [7,1] 40                                      ; -- TCO_LINE
+[JLexer]      → 2150 [7,4]                                         ; -- TK_PRINT
+[JLexer]      → 1702 [7,10] ESTO NO DEBE EJECUTARSE                ; -- TES_STRING
+[JLexer]      → 9901 [7,0]                                         ; -- TCO_EOL
+[JLexer] 009: 50 GOTO 9999 : REM salto inexistente, no error
+[JLexer]      → -- SRC:  50 GOTO 9999 : REM salto inexistente, no error
+[JLexer]      → 9902 [8,1] 50                                      ; -- TCO_LINE
+[JLexer]      → 1139 [8,4]                                         ; -- TK_GOTO
+[JLexer]      → 1701 [8,9] 9999                                    ; -- TES_NUMBER
+[JLexer]      → 1518 [8,14]                                        ; -- TSP_DOSPUNTOS
+[JLexer]      → 2152 [8,16]                                        ; -- TK_REM
+[JLexer]      → 1702 [8,20] salto inexistente, no error            ; -- TES_STRING
+[JLexer]      → 9901 [8,0]                                         ; -- TCO_EOL
+[JLexer] 010: 60 PRINT "TAMPOCO DEBE VERSE"
+[JLexer]      → -- SRC:  60 PRINT "TAMPOCO DEBE VERSE"
+[JLexer]      → 9902 [9,1] 60                                      ; -- TCO_LINE
+[JLexer]      → 2150 [9,4]                                         ; -- TK_PRINT
+[JLexer]      → 1702 [9,10] TAMPOCO DEBE VERSE                     ; -- TES_STRING
+[JLexer]      → 9901 [9,0]                                         ; -- TCO_EOL
+[JLexer] 011: 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JLexer]      → -- SRC:  100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JLexer]      → 9902 [10,1] 100                                    ; -- TCO_LINE
+[JLexer]      → 2150 [10,5]                                        ; -- TK_PRINT
+[JLexer]      → 1702 [10,11] ENTRA EN BLOQUE IF SIMPLE             ; -- TES_STRING
+[JLexer]      → 9901 [10,0]                                        ; -- TCO_EOL
+[JLexer] 012: 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JLexer]      → -- SRC:  110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JLexer]      → 9902 [11,1] 110                                    ; -- TCO_LINE
+[JLexer]      → 2140 [11,5]                                        ; -- TK_IF
+[JLexer]      → 1700 [11,8] A                                      ; -- TES_IDENT
+[JLexer]      → 1405 [11,9]                                        ; -- TOP_EQ
+[JLexer]      → 1701 [11,10] 1                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [11,12]                                       ; -- TK_THEN
+[JLexer]      → 2150 [11,17]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [11,23] IF SIMPLE CON PRINT                   ; -- TES_STRING
+[JLexer]      → 9901 [11,0]                                        ; -- TCO_EOL
+[JLexer] 013: 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JLexer]      → -- SRC:  120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JLexer]      → 9902 [12,1] 120                                    ; -- TCO_LINE
+[JLexer]      → 2140 [12,5]                                        ; -- TK_IF
+[JLexer]      → 1700 [12,8] A                                      ; -- TES_IDENT
+[JLexer]      → 1405 [12,9]                                        ; -- TOP_EQ
+[JLexer]      → 1701 [12,10] 1                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [12,12]                                       ; -- TK_THEN
+[JLexer]      → 2150 [12,17]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [12,23] UNO                                   ; -- TES_STRING
+[JLexer]      → 1518 [12,29]                                       ; -- TSP_DOSPUNTOS
+[JLexer]      → 2150 [12,31]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [12,37] DOS                                   ; -- TES_STRING
+[JLexer]      → 1518 [12,43]                                       ; -- TSP_DOSPUNTOS
+[JLexer]      → 2150 [12,45]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [12,51] TRES                                  ; -- TES_STRING
+[JLexer]      → 9901 [12,0]                                        ; -- TCO_EOL
+[JLexer] 014: 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JLexer]      → -- SRC:  130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JLexer]      → 9902 [13,1] 130                                    ; -- TCO_LINE
+[JLexer]      → 2140 [13,5]                                        ; -- TK_IF
+[JLexer]      → 1700 [13,8] A                                      ; -- TES_IDENT
+[JLexer]      → 1405 [13,9]                                        ; -- TOP_EQ
+[JLexer]      → 1701 [13,10] 1                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [13,12]                                       ; -- TK_THEN
+[JLexer]      → 2140 [13,17]                                       ; -- TK_IF
+[JLexer]      → 1700 [13,20] B                                     ; -- TES_IDENT
+[JLexer]      → 1405 [13,21]                                       ; -- TOP_EQ
+[JLexer]      → 1701 [13,22] 2                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [13,24]                                       ; -- TK_THEN
+[JLexer]      → 2150 [13,29]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [13,35] IF DOBLE                              ; -- TES_STRING
+[JLexer]      → 9901 [13,0]                                        ; -- TCO_EOL
+[JLexer] 015: 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JLexer]      → -- SRC:  140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JLexer]      → 9902 [14,1] 140                                    ; -- TCO_LINE
+[JLexer]      → 2140 [14,5]                                        ; -- TK_IF
+[JLexer]      → 1700 [14,8] A                                      ; -- TES_IDENT
+[JLexer]      → 1405 [14,9]                                        ; -- TOP_EQ
+[JLexer]      → 1701 [14,10] 1                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [14,12]                                       ; -- TK_THEN
+[JLexer]      → 2140 [14,17]                                       ; -- TK_IF
+[JLexer]      → 1700 [14,20] B                                     ; -- TES_IDENT
+[JLexer]      → 1405 [14,21]                                       ; -- TOP_EQ
+[JLexer]      → 1701 [14,22] 2                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [14,24]                                       ; -- TK_THEN
+[JLexer]      → 2140 [14,29]                                       ; -- TK_IF
+[JLexer]      → 1700 [14,32] C                                     ; -- TES_IDENT
+[JLexer]      → 1405 [14,33]                                       ; -- TOP_EQ
+[JLexer]      → 1701 [14,34] 3                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [14,36]                                       ; -- TK_THEN
+[JLexer]      → 2150 [14,41]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [14,47] IF TRIPLE                             ; -- TES_STRING
+[JLexer]      → 9901 [14,0]                                        ; -- TCO_EOL
+[JLexer] 016: 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JLexer]      → -- SRC:  150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JLexer]      → 9902 [15,1] 150                                    ; -- TCO_LINE
+[JLexer]      → 2140 [15,5]                                        ; -- TK_IF
+[JLexer]      → 1700 [15,8] A                                      ; -- TES_IDENT
+[JLexer]      → 1405 [15,9]                                        ; -- TOP_EQ
+[JLexer]      → 1701 [15,10] 1                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [15,12]                                       ; -- TK_THEN
+[JLexer]      → 2140 [15,17]                                       ; -- TK_IF
+[JLexer]      → 1700 [15,20] B                                     ; -- TES_IDENT
+[JLexer]      → 1405 [15,21]                                       ; -- TOP_EQ
+[JLexer]      → 1701 [15,22] 2                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [15,24]                                       ; -- TK_THEN
+[JLexer]      → 2140 [15,29]                                       ; -- TK_IF
+[JLexer]      → 1700 [15,32] C                                     ; -- TES_IDENT
+[JLexer]      → 1405 [15,33]                                       ; -- TOP_EQ
+[JLexer]      → 1701 [15,34] 3                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [15,36]                                       ; -- TK_THEN
+[JLexer]      → 2150 [15,41]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [15,47] A                                     ; -- TES_STRING
+[JLexer]      → 1518 [15,51]                                       ; -- TSP_DOSPUNTOS
+[JLexer]      → 2150 [15,53]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [15,59] B                                     ; -- TES_STRING
+[JLexer]      → 1518 [15,63]                                       ; -- TSP_DOSPUNTOS
+[JLexer]      → 2150 [15,65]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [15,71] C                                     ; -- TES_STRING
+[JLexer]      → 9901 [15,0]                                        ; -- TCO_EOL
+[JLexer] 017: 200 FOR I=1 TO 3
+[JLexer]      → -- SRC:  200 FOR I=1 TO 3
+[JLexer]      → 9902 [16,1] 200                                    ; -- TCO_LINE
+[JLexer]      → 2136 [16,5]                                        ; -- TK_FOR
+[JLexer]      → 1700 [16,9] I                                      ; -- TES_IDENT
+[JLexer]      → 1405 [16,10]                                       ; -- TOP_EQ
+[JLexer]      → 1701 [16,11] 1                                     ; -- TES_NUMBER
+[JLexer]      → 1162 [16,13]                                       ; -- TK_TO
+[JLexer]      → 1701 [16,16] 3                                     ; -- TES_NUMBER
+[JLexer]      → 9901 [16,0]                                        ; -- TCO_EOL
+[JLexer] 018: 210 PRINT "BUCLE I=";I
+[JLexer]      → -- SRC:  210 PRINT "BUCLE I=";I
+[JLexer]      → 9902 [17,1] 210                                    ; -- TCO_LINE
+[JLexer]      → 2150 [17,5]                                        ; -- TK_PRINT
+[JLexer]      → 1702 [17,11] BUCLE I=                              ; -- TES_STRING
+[JLexer]      → 1517 [17,21]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1700 [17,22] I                                     ; -- TES_IDENT
+[JLexer]      → 9901 [17,0]                                        ; -- TCO_EOL
+[JLexer] 019: 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JLexer]      → -- SRC:  220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JLexer]      → 9902 [18,1] 220                                    ; -- TCO_LINE
+[JLexer]      → 2140 [18,5]                                        ; -- TK_IF
+[JLexer]      → 1700 [18,8] I                                      ; -- TES_IDENT
+[JLexer]      → 1405 [18,9]                                        ; -- TOP_EQ
+[JLexer]      → 1701 [18,10] 2                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [18,12]                                       ; -- TK_THEN
+[JLexer]      → 2150 [18,17]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [18,23] IF DENTRO DEL FOR                     ; -- TES_STRING
+[JLexer]      → 9901 [18,0]                                        ; -- TCO_EOL
+[JLexer] 020: 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JLexer]      → -- SRC:  230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JLexer]      → 9902 [19,1] 230                                    ; -- TCO_LINE
+[JLexer]      → 2140 [19,5]                                        ; -- TK_IF
+[JLexer]      → 1700 [19,8] I                                      ; -- TES_IDENT
+[JLexer]      → 1405 [19,9]                                        ; -- TOP_EQ
+[JLexer]      → 1701 [19,10] 2                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [19,12]                                       ; -- TK_THEN
+[JLexer]      → 2142 [19,17]                                       ; -- TK_LET
+[JLexer]      → 1700 [19,21] B                                     ; -- TES_IDENT
+[JLexer]      → 1405 [19,22]                                       ; -- TOP_EQ
+[JLexer]      → 1701 [19,23] 4                                     ; -- TES_NUMBER
+[JLexer]      → 1518 [19,25]                                       ; -- TSP_DOSPUNTOS
+[JLexer]      → 1139 [19,27]                                       ; -- TK_GOTO
+[JLexer]      → 1701 [19,32] 8888                                  ; -- TES_NUMBER
+[JLexer]      → 1518 [19,37]                                       ; -- TSP_DOSPUNTOS
+[JLexer]      → 2142 [19,39]                                       ; -- TK_LET
+[JLexer]      → 1700 [19,43] A                                     ; -- TES_IDENT
+[JLexer]      → 1405 [19,44]                                       ; -- TOP_EQ
+[JLexer]      → 1701 [19,45] 9                                     ; -- TES_NUMBER
+[JLexer]      → 1518 [19,47]                                       ; -- TSP_DOSPUNTOS
+[JLexer]      → 2152 [19,49]                                       ; -- TK_REM
+[JLexer]      → 1702 [19,53] código inalcanzable                   ; -- TES_STRING
+[JLexer]      → 9901 [19,0]                                        ; -- TCO_EOL
+[JLexer] 021: 240 PRINT "DESPUES DEL IF EN FOR"
+[JLexer]      → -- SRC:  240 PRINT "DESPUES DEL IF EN FOR"
+[JLexer]      → 9902 [20,1] 240                                    ; -- TCO_LINE
+[JLexer]      → 2150 [20,5]                                        ; -- TK_PRINT
+[JLexer]      → 1702 [20,11] DESPUES DEL IF EN FOR                 ; -- TES_STRING
+[JLexer]      → 9901 [20,0]                                        ; -- TCO_EOL
+[JLexer] 022: 250 NEXT I
+[JLexer]      → -- SRC:  250 NEXT I
+[JLexer]      → 9902 [21,1] 250                                    ; -- TCO_LINE
+[JLexer]      → 2146 [21,5]                                        ; -- TK_NEXT
+[JLexer]      → 1700 [21,10] I                                     ; -- TES_IDENT
+[JLexer]      → 9901 [21,0]                                        ; -- TCO_EOL
+[JLexer] 023: 300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JLexer]      → -- SRC:  300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JLexer]      → 9902 [22,1] 300                                    ; -- TCO_LINE
+[JLexer]      → 2152 [22,5]                                        ; -- TK_REM
+[JLexer]      → 1702 [22,9] --- PRUEBA READ / DATA / RESTORE ---   ; -- TES_STRING
+[JLexer]      → 9901 [22,0]                                        ; -- TCO_EOL
+[JLexer] 024: 310 DATA 10,20,30
+[JLexer]      → -- SRC:  310 DATA 10,20,30
+[JLexer]      → 9902 [23,1] 310                                    ; -- TCO_LINE
+[JLexer]      → 1131 [23,5]                                        ; -- TK_DATA
+[JLexer]      → 1701 [23,10] 10                                    ; -- TES_NUMBER
+[JLexer]      → 1516 [23,12]                                       ; -- TSP_COMA
+[JLexer]      → 1701 [23,13] 20                                    ; -- TES_NUMBER
+[JLexer]      → 1516 [23,15]                                       ; -- TSP_COMA
+[JLexer]      → 1701 [23,16] 30                                    ; -- TES_NUMBER
+[JLexer]      → 9901 [23,0]                                        ; -- TCO_EOL
+[JLexer] 025: 320 READ X
+[JLexer]      → -- SRC:  320 READ X
+[JLexer]      → 9902 [24,1] 320                                    ; -- TCO_LINE
+[JLexer]      → 1151 [24,5]                                        ; -- TK_READ
+[JLexer]      → 1700 [24,10] X                                     ; -- TES_IDENT
+[JLexer]      → 9901 [24,0]                                        ; -- TCO_EOL
+[JLexer] 026: 330 PRINT "X=";X
+[JLexer]      → -- SRC:  330 PRINT "X=";X
+[JLexer]      → 9902 [25,1] 330                                    ; -- TCO_LINE
+[JLexer]      → 2150 [25,5]                                        ; -- TK_PRINT
+[JLexer]      → 1702 [25,11] X=                                    ; -- TES_STRING
+[JLexer]      → 1517 [25,15]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1700 [25,16] X                                     ; -- TES_IDENT
+[JLexer]      → 9901 [25,0]                                        ; -- TCO_EOL
+[JLexer] 027: 340 READ X
+[JLexer]      → -- SRC:  340 READ X
+[JLexer]      → 9902 [26,1] 340                                    ; -- TCO_LINE
+[JLexer]      → 1151 [26,5]                                        ; -- TK_READ
+[JLexer]      → 1700 [26,10] X                                     ; -- TES_IDENT
+[JLexer]      → 9901 [26,0]                                        ; -- TCO_EOL
+[JLexer] 028: 350 PRINT "X=",X
+[JLexer]      → -- SRC:  350 PRINT "X=",X
+[JLexer]      → 9902 [27,1] 350                                    ; -- TCO_LINE
+[JLexer]      → 2150 [27,5]                                        ; -- TK_PRINT
+[JLexer]      → 1702 [27,11] X=                                    ; -- TES_STRING
+[JLexer]      → 1516 [27,15]                                       ; -- TSP_COMA
+[JLexer]      → 1700 [27,16] X                                     ; -- TES_IDENT
+[JLexer]      → 9901 [27,0]                                        ; -- TCO_EOL
+[JLexer] 029: 360 RESTORE 310
+[JLexer]      → -- SRC:  360 RESTORE 310
+[JLexer]      → 9902 [28,1] 360                                    ; -- TCO_LINE
+[JLexer]      → 1153 [28,5]                                        ; -- TK_RESTORE
+[JLexer]      → 1701 [28,13] 310                                   ; -- TES_NUMBER
+[JLexer]      → 9901 [28,0]                                        ; -- TCO_EOL
+[JLexer] 030: 370 READ X
+[JLexer]      → -- SRC:  370 READ X
+[JLexer]      → 9902 [29,1] 370                                    ; -- TCO_LINE
+[JLexer]      → 1151 [29,5]                                        ; -- TK_READ
+[JLexer]      → 1700 [29,10] X                                     ; -- TES_IDENT
+[JLexer]      → 9901 [29,0]                                        ; -- TCO_EOL
+[JLexer] 031: 380 PRINT "X=";X
+[JLexer]      → -- SRC:  380 PRINT "X=";X
+[JLexer]      → 9902 [30,1] 380                                    ; -- TCO_LINE
+[JLexer]      → 2150 [30,5]                                        ; -- TK_PRINT
+[JLexer]      → 1702 [30,11] X=                                    ; -- TES_STRING
+[JLexer]      → 1517 [30,15]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1700 [30,16] X                                     ; -- TES_IDENT
+[JLexer]      → 9901 [30,0]                                        ; -- TCO_EOL
+[JLexer] 032: 400 REM --- IF CON READ ---
+[JLexer]      → -- SRC:  400 REM --- IF CON READ ---
+[JLexer]      → 9902 [31,1] 400                                    ; -- TCO_LINE
+[JLexer]      → 2152 [31,5]                                        ; -- TK_REM
+[JLexer]      → 1702 [31,9] --- IF CON READ ---                    ; -- TES_STRING
+[JLexer]      → 9901 [31,0]                                        ; -- TCO_EOL
+[JLexer] 033: 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JLexer]      → -- SRC:  410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JLexer]      → 9902 [32,1] 410                                    ; -- TCO_LINE
+[JLexer]      → 2140 [32,5]                                        ; -- TK_IF
+[JLexer]      → 1700 [32,8] A                                      ; -- TES_IDENT
+[JLexer]      → 1405 [32,9]                                        ; -- TOP_EQ
+[JLexer]      → 1701 [32,10] 1                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [32,12]                                       ; -- TK_THEN
+[JLexer]      → 1151 [32,17]                                       ; -- TK_READ
+[JLexer]      → 1700 [32,22] X                                     ; -- TES_IDENT
+[JLexer]      → 1518 [32,24]                                       ; -- TSP_DOSPUNTOS
+[JLexer]      → 2150 [32,26]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [32,32] READ EN IF=                           ; -- TES_STRING
+[JLexer]      → 1517 [32,45]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1700 [32,46] X                                     ; -- TES_IDENT
+[JLexer]      → 9901 [32,0]                                        ; -- TCO_EOL
+[JLexer] 034: 500 REM --- STOP INTERMEDIO ---
+[JLexer]      → -- SRC:  500 REM --- STOP INTERMEDIO ---
+[JLexer]      → 9902 [33,1] 500                                    ; -- TCO_LINE
+[JLexer]      → 2152 [33,5]                                        ; -- TK_REM
+[JLexer]      → 1702 [33,9] --- STOP INTERMEDIO ---                ; -- TES_STRING
+[JLexer]      → 9901 [33,0]                                        ; -- TCO_EOL
+[JLexer] 035: 510 STOP
+[JLexer]      → -- SRC:  510 STOP
+[JLexer]      → 9902 [34,1] 510                                    ; -- TCO_LINE
+[JLexer]      → 1160 [34,5]                                        ; -- TK_STOP
+[JLexer]      → 9901 [34,0]                                        ; -- TCO_EOL
+[JLexer] 036: 520 PRINT "NO DEBE EJECUTARSE"
+[JLexer]      → -- SRC:  520 PRINT "NO DEBE EJECUTARSE"
+[JLexer]      → 9902 [35,1] 520                                    ; -- TCO_LINE
+[JLexer]      → 2150 [35,5]                                        ; -- TK_PRINT
+[JLexer]      → 1702 [35,11] NO DEBE EJECUTARSE                    ; -- TES_STRING
+[JLexer]      → 9901 [35,0]                                        ; -- TCO_EOL
+[JLexer] 037: 600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JLexer]      → -- SRC:  600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JLexer]      → 9902 [36,1] 600                                    ; -- TCO_LINE
+[JLexer]      → 2152 [36,5]                                        ; -- TK_REM
+[JLexer]      → 1702 [36,9] --- IF MULTIPLE FINAL MALVADO ---      ; -- TES_STRING
+[JLexer]      → 9901 [36,0]                                        ; -- TCO_EOL
+[JLexer] 038: 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JLexer]      → -- SRC:  610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JLexer]      → 9902 [37,1] 610                                    ; -- TCO_LINE
+[JLexer]      → 2140 [37,5]                                        ; -- TK_IF
+[JLexer]      → 1700 [37,8] A                                      ; -- TES_IDENT
+[JLexer]      → 1405 [37,9]                                        ; -- TOP_EQ
+[JLexer]      → 1701 [37,10] 1                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [37,12]                                       ; -- TK_THEN
+[JLexer]      → 2140 [37,17]                                       ; -- TK_IF
+[JLexer]      → 1700 [37,20] B                                     ; -- TES_IDENT
+[JLexer]      → 1408 [37,21]                                       ; -- TOP_GT
+[JLexer]      → 1701 [37,22] 2                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [37,24]                                       ; -- TK_THEN
+[JLexer]      → 2140 [37,29]                                       ; -- TK_IF
+[JLexer]      → 1700 [37,32] C                                     ; -- TES_IDENT
+[JLexer]      → 1406 [37,33]                                       ; -- TOP_NE
+[JLexer]      → 1701 [37,35] 3                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [37,37]                                       ; -- TK_THEN
+[JLexer]      → 2150 [37,42]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [37,48] X                                     ; -- TES_STRING
+[JLexer]      → 1518 [37,52]                                       ; -- TSP_DOSPUNTOS
+[JLexer]      → 2140 [37,54]                                       ; -- TK_IF
+[JLexer]      → 1700 [37,57] A                                     ; -- TES_IDENT
+[JLexer]      → 1405 [37,58]                                       ; -- TOP_EQ
+[JLexer]      → 1701 [37,59] 1                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [37,61]                                       ; -- TK_THEN
+[JLexer]      → 2150 [37,66]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [37,72] Y                                     ; -- TES_STRING
+[JLexer]      → 1518 [37,76]                                       ; -- TSP_DOSPUNTOS
+[JLexer]      → 2140 [37,78]                                       ; -- TK_IF
+[JLexer]      → 1700 [37,81] B                                     ; -- TES_IDENT
+[JLexer]      → 1405 [37,82]                                       ; -- TOP_EQ
+[JLexer]      → 1701 [37,83] 2                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [37,85]                                       ; -- TK_THEN
+[JLexer]      → 2150 [37,90]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [37,96] Z                                     ; -- TES_STRING
+[JLexer]      → 9901 [37,0]                                        ; -- TCO_EOL
+[JLexer] 039: 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK" 
+[JLexer]      → -- SRC:  650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+[JLexer]      → 9902 [38,1] 650                                    ; -- TCO_LINE
+[JLexer]      → 2140 [38,5]                                        ; -- TK_IF
+[JLexer]      → 1700 [38,8] A                                      ; -- TES_IDENT
+[JLexer]      → 1703 [38,10] BX + C +  5   , Z * 4 + F             ; -- TES_GREXPR
+[JLexer]      → 1405 [38,39]                                       ; -- TOP_EQ
+[JLexer]      → 1700 [38,41] C                                     ; -- TES_IDENT
+[JLexer]      → 1703 [38,43] t * 4                                 ; -- TES_GREXPR
+[JLexer]      → 1400 [38,52]                                       ; -- TOP_PLUS
+[JLexer]      → 1700 [38,53] u                                     ; -- TES_IDENT
+[JLexer]      → 1700 [38,55] AND                                   ; -- TES_IDENT
+[JLexer]      → 1700 [38,59] b                                     ; -- TES_IDENT
+[JLexer]      → 1406 [38,61]                                       ; -- TOP_NE
+[JLexer]      → 1701 [38,64] 0                                     ; -- TES_NUMBER
+[JLexer]      → 1161 [38,66]                                       ; -- TK_THEN
+[JLexer]      → 2150 [38,71]                                       ; -- TK_PRINT
+[JLexer]      → 1702 [38,77] OK                                    ; -- TES_STRING
+[JLexer]      → 9901 [38,0]                                        ; -- TCO_EOL
+[JLexer] 040: 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JLexer]      → -- SRC:  660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JLexer]      → 9902 [39,1] 660                                    ; -- TCO_LINE
+[JLexer]      → 2142 [39,5]                                        ; -- TK_LET
+[JLexer]      → 1700 [39,11] A                                     ; -- TES_IDENT
+[JLexer]      → 1703 [39,14] BX+C +5, Z * 4+F                      ; -- TES_GREXPR
+[JLexer]      → 1405 [39,33]                                       ; -- TOP_EQ
+[JLexer]      → 1700 [39,34] C                                     ; -- TES_IDENT
+[JLexer]      → 1703 [39,36] t *4                                  ; -- TES_GREXPR
+[JLexer]      → 1518 [39,43]                                       ; -- TSP_DOSPUNTOS
+[JLexer]      → 2142 [39,45]                                       ; -- TK_LET
+[JLexer]      → 1700 [39,49] B                                     ; -- TES_IDENT
+[JLexer]      → 1405 [39,50]                                       ; -- TOP_EQ
+[JLexer]      → 1700 [39,51] C                                     ; -- TES_IDENT
+[JLexer]      → 1404 [39,52]                                       ; -- TOP_POW
+[JLexer]      → 1701 [39,54] 3                                     ; -- TES_NUMBER
+[JLexer]      → 9901 [39,0]                                        ; -- TCO_EOL
+[JLexer] 041: 700 REM === FIN ===
+[JLexer]      → -- SRC:  700 REM === FIN ===
+[JLexer]      → 9902 [40,1] 700                                    ; -- TCO_LINE
+[JLexer]      → 2152 [40,5]                                        ; -- TK_REM
+[JLexer]      → 1702 [40,9] === FIN ===                            ; -- TES_STRING
+[JLexer]      → 9901 [40,0]                                        ; -- TCO_EOL
+[JLexer] 042: 800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JLexer]      → -- SRC:  800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JLexer]      → 9902 [41,1] 800                                    ; -- TCO_LINE
+[JLexer]      → 2150 [41,5]                                        ; -- TK_PRINT
+[JLexer]      → 1600 [41,11]                                       ; -- TK_AT
+[JLexer]      → 1701 [41,14] 10                                    ; -- TES_NUMBER
+[JLexer]      → 1516 [41,16]                                       ; -- TSP_COMA
+[JLexer]      → 1701 [41,17] 2                                     ; -- TES_NUMBER
+[JLexer]      → 1517 [41,18]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1702 [41,19] K                                     ; -- TES_STRING
+[JLexer]      → 1517 [41,22]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1600 [41,23]                                       ; -- TK_AT
+[JLexer]      → 1700 [41,26] G                                     ; -- TES_IDENT
+[JLexer]      → 1703 [41,27] 10                                    ; -- TES_GREXPR
+[JLexer]      → 1516 [41,31]                                       ; -- TSP_COMA
+[JLexer]      → 1701 [41,32] 2                                     ; -- TES_NUMBER
+[JLexer]      → 1516 [41,33]                                       ; -- TSP_COMA
+[JLexer]      → 1702 [41,34] L                                     ; -- TES_STRING
+[JLexer]      → 1517 [41,37]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1206 [41,38]                                       ; -- TK_INK
+[JLexer]      → 1701 [41,42] 4                                     ; -- TES_NUMBER
+[JLexer]      → 1517 [41,43]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1211 [41,44]                                       ; -- TK_PAPER
+[JLexer]      → 1701 [41,50] 3                                     ; -- TES_NUMBER
+[JLexer]      → 1517 [41,51]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1701 [41,52] 45                                    ; -- TES_NUMBER
+[JLexer]      → 1517 [41,54]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1700 [41,55] A                                     ; -- TES_IDENT
+[JLexer]      → 1703 [41,56] bc+4, C*4                             ; -- TES_GREXPR
+[JLexer]      → 1516 [41,67]                                       ; -- TSP_COMA
+[JLexer]      → 1700 [41,68] B                                     ; -- TES_IDENT
+[JLexer]      → 9901 [41,0]                                        ; -- TCO_EOL
+[JLexer] 043: 810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+[JLexer]      → -- SRC:  810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+[JLexer]      → 9902 [42,1] 810                                    ; -- TCO_LINE
+[JLexer]      → 2150 [42,5]                                        ; -- TK_PRINT
+[JLexer]      → 1601 [42,11]                                       ; -- TK_TAB
+[JLexer]      → 1701 [42,15] 10                                    ; -- TES_NUMBER
+[JLexer]      → 1517 [42,17]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1702 [42,18] A                                     ; -- TES_STRING
+[JLexer]      → 1517 [42,21]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1601 [42,22]                                       ; -- TK_TAB
+[JLexer]      → 1703 [42,25] 20                                    ; -- TES_GREXPR
+[JLexer]      → 1517 [42,29]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1702 [42,30] B                                     ; -- TES_STRING
+[JLexer]      → 1517 [42,33]                                       ; -- TSP_PUNTOYCOMA
+[JLexer]      → 1600 [42,34]                                       ; -- TK_AT
+[JLexer]      → 1701 [42,37] 1                                     ; -- TES_NUMBER
+[JLexer]      → 1516 [42,38]                                       ; -- TSP_COMA
+[JLexer]      → 1701 [42,39] 4                                     ; -- TES_NUMBER
+[JLexer]      → 9901 [42,0]                                        ; -- TCO_EOL
+[JLexer]      → 9900 [42,0]                                        ; -- TCO_EOF
+[JParser]      → IRP 1.0
+[JParser] 002: 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JParser]      → -- SRC:  10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JParser]      → 9902 10                                            ; --  TCO_LINE
+[JParser]      → 2152 "=== PRUEBA COMPLETA GENERADOR ZX2SB ==="     ; --  TK_REM
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 003: 11 PRINT BIN 11100110
+[JParser]      → -- SRC:  11 PRINT BIN 11100110
+[JParser]      → 9902 11                                            ; --  TCO_LINE
+[JParser]      → 2150 3217,N,11100110                               ; --  TK_PRINT TK_BIN
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 004: 15 FOR J=1 to 10 : PRINT J : NEXT J
+[JParser]      → -- SRC:  15 FOR J=1 to 10 : PRINT J : NEXT J
+[JParser]      → 9902 15                                            ; --  TCO_LINE
+[JParser]      → 2136 J = 1 TO 10                                   ; --  TK_FOR
+[JParser]      → 2150 1700,N,J                                      ; --  TK_PRINT TES_IDENT
+[JParser]      → 2146 J                                             ; --  TK_NEXT
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 005: 20 LET A=1: LET B=2: LET C=3
+[JParser]      → -- SRC:  20 LET A=1: LET B=2: LET C=3
+[JParser]      → 9902 20                                            ; --  TCO_LINE
+[JParser]      → 2142 A = 1                                         ; --  TK_LET
+[JParser]      → 2142 B = 2                                         ; --  TK_LET
+[JParser]      → 2142 C = 3                                         ; --  TK_LET
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 006: 25 GO SUB 750
+[JParser]      → -- SRC:  25 GO SUB 750
+[JParser]      → 9902 25                                            ; --  TCO_LINE
+[JParser]      → 1138 750                                           ; --  TK_GOSUB
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 007: 30 IF A=1 THEN GO TO 100
+[JParser]      → -- SRC:  30 IF A=1 THEN GO TO 100
+[JParser]      → 9902 30                                            ; --  TCO_LINE
+[JParser]      → 2140 A = 1                                         ; --  TK_IF
+[JParser]      → 1139 100                                           ; --  TK_GOTO
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 008: 40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JParser]      → -- SRC:  40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JParser]      → 9902 40                                            ; --  TCO_LINE
+[JParser]      → 2150 1702,N,"ESTO NO DEBE EJECUTARSE"              ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 009: 50 GOTO 9999 : REM salto inexistente, no error
+[JParser]      → -- SRC:  50 GOTO 9999 : REM salto inexistente, no error
+[JParser]      → 9902 50                                            ; --  TCO_LINE
+[JParser]      → 1139 9999                                          ; --  TK_GOTO
+[JParser]      → 2152 "salto inexistente, no error"                 ; --  TK_REM
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 010: 60 PRINT "TAMPOCO DEBE VERSE"
+[JParser]      → -- SRC:  60 PRINT "TAMPOCO DEBE VERSE"
+[JParser]      → 9902 60                                            ; --  TCO_LINE
+[JParser]      → 2150 1702,N,"TAMPOCO DEBE VERSE"                   ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 011: 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JParser]      → -- SRC:  100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JParser]      → 9902 100                                           ; --  TCO_LINE
+[JParser]      → 2150 1702,N,"ENTRA EN BLOQUE IF SIMPLE"            ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 012: 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JParser]      → -- SRC:  110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JParser]      → 9902 110                                           ; --  TCO_LINE
+[JParser]      → 2140 A = 1                                         ; --  TK_IF
+[JParser]      → 2150 1702,N,"IF SIMPLE CON PRINT"                  ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 013: 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JParser]      → -- SRC:  120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JParser]      → 9902 120                                           ; --  TCO_LINE
+[JParser]      → 2140 A = 1                                         ; --  TK_IF
+[JParser]      → 2150 1702,N,"UNO"                                  ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1702,N,"DOS"                                  ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1702,N,"TRES"                                 ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 014: 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JParser]      → -- SRC:  130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JParser]      → 9902 130                                           ; --  TCO_LINE
+[JParser]      → 2140 A = 1                                         ; --  TK_IF
+[JParser]      → 2140 B = 2                                         ; --  TK_IF
+[JParser]      → 2150 1702,N,"IF DOBLE"                             ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 015: 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JParser]      → -- SRC:  140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JParser]      → 9902 140                                           ; --  TCO_LINE
+[JParser]      → 2140 A = 1                                         ; --  TK_IF
+[JParser]      → 2140 B = 2                                         ; --  TK_IF
+[JParser]      → 2140 C = 3                                         ; --  TK_IF
+[JParser]      → 2150 1702,N,"IF TRIPLE"                            ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 016: 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JParser]      → -- SRC:  150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JParser]      → 9902 150                                           ; --  TCO_LINE
+[JParser]      → 2140 A = 1                                         ; --  TK_IF
+[JParser]      → 2140 B = 2                                         ; --  TK_IF
+[JParser]      → 2140 C = 3                                         ; --  TK_IF
+[JParser]      → 2150 1702,N,"A"                                    ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1702,N,"B"                                    ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1702,N,"C"                                    ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 017: 200 FOR I=1 TO 3
+[JParser]      → -- SRC:  200 FOR I=1 TO 3
+[JParser]      → 9902 200                                           ; --  TCO_LINE
+[JParser]      → 2136 I = 1 TO 3                                    ; --  TK_FOR
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 018: 210 PRINT "BUCLE I=";I
+[JParser]      → -- SRC:  210 PRINT "BUCLE I=";I
+[JParser]      → 9902 210                                           ; --  TCO_LINE
+[JParser]      → 2150 1702,P,"BUCLE I="                             ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1700,N,I                                      ; --  TK_PRINT TES_IDENT
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 019: 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JParser]      → -- SRC:  220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JParser]      → 9902 220                                           ; --  TCO_LINE
+[JParser]      → 2140 I = 2                                         ; --  TK_IF
+[JParser]      → 2150 1702,N,"IF DENTRO DEL FOR"                    ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 020: 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JParser]      → -- SRC:  230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JParser]      → 9902 230                                           ; --  TCO_LINE
+[JParser]      → 2140 I = 2                                         ; --  TK_IF
+[JParser]      → 2142 B = 4                                         ; --  TK_LET
+[JParser]      → 1139 8888                                          ; --  TK_GOTO
+[JParser]      → 2142 A = 9                                         ; --  TK_LET
+[JParser]      → 2152 "código inalcanzable"                         ; --  TK_REM
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 021: 240 PRINT "DESPUES DEL IF EN FOR"
+[JParser]      → -- SRC:  240 PRINT "DESPUES DEL IF EN FOR"
+[JParser]      → 9902 240                                           ; --  TCO_LINE
+[JParser]      → 2150 1702,N,"DESPUES DEL IF EN FOR"                ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 022: 250 NEXT I
+[JParser]      → -- SRC:  250 NEXT I
+[JParser]      → 9902 250                                           ; --  TCO_LINE
+[JParser]      → 2146 I                                             ; --  TK_NEXT
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 023: 300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JParser]      → -- SRC:  300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JParser]      → 9902 300                                           ; --  TCO_LINE
+[JParser]      → 2152 "--- PRUEBA READ / DATA / RESTORE ---"        ; --  TK_REM
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 024: 310 DATA 10,20,30
+[JParser]      → -- SRC:  310 DATA 10,20,30
+[JParser]      → 9902 310                                           ; --  TCO_LINE
+[JParser]      → 1131 10 , 20 , 30                                  ; --  TK_DATA
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 025: 320 READ X
+[JParser]      → -- SRC:  320 READ X
+[JParser]      → 9902 320                                           ; --  TCO_LINE
+[JParser]      → 1151 X                                             ; --  TK_READ
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 026: 330 PRINT "X=";X
+[JParser]      → -- SRC:  330 PRINT "X=";X
+[JParser]      → 9902 330                                           ; --  TCO_LINE
+[JParser]      → 2150 1702,P,"X="                                   ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1700,N,X                                      ; --  TK_PRINT TES_IDENT
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 027: 340 READ X
+[JParser]      → -- SRC:  340 READ X
+[JParser]      → 9902 340                                           ; --  TCO_LINE
+[JParser]      → 1151 X                                             ; --  TK_READ
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 028: 350 PRINT "X=",X
+[JParser]      → -- SRC:  350 PRINT "X=",X
+[JParser]      → 9902 350                                           ; --  TCO_LINE
+[JParser]      → 2150 1702,C,"X="                                   ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1700,N,X                                      ; --  TK_PRINT TES_IDENT
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 029: 360 RESTORE 310
+[JParser]      → -- SRC:  360 RESTORE 310
+[JParser]      → 9902 360                                           ; --  TCO_LINE
+[JParser]      → 1153 310                                           ; --  TK_RESTORE
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 030: 370 READ X
+[JParser]      → -- SRC:  370 READ X
+[JParser]      → 9902 370                                           ; --  TCO_LINE
+[JParser]      → 1151 X                                             ; --  TK_READ
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 031: 380 PRINT "X=";X
+[JParser]      → -- SRC:  380 PRINT "X=";X
+[JParser]      → 9902 380                                           ; --  TCO_LINE
+[JParser]      → 2150 1702,P,"X="                                   ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1700,N,X                                      ; --  TK_PRINT TES_IDENT
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 032: 400 REM --- IF CON READ ---
+[JParser]      → -- SRC:  400 REM --- IF CON READ ---
+[JParser]      → 9902 400                                           ; --  TCO_LINE
+[JParser]      → 2152 "--- IF CON READ ---"                         ; --  TK_REM
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 033: 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JParser]      → -- SRC:  410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JParser]      → 9902 410                                           ; --  TCO_LINE
+[JParser]      → 2140 A = 1                                         ; --  TK_IF
+[JParser]      → 1151 X                                             ; --  TK_READ
+[JParser]      → 2150 1702,P,"READ EN IF="                          ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1700,N,X                                      ; --  TK_PRINT TES_IDENT
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 034: 500 REM --- STOP INTERMEDIO ---
+[JParser]      → -- SRC:  500 REM --- STOP INTERMEDIO ---
+[JParser]      → 9902 500                                           ; --  TCO_LINE
+[JParser]      → 2152 "--- STOP INTERMEDIO ---"                     ; --  TK_REM
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 035: 510 STOP
+[JParser]      → -- SRC:  510 STOP
+[JParser]      → 9902 510                                           ; --  TCO_LINE
+[JParser]      → 1160                                               ; --  TK_STOP
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 036: 520 PRINT "NO DEBE EJECUTARSE"
+[JParser]      → -- SRC:  520 PRINT "NO DEBE EJECUTARSE"
+[JParser]      → 9902 520                                           ; --  TCO_LINE
+[JParser]      → 2150 1702,N,"NO DEBE EJECUTARSE"                   ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 037: 600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JParser]      → -- SRC:  600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JParser]      → 9902 600                                           ; --  TCO_LINE
+[JParser]      → 2152 "--- IF MULTIPLE FINAL MALVADO ---"           ; --  TK_REM
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 038: 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JParser]      → -- SRC:  610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JParser]      → 9902 610                                           ; --  TCO_LINE
+[JParser]      → 2140 A = 1                                         ; --  TK_IF
+[JParser]      → 2140 B > 2                                         ; --  TK_IF
+[JParser]      → 2140 C <> 3                                        ; --  TK_IF
+[JParser]      → 2150 1702,N,"X"                                    ; --  TK_PRINT TES_STRING
+[JParser]      → 2140 A = 1                                         ; --  TK_IF
+[JParser]      → 2150 1702,N,"Y"                                    ; --  TK_PRINT TES_STRING
+[JParser]      → 2140 B = 2                                         ; --  TK_IF
+[JParser]      → 2150 1702,N,"Z"                                    ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 039: 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+[JParser]      → -- SRC:  650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+[JParser]      → 9902 650                                           ; --  TCO_LINE
+[JParser]      → 2140 A (BX + C +  5   , Z * 4 + F) = C (t * 4) + u AND b <> 0
+[JParser]      →                                                    ; --  TK_IF
+[JParser]      → 2150 1702,N,"OK"                                   ; --  TK_PRINT TES_STRING
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 040: 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JParser]      → -- SRC:  660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JParser]      → 9902 660                                           ; --  TCO_LINE
+[JParser]      → 2142 A(BX+C +5, Z * 4+F) = C (t *4)                ; --  TK_LET
+[JParser]      → 2142 B = C ^ 3                                     ; --  TK_LET
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 041: 700 REM === FIN ===
+[JParser]      → -- SRC:  700 REM === FIN ===
+[JParser]      → 9902 700                                           ; --  TCO_LINE
+[JParser]      → 2152 "=== FIN ==="                                 ; --  TK_REM
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 042: 800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JParser]      → -- SRC:  800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JParser]      → 9902 800                                           ; --  TCO_LINE
+[JParser]      → 2150 1600,P,10,2                                   ; --  TK_PRINT TK_AT
+[JParser]      → 2150 1702,P,"K"                                    ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1600,C,G (10),2                               ; --  TK_PRINT TK_AT
+[JParser]      → 2150 1702,P,"L"                                    ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1206,P,4                                      ; --  TK_PRINT TK_INK
+[JParser]      → 2150 1211,P,3                                      ; --  TK_PRINT TK_PAPER
+[JParser]      → 2150 1701,P,45                                     ; --  TK_PRINT TES_NUMBER
+[JParser]      → 2150 1700,C,A(bc+4, C*4)                           ; --  TK_PRINT TES_IDENT
+[JParser]      → 2150 1700,N,B                                      ; --  TK_PRINT TES_IDENT
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser] 043: 810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+[JParser]      → -- SRC:  810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+[JParser]      → 9902 810                                           ; --  TCO_LINE
+[JParser]      → 2150 1601,P,10                                     ; --  TK_PRINT TK_TAB
+[JParser]      → 2150 1702,P,"A"                                    ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1601,P,(20)                                   ; --  TK_PRINT TK_TAB
+[JParser]      → 2150 1702,P,"B"                                    ; --  TK_PRINT TES_STRING
+[JParser]      → 2150 1600,N,1,4                                    ; --  TK_PRINT TK_AT
+[JParser]      → 9901                                               ; --  TCO_EOL
+[JParser]      → 9900                                               ; --  TCO_EOF
 [JSemantic.1] IRP 1.0
 [JSemantic.1] 002: 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
-[JSemantic.1] 003: 11 FOR J=1 to 10 : PRINT J
-[JSemantic.1] 004: 20 LET A=1: LET B=2: LET C=3
-[JSemantic.1] 005: 30 IF A=1 THEN GOTO 100
-[JSemantic.1] 006: 40 PRINT "ESTO NO DEBE EJECUTARSE"
-[JSemantic.1] 007: 50 GOTO 9999 : REM salto inexistente, no error
-[JSemantic.1] 008: 60 PRINT "TAMPOCO DEBE VERSE"
-[JSemantic.1] 009: 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
-[JSemantic.1] 010: 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
-[JSemantic.1] 011: 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
-[JSemantic.1] 012: 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
-[JSemantic.1] 013: 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
-[JSemantic.1] 014: 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
-[JSemantic.1] 015: 200 FOR I=1 TO 3
-[JSemantic.1] 016: 210 PRINT "BUCLE I=";I
-[JSemantic.1] 017: 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
-[JSemantic.1] 018: 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
-[JSemantic.1] 019: 240 PRINT "DESPUES DEL IF EN FOR"
-[JSemantic.1] 020: 250 NEXT I
-[JSemantic.1] 021: 300 REM --- PRUEBA READ / DATA / RESTORE ---
-[JSemantic.1] 022: 310 DATA 10,20,30
-[JSemantic.1] 023: 320 READ X
-[JSemantic.1] 024: 330 PRINT "X=";X
-[JSemantic.1] 025: 340 READ X
-[JSemantic.1] 026: 350 PRINT "X=";X
-[JSemantic.1] 027: 360 RESTORE 310
-[JSemantic.1] 028: 370 READ X
-[JSemantic.1] 029: 380 PRINT "X=";X
-[JSemantic.1] 030: 400 REM --- IF CON READ ---
-[JSemantic.1] 031: 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
-[JSemantic.1] 032: 500 REM --- STOP INTERMEDIO ---
-[JSemantic.1] 033: 510 STOP
-[JSemantic.1] 034: 520 PRINT "NO DEBE EJECUTARSE"
-[JSemantic.1] 035: 600 REM --- IF MULTIPLE FINAL MALVADO ---
-[JSemantic.1] 036: 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
-[JSemantic.1] 037: 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )   AND b <> 0 THEN PRINT "OK"
-[JSemantic.1] 038: 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
-[JSemantic.1] 039: 700 REM === FIN ===
+[JSemantic.1] 003: 11 PRINT BIN 11100110
+[JSemantic.1] 004: 15 FOR J=1 to 10 : PRINT J : NEXT J
+[JSemantic.1] 005: 20 LET A=1: LET B=2: LET C=3
+[JSemantic.1] 006: 25 GO SUB 750
+[JSemantic.1] 007: 30 IF A=1 THEN GO TO 100
+[JSemantic.1] 008: 40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JSemantic.1] 009: 50 GOTO 9999 : REM salto inexistente, no error
+[JSemantic.1] 010: 60 PRINT "TAMPOCO DEBE VERSE"
+[JSemantic.1] 011: 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JSemantic.1] 012: 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JSemantic.1] 013: 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JSemantic.1] 014: 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JSemantic.1] 015: 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JSemantic.1] 016: 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JSemantic.1] 017: 200 FOR I=1 TO 3
+[JSemantic.1] 018: 210 PRINT "BUCLE I=";I
+[JSemantic.1] 019: 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JSemantic.1] 020: 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JSemantic.1] 021: 240 PRINT "DESPUES DEL IF EN FOR"
+[JSemantic.1] 022: 250 NEXT I
+[JSemantic.1] 023: 300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JSemantic.1] 024: 310 DATA 10,20,30
+[JSemantic.1] 025: 320 READ X
+[JSemantic.1] 026: 330 PRINT "X=";X
+[JSemantic.1] 027: 340 READ X
+[JSemantic.1] 028: 350 PRINT "X=",X
+[JSemantic.1] 029: 360 RESTORE 310
+[JSemantic.1] 030: 370 READ X
+[JSemantic.1] 031: 380 PRINT "X=";X
+[JSemantic.1] 032: 400 REM --- IF CON READ ---
+[JSemantic.1] 033: 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JSemantic.1] 034: 500 REM --- STOP INTERMEDIO ---
+[JSemantic.1] 035: 510 STOP
+[JSemantic.1] 036: 520 PRINT "NO DEBE EJECUTARSE"
+[JSemantic.1] 037: 600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JSemantic.1] 038: 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JSemantic.1] 039: 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+[JSemantic.1] 040: 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JSemantic.1] 041: 700 REM === FIN ===
+[JSemantic.1] 042: 800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JSemantic.1] 043: 810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
 [JSemantic.2]      → IRS 1.0
 [JSemantic.2] IRP 1.0
 [JSemantic.2] 002: 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
 [JSemantic.2]      → -- SRC:  10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
-[JSemantic.2]      → 9902 10                                            ; TE_LINE
-[JSemantic.2]      → 2152 === PRUEBA COMPLETA GENERADOR ZX2SB ===       ; TK_REM
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 003: 11 FOR J=1 to 10 : PRINT J
-[JSemantic.2]      → -- SRC:  11 FOR J=1 to 10 : PRINT J
-[JSemantic.2]      → 9902 11                                            ; TE_LINE
-[JSemantic.2]      → 2136 J=1TO10                                       ; TK_FOR
-[JSemantic.2]      → 2150 J                                             ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 004: 20 LET A=1: LET B=2: LET C=3
+[JSemantic.2]      → 9902 10                                            ; --  TCO_LINE
+[JSemantic.2]      → 2152 "=== PRUEBA COMPLETA GENERADOR ZX2SB ==="     ; --  TK_REM
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 003: 11 PRINT BIN 11100110
+[JSemantic.2]      → -- SRC:  11 PRINT BIN 11100110
+[JSemantic.2]      → 9902 11                                            ; --  TCO_LINE
+[JSemantic.2]      → 2150 3217,N,11100110                               ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 004: 15 FOR J=1 to 10 : PRINT J : NEXT J
+[JSemantic.2]      → -- SRC:  15 FOR J=1 to 10 : PRINT J : NEXT J
+[JSemantic.2]      → 9902 15                                            ; --  TCO_LINE
+[JSemantic.2]      → 2136 J = 1 TO 10                                   ; --  TK_FOR
+[JSemantic.2]      → 2150 1700,N,J                                      ; --  TK_PRINT
+[JSemantic.2]      → 2146 J                                             ; --  TK_NEXT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 005: 20 LET A=1: LET B=2: LET C=3
 [JSemantic.2]      → -- SRC:  20 LET A=1: LET B=2: LET C=3
-[JSemantic.2]      → 9902 20                                            ; TE_LINE
-[JSemantic.2]      → 2142 A=1                                           ; TK_LET
-[JSemantic.2]      → 2142 B=2                                           ; TK_LET
-[JSemantic.2]      → 2142 C=3                                           ; TK_LET
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 005: 30 IF A=1 THEN GOTO 100
-[JSemantic.2]      → -- SRC:  30 IF A=1 THEN GOTO 100
-[JSemantic.2]      → 9902 30                                            ; TE_LINE
-[JSemantic.2]      → 2140 A=1                                           ; TK_IF
-[JSemantic.2]      → 1139 100                                           ; TK_GOTO
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 006: 40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JSemantic.2]      → 9902 20                                            ; --  TCO_LINE
+[JSemantic.2]      → 2142 A=1                                           ; --  TK_LET
+[JSemantic.2]      → 2142 B=2                                           ; --  TK_LET
+[JSemantic.2]      → 2142 C=3                                           ; --  TK_LET
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 006: 25 GO SUB 750
+[JSemantic.2]      → -- SRC:  25 GO SUB 750
+[JSemantic.2]      → 9902 25                                            ; --  TCO_LINE
+[JSemantic.2]      → 1138 750                                           ; --  TK_GOSUB
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 007: 30 IF A=1 THEN GO TO 100
+[JSemantic.2]      → -- SRC:  30 IF A=1 THEN GO TO 100
+[JSemantic.2]      → 9902 30                                            ; --  TCO_LINE
+[JSemantic.2]      → 2140 A = 1                                         ; --  TK_IF
+[JSemantic.2]      → 1139 100                                           ; --  TK_GOTO
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 008: 40 PRINT "ESTO NO DEBE EJECUTARSE"
 [JSemantic.2]      → -- SRC:  40 PRINT "ESTO NO DEBE EJECUTARSE"
-[JSemantic.2]      → 9902 40                                            ; TE_LINE
-[JSemantic.2]      → 2150 "ESTO NO DEBE EJECUTARSE"                     ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 007: 50 GOTO 9999 : REM salto inexistente, no error
+[JSemantic.2]      → 9902 40                                            ; --  TCO_LINE
+[JSemantic.2]      → 2150 1702,N,"ESTO NO DEBE EJECUTARSE"              ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 009: 50 GOTO 9999 : REM salto inexistente, no error
 [JSemantic.2]      → -- SRC:  50 GOTO 9999 : REM salto inexistente, no error
-[JSemantic.2]      → 9902 50                                            ; TE_LINE
-[JSemantic.2]      → 1139 9999                                          ; TK_GOTO
-[JSemantic.2]      → 2152 salto inexistente, no error                   ; TK_REM
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 008: 60 PRINT "TAMPOCO DEBE VERSE"
+[JSemantic.2]      → 9902 50                                            ; --  TCO_LINE
+[JSemantic.2]      → 1139 9999                                          ; --  TK_GOTO
+[JSemantic.2]      → 2152 "salto inexistente, no error"                 ; --  TK_REM
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 010: 60 PRINT "TAMPOCO DEBE VERSE"
 [JSemantic.2]      → -- SRC:  60 PRINT "TAMPOCO DEBE VERSE"
-[JSemantic.2]      → 9902 60                                            ; TE_LINE
-[JSemantic.2]      → 2150 "TAMPOCO DEBE VERSE"                          ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 009: 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JSemantic.2]      → 9902 60                                            ; --  TCO_LINE
+[JSemantic.2]      → 2150 1702,N,"TAMPOCO DEBE VERSE"                   ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 011: 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
 [JSemantic.2]      → -- SRC:  100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
-[JSemantic.2]      → 9902 100                                           ; TE_LINE
-[JSemantic.2]      → 2150 "ENTRA EN BLOQUE IF SIMPLE"                   ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 010: 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JSemantic.2]      → 9902 100                                           ; --  TCO_LINE
+[JSemantic.2]      → 2150 1702,N,"ENTRA EN BLOQUE IF SIMPLE"            ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 012: 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
 [JSemantic.2]      → -- SRC:  110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
-[JSemantic.2]      → 9902 110                                           ; TE_LINE
-[JSemantic.2]      → 2140 A=1                                           ; TK_IF
-[JSemantic.2]      → 2150 "IF SIMPLE CON PRINT"                         ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 011: 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JSemantic.2]      → 9902 110                                           ; --  TCO_LINE
+[JSemantic.2]      → 2140 A = 1                                         ; --  TK_IF
+[JSemantic.2]      → 2150 1702,N,"IF SIMPLE CON PRINT"                  ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 013: 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
 [JSemantic.2]      → -- SRC:  120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
-[JSemantic.2]      → 9902 120                                           ; TE_LINE
-[JSemantic.2]      → 2140 A=1                                           ; TK_IF
-[JSemantic.2]      → 2150 "UNO"                                         ; TK_PRINT
-[JSemantic.2]      → 2150 "DOS"                                         ; TK_PRINT
-[JSemantic.2]      → 2150 "TRES"                                        ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 012: 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JSemantic.2]      → 9902 120                                           ; --  TCO_LINE
+[JSemantic.2]      → 2140 A = 1                                         ; --  TK_IF
+[JSemantic.2]      → 2150 1702,N,"UNO"                                  ; --  TK_PRINT
+[JSemantic.2]      → 2150 1702,N,"DOS"                                  ; --  TK_PRINT
+[JSemantic.2]      → 2150 1702,N,"TRES"                                 ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 014: 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
 [JSemantic.2]      → -- SRC:  130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
-[JSemantic.2]      → 9902 130                                           ; TE_LINE
-[JSemantic.2]      → 2140 A=1                                           ; TK_IF
-[JSemantic.2]      → 2140 B=2                                           ; TK_IF
-[JSemantic.2]      → 2150 "IF DOBLE"                                    ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 013: 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JSemantic.2]      → 9902 130                                           ; --  TCO_LINE
+[JSemantic.2]      → 2140 A = 1                                         ; --  TK_IF
+[JSemantic.2]      → 2140 B = 2                                         ; --  TK_IF
+[JSemantic.2]      → 2150 1702,N,"IF DOBLE"                             ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 015: 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
 [JSemantic.2]      → -- SRC:  140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
-[JSemantic.2]      → 9902 140                                           ; TE_LINE
-[JSemantic.2]      → 2140 A=1                                           ; TK_IF
-[JSemantic.2]      → 2140 B=2                                           ; TK_IF
-[JSemantic.2]      → 2140 C=3                                           ; TK_IF
-[JSemantic.2]      → 2150 "IF TRIPLE"                                   ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 014: 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JSemantic.2]      → 9902 140                                           ; --  TCO_LINE
+[JSemantic.2]      → 2140 A = 1                                         ; --  TK_IF
+[JSemantic.2]      → 2140 B = 2                                         ; --  TK_IF
+[JSemantic.2]      → 2140 C = 3                                         ; --  TK_IF
+[JSemantic.2]      → 2150 1702,N,"IF TRIPLE"                            ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 016: 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
 [JSemantic.2]      → -- SRC:  150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
-[JSemantic.2]      → 9902 150                                           ; TE_LINE
-[JSemantic.2]      → 2140 A=1                                           ; TK_IF
-[JSemantic.2]      → 2140 B=2                                           ; TK_IF
-[JSemantic.2]      → 2140 C=3                                           ; TK_IF
-[JSemantic.2]      → 2150 "A"                                           ; TK_PRINT
-[JSemantic.2]      → 2150 "B"                                           ; TK_PRINT
-[JSemantic.2]      → 2150 "C"                                           ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 015: 200 FOR I=1 TO 3
+[JSemantic.2]      → 9902 150                                           ; --  TCO_LINE
+[JSemantic.2]      → 2140 A = 1                                         ; --  TK_IF
+[JSemantic.2]      → 2140 B = 2                                         ; --  TK_IF
+[JSemantic.2]      → 2140 C = 3                                         ; --  TK_IF
+[JSemantic.2]      → 2150 1702,N,"A"                                    ; --  TK_PRINT
+[JSemantic.2]      → 2150 1702,N,"B"                                    ; --  TK_PRINT
+[JSemantic.2]      → 2150 1702,N,"C"                                    ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 017: 200 FOR I=1 TO 3
 [JSemantic.2]      → -- SRC:  200 FOR I=1 TO 3
-[JSemantic.2]      → 9902 200                                           ; TE_LINE
-[JSemantic.2]      → 2136 I=1TO3                                        ; TK_FOR
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 016: 210 PRINT "BUCLE I=";I
+[JSemantic.2]      → 9902 200                                           ; --  TCO_LINE
+[JSemantic.2]      → 2136 I = 1 TO 3                                    ; --  TK_FOR
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 018: 210 PRINT "BUCLE I=";I
 [JSemantic.2]      → -- SRC:  210 PRINT "BUCLE I=";I
-[JSemantic.2]      → 9902 210                                           ; TE_LINE
-[JSemantic.2]      → 2150 "BUCLE I=";I                                  ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 017: 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JSemantic.2]      → 9902 210                                           ; --  TCO_LINE
+[JSemantic.2]      → 2150 1702,P,"BUCLE I="                             ; --  TK_PRINT
+[JSemantic.2]      → 2150 1700,N,I                                      ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 019: 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
 [JSemantic.2]      → -- SRC:  220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
-[JSemantic.2]      → 9902 220                                           ; TE_LINE
-[JSemantic.2]      → 2140 I=2                                           ; TK_IF
-[JSemantic.2]      → 2150 "IF DENTRO DEL FOR"                           ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 018: 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JSemantic.2]      → 9902 220                                           ; --  TCO_LINE
+[JSemantic.2]      → 2140 I = 2                                         ; --  TK_IF
+[JSemantic.2]      → 2150 1702,N,"IF DENTRO DEL FOR"                    ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 020: 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
 [JSemantic.2]      → -- SRC:  230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
-[JSemantic.2]      → 9902 230                                           ; TE_LINE
-[JSemantic.2]      → 2140 I=2                                           ; TK_IF
-[JSemantic.2]      → 2142 B=4                                           ; TK_LET
-[JSemantic.2]      → 1139 8888                                          ; TK_GOTO
-[JSemantic.2]      → 2142 A=9                                           ; TK_LET
-[JSemantic.2]      → 2152 código inalcanzable                           ; TK_REM
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 019: 240 PRINT "DESPUES DEL IF EN FOR"
+[JSemantic.2]      → 9902 230                                           ; --  TCO_LINE
+[JSemantic.2]      → 2140 I = 2                                         ; --  TK_IF
+[JSemantic.2]      → 2142 B=4                                           ; --  TK_LET
+[JSemantic.2]      → 1139 8888                                          ; --  TK_GOTO
+[JSemantic.2]      → 2142 A=9                                           ; --  TK_LET
+[JSemantic.2]      → 2152 "código inalcanzable"                         ; --  TK_REM
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 021: 240 PRINT "DESPUES DEL IF EN FOR"
 [JSemantic.2]      → -- SRC:  240 PRINT "DESPUES DEL IF EN FOR"
-[JSemantic.2]      → 9902 240                                           ; TE_LINE
-[JSemantic.2]      → 2150 "DESPUES DEL IF EN FOR"                       ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 020: 250 NEXT I
+[JSemantic.2]      → 9902 240                                           ; --  TCO_LINE
+[JSemantic.2]      → 2150 1702,N,"DESPUES DEL IF EN FOR"                ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 022: 250 NEXT I
 [JSemantic.2]      → -- SRC:  250 NEXT I
-[JSemantic.2]      → 9902 250                                           ; TE_LINE
-[JSemantic.2]      → 2146 I                                             ; TK_NEXT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 021: 300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JSemantic.2]      → 9902 250                                           ; --  TCO_LINE
+[JSemantic.2]      → 2146 I                                             ; --  TK_NEXT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 023: 300 REM --- PRUEBA READ / DATA / RESTORE ---
 [JSemantic.2]      → -- SRC:  300 REM --- PRUEBA READ / DATA / RESTORE ---
-[JSemantic.2]      → 9902 300                                           ; TE_LINE
-[JSemantic.2]      → 2152 --- PRUEBA READ / DATA / RESTORE ---          ; TK_REM
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 022: 310 DATA 10,20,30
+[JSemantic.2]      → 9902 300                                           ; --  TCO_LINE
+[JSemantic.2]      → 2152 "--- PRUEBA READ / DATA / RESTORE ---"        ; --  TK_REM
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 024: 310 DATA 10,20,30
 [JSemantic.2]      → -- SRC:  310 DATA 10,20,30
-[JSemantic.2]      → 9902 310                                           ; TE_LINE
-[JSemantic.2]      → 1131 10,20,30                                      ; TK_DATA
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 023: 320 READ X
+[JSemantic.2]      → 9902 310                                           ; --  TCO_LINE
+[JSemantic.2]      → 1131 10 , 20 , 30                                  ; --  TK_DATA
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 025: 320 READ X
 [JSemantic.2]      → -- SRC:  320 READ X
-[JSemantic.2]      → 9902 320                                           ; TE_LINE
-[JSemantic.2]      → 1151 X                                             ; TK_READ
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 024: 330 PRINT "X=";X
+[JSemantic.2]      → 9902 320                                           ; --  TCO_LINE
+[JSemantic.2]      → 1151 X                                             ; --  TK_READ
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 026: 330 PRINT "X=";X
 [JSemantic.2]      → -- SRC:  330 PRINT "X=";X
-[JSemantic.2]      → 9902 330                                           ; TE_LINE
-[JSemantic.2]      → 2150 "X=";X                                        ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 025: 340 READ X
+[JSemantic.2]      → 9902 330                                           ; --  TCO_LINE
+[JSemantic.2]      → 2150 1702,P,"X="                                   ; --  TK_PRINT
+[JSemantic.2]      → 2150 1700,N,X                                      ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 027: 340 READ X
 [JSemantic.2]      → -- SRC:  340 READ X
-[JSemantic.2]      → 9902 340                                           ; TE_LINE
-[JSemantic.2]      → 1151 X                                             ; TK_READ
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 026: 350 PRINT "X=";X
-[JSemantic.2]      → -- SRC:  350 PRINT "X=";X
-[JSemantic.2]      → 9902 350                                           ; TE_LINE
-[JSemantic.2]      → 2150 "X=";X                                        ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 027: 360 RESTORE 310
+[JSemantic.2]      → 9902 340                                           ; --  TCO_LINE
+[JSemantic.2]      → 1151 X                                             ; --  TK_READ
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 028: 350 PRINT "X=",X
+[JSemantic.2]      → -- SRC:  350 PRINT "X=",X
+[JSemantic.2]      → 9902 350                                           ; --  TCO_LINE
+[JSemantic.2]      → 2150 1702,C,"X="                                   ; --  TK_PRINT
+[JSemantic.2]      → 2150 1700,N,X                                      ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 029: 360 RESTORE 310
 [JSemantic.2]      → -- SRC:  360 RESTORE 310
-[JSemantic.2]      → 9902 360                                           ; TE_LINE
-[JSemantic.2]      → 1153 310                                           ; TK_RESTORE
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 028: 370 READ X
+[JSemantic.2]      → 9902 360                                           ; --  TCO_LINE
+[JSemantic.2]      → 1153 310                                           ; --  TK_RESTORE
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 030: 370 READ X
 [JSemantic.2]      → -- SRC:  370 READ X
-[JSemantic.2]      → 9902 370                                           ; TE_LINE
-[JSemantic.2]      → 1151 X                                             ; TK_READ
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 029: 380 PRINT "X=";X
+[JSemantic.2]      → 9902 370                                           ; --  TCO_LINE
+[JSemantic.2]      → 1151 X                                             ; --  TK_READ
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 031: 380 PRINT "X=";X
 [JSemantic.2]      → -- SRC:  380 PRINT "X=";X
-[JSemantic.2]      → 9902 380                                           ; TE_LINE
-[JSemantic.2]      → 2150 "X=";X                                        ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 030: 400 REM --- IF CON READ ---
+[JSemantic.2]      → 9902 380                                           ; --  TCO_LINE
+[JSemantic.2]      → 2150 1702,P,"X="                                   ; --  TK_PRINT
+[JSemantic.2]      → 2150 1700,N,X                                      ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 032: 400 REM --- IF CON READ ---
 [JSemantic.2]      → -- SRC:  400 REM --- IF CON READ ---
-[JSemantic.2]      → 9902 400                                           ; TE_LINE
-[JSemantic.2]      → 2152 --- IF CON READ ---                           ; TK_REM
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 031: 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JSemantic.2]      → 9902 400                                           ; --  TCO_LINE
+[JSemantic.2]      → 2152 "--- IF CON READ ---"                         ; --  TK_REM
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 033: 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
 [JSemantic.2]      → -- SRC:  410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
-[JSemantic.2]      → 9902 410                                           ; TE_LINE
-[JSemantic.2]      → 2140 A=1                                           ; TK_IF
-[JSemantic.2]      → 1151 X                                             ; TK_READ
-[JSemantic.2]      → 2150 "READ EN IF=";X                               ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 032: 500 REM --- STOP INTERMEDIO ---
+[JSemantic.2]      → 9902 410                                           ; --  TCO_LINE
+[JSemantic.2]      → 2140 A = 1                                         ; --  TK_IF
+[JSemantic.2]      → 1151 X                                             ; --  TK_READ
+[JSemantic.2]      → 2150 1702,P,"READ EN IF="                          ; --  TK_PRINT
+[JSemantic.2]      → 2150 1700,N,X                                      ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 034: 500 REM --- STOP INTERMEDIO ---
 [JSemantic.2]      → -- SRC:  500 REM --- STOP INTERMEDIO ---
-[JSemantic.2]      → 9902 500                                           ; TE_LINE
-[JSemantic.2]      → 2152 --- STOP INTERMEDIO ---                       ; TK_REM
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 033: 510 STOP
+[JSemantic.2]      → 9902 500                                           ; --  TCO_LINE
+[JSemantic.2]      → 2152 "--- STOP INTERMEDIO ---"                     ; --  TK_REM
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 035: 510 STOP
 [JSemantic.2]      → -- SRC:  510 STOP
-[JSemantic.2]      → 9902 510                                           ; TE_LINE
-[JSemantic.2]      → 1160                                               ; TK_STOP
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 034: 520 PRINT "NO DEBE EJECUTARSE"
+[JSemantic.2]      → 9902 510                                           ; --  TCO_LINE
+[JSemantic.2]      → 1160                                               ; --  TK_STOP
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 036: 520 PRINT "NO DEBE EJECUTARSE"
 [JSemantic.2]      → -- SRC:  520 PRINT "NO DEBE EJECUTARSE"
-[JSemantic.2]      → 9902 520                                           ; TE_LINE
-[JSemantic.2]      → 2150 "NO DEBE EJECUTARSE"                          ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 035: 600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JSemantic.2]      → 9902 520                                           ; --  TCO_LINE
+[JSemantic.2]      → 2150 1702,N,"NO DEBE EJECUTARSE"                   ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 037: 600 REM --- IF MULTIPLE FINAL MALVADO ---
 [JSemantic.2]      → -- SRC:  600 REM --- IF MULTIPLE FINAL MALVADO ---
-[JSemantic.2]      → 9902 600                                           ; TE_LINE
-[JSemantic.2]      → 2152 --- IF MULTIPLE FINAL MALVADO ---             ; TK_REM
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 036: 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JSemantic.2]      → 9902 600                                           ; --  TCO_LINE
+[JSemantic.2]      → 2152 "--- IF MULTIPLE FINAL MALVADO ---"           ; --  TK_REM
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 038: 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
 [JSemantic.2]      → -- SRC:  610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
-[JSemantic.2]      → 9902 610                                           ; TE_LINE
-[JSemantic.2]      → 2140 A=1                                           ; TK_IF
-[JSemantic.2]      → 2140 B>2                                           ; TK_IF
-[JSemantic.2]      → 2140 C<>3                                          ; TK_IF
-[JSemantic.2]      → 2150 "X"                                           ; TK_PRINT
-[JSemantic.2]      → 2140 A=1                                           ; TK_IF
-[JSemantic.2]      → 2150 "Y"                                           ; TK_PRINT
-[JSemantic.2]      → 2140 B=2                                           ; TK_IF
-[JSemantic.2]      → 2150 "Z"                                           ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 037: 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )   AND b <> 0 THEN PRINT "OK"
-[JSemantic.2]      → -- SRC:  650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )   AND b <> 0 THEN PRINT "OK"
-[JSemantic.2]      → 9902 650                                           ; TE_LINE
-[JSemantic.2]      → 2140 A(BX+C+5,Z*4+F)=C(t*4) AND b<>0               ; TK_IF
-[JSemantic.2]      → 2150 "OK"                                          ; TK_PRINT
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 038: 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JSemantic.2]      → 9902 610                                           ; --  TCO_LINE
+[JSemantic.2]      → 2140 A = 1                                         ; --  TK_IF
+[JSemantic.2]      → 2140 B > 2                                         ; --  TK_IF
+[JSemantic.2]      → 2140 C <> 3                                        ; --  TK_IF
+[JSemantic.2]      → 2150 1702,N,"X"                                    ; --  TK_PRINT
+[JSemantic.2]      → 2140 A = 1                                         ; --  TK_IF
+[JSemantic.2]      → 2150 1702,N,"Y"                                    ; --  TK_PRINT
+[JSemantic.2]      → 2140 B = 2                                         ; --  TK_IF
+[JSemantic.2]      → 2150 1702,N,"Z"                                    ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 039: 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+[JSemantic.2]      → -- SRC:  650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+[JSemantic.2]      → 9902 650                                           ; --  TCO_LINE
+[JSemantic.2]      → 2140 A (BX + C +  5   , Z * 4 + F) = C (t * 4) + u AND b <> 0
+[JSemantic.2]      →                                                    ; --  TK_IF
+[JSemantic.2]      → 2150 1702,N,"OK"                                   ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 040: 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
 [JSemantic.2]      → -- SRC:  660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
-[JSemantic.2]      → 9902 660                                           ; TE_LINE
-[JSemantic.2]      → 2142 A(BX+C+5,Z*4+F)=C(t*4)                        ; TK_LET
-[JSemantic.2]      → 2142 B=C^3                                         ; TK_LET
-[JSemantic.2]      → 9901                                               ; TE_EOL
-[JSemantic.2] 039: 700 REM === FIN ===
+[JSemantic.2]      → 9902 660                                           ; --  TCO_LINE
+[JSemantic.2]      → 2142 A(BX+C +5, Z * 4+F)=C (t *4)                  ; --  TK_LET
+[JSemantic.2]      → 2142 B=C ^ 3                                       ; --  TK_LET
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 041: 700 REM === FIN ===
 [JSemantic.2]      → -- SRC:  700 REM === FIN ===
-[JSemantic.2]      → 9902 700                                           ; TE_LINE
-[JSemantic.2]      → 2152 === FIN ===                                   ; TK_REM
-[JSemantic.2]      → 9901                                               ; TE_EOL
+[JSemantic.2]      → 9902 700                                           ; --  TCO_LINE
+[JSemantic.2]      → 2152 "=== FIN ==="                                 ; --  TK_REM
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 042: 800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JSemantic.2]      → -- SRC:  800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JSemantic.2]      → 9902 800                                           ; --  TCO_LINE
+[JSemantic.2]      → 2150 1600,P,10,2                                   ; --  TK_PRINT
+[JSemantic.2]      → 2150 1702,P,"K"                                    ; --  TK_PRINT
+[JSemantic.2]      → 2150 1600,C,G (10),2                               ; --  TK_PRINT
+[JSemantic.2]      → 2150 1702,P,"L"                                    ; --  TK_PRINT
+[JSemantic.2]      → 2150 1206,P,4                                      ; --  TK_PRINT
+[JSemantic.2]      → 2150 1211,P,3                                      ; --  TK_PRINT
+[JSemantic.2]      → 2150 1701,P,45                                     ; --  TK_PRINT
+[JSemantic.2]      → 2150 1700,C,A(bc+4, C*4)                           ; --  TK_PRINT
+[JSemantic.2]      → 2150 1700,N,B                                      ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2] 043: 810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+[JSemantic.2]      → -- SRC:  810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+[JSemantic.2]      → 9902 810                                           ; --  TCO_LINE
+[JSemantic.2]      → 2150 1601,P,10                                     ; --  TK_PRINT
+[JSemantic.2]      → 2150 1702,P,"A"                                    ; --  TK_PRINT
+[JSemantic.2]      → 2150 1601,P,(20)                                   ; --  TK_PRINT
+[JSemantic.2]      → 2150 1702,P,"B"                                    ; --  TK_PRINT
+[JSemantic.2]      → 2150 1600,N,1,4                                    ; --  TK_PRINT
+[JSemantic.2]      → 9901                                               ; --  TCO_EOL
+[JSemantic.2]      → 9900                                               ; --  TCO_EOF
 [JSemantic.2]      → VAR  VAR 1.0
 [JSemantic.2]      → VAR  
-[JSemantic.2]      → VAR  NUM A [A ]
-[JSemantic.2]      → VAR  NUM B [A ]
+[JSemantic.2]      → VAR  NUM A [AU]
+[JSemantic.2]      → VAR  NUM B [AU]
 [JSemantic.2]      → VAR  NUM C [AU]
 [JSemantic.2]      → VAR  NUM X [AU]
+[JSemantic.2]      → VAR  NUM N [ U]
 [JSemantic.2]      → VAR  NUM TO [ U]
 [JSemantic.2]      → VAR  NUM J [ U]
+[JSemantic.2]      → VAR  NUM P [ U]
 [JSemantic.2]      → VAR  NUM I [ U]
 [JSemantic.2]      → VAR  NUM T [ U]
+[JSemantic.2]      → VAR  NUM G [ U]
+[JSemantic.2]      → VAR  NUM BC [ U]
 [JSemantic.2]      → VAR  
 [JSemantic.2]      → VAR  ENDVARS
 [JSemantic.2]      → VAR  
@@ -290,5 +1094,751 @@
 [JSemantic.2]      → DATA  
 [JSemantic.2]      → DATA  ENDDATA
 [JSemantic.2]      → DATA  
-[JSemantic]  
-[JSemantic] Finalizado correctamente
+[JGeneratorSB] ⇒    1 REM **************************************************************
+[JGeneratorSB] ⇒    2 REM * PROGRAMA GENERADO POR ZX2SB 0.0α by javu61                 *
+[JGeneratorSB] ⇒    3 REM **************************************************************
+[JGeneratorSB] ⇒    4 REM * Si el resultado no es correcto, por favor contacta         *
+[JGeneratorSB] ⇒    5 REM * javu61@hotmail.com, intentaré solucionarlo                 *
+[JGeneratorSB] ⇒    6 REM **************************************************************
+[JGeneratorSB] ⇒    7 ZX2SB_INIT
+[JGeneratorSB] ⇒    81 ::
+[JGeneratorSB] 002: 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JGeneratorSB] ⇒ REM --> 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JGeneratorSB] ⇒    1000 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JGeneratorSB] 003: 11 PRINT BIN 11100110
+[JGeneratorSB] ⇒ REM --> 11 PRINT BIN 11100110
+[JGeneratorSB] ⇒    1100 PRINT 11100110
+[JGeneratorSB] 004: 15 FOR J=1 to 10 : PRINT J : NEXT J
+[JGeneratorSB] ⇒ REM --> 15 FOR J=1 to 10 : PRINT J : NEXT J
+[JGeneratorSB] ⇒    1500 FOR J = 1 TO 10
+[JGeneratorSB] ⇒    1501 PRINT J
+[JGeneratorSB] ⇒    1502 End For J
+[JGeneratorSB] 005: 20 LET A=1: LET B=2: LET C=3
+[JGeneratorSB] ⇒ REM --> 20 LET A=1: LET B=2: LET C=3
+[JGeneratorSB] ⇒    2000 A=1
+[JGeneratorSB] ⇒    2001 B=2
+[JGeneratorSB] ⇒    2002 C=3
+[JGeneratorSB] 006: 25 GO SUB 750
+[JGeneratorSB] ⇒ REM --> 25 GO SUB 750
+[JGeneratorSB] ⇒    2500 GOSUB 75000
+[JGeneratorSB] 007: 30 IF A=1 THEN GO TO 100
+[JGeneratorSB] ⇒ REM --> 30 IF A=1 THEN GO TO 100
+[JGeneratorSB] ⇒    3000 IF A = 1 THEN
+[JGeneratorSB] ⇒    3001 GOTO 10000
+[JGeneratorSB] ⇒    3002 End If
+[JGeneratorSB] 008: 40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JGeneratorSB] ⇒ REM --> 40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JGeneratorSB] ⇒    4000 PRINT "ESTO NO DEBE EJECUTARSE"
+[JGeneratorSB] 009: 50 GOTO 9999 : REM salto inexistente, no error
+[JGeneratorSB] ⇒ REM --> 50 GOTO 9999 : REM salto inexistente, no error
+[JGeneratorSB] ⇒    5000 GOTO 999900
+[JGeneratorSB] ⇒    5001 REM salto inexistente, no error
+[JGeneratorSB] 010: 60 PRINT "TAMPOCO DEBE VERSE"
+[JGeneratorSB] ⇒ REM --> 60 PRINT "TAMPOCO DEBE VERSE"
+[JGeneratorSB] ⇒    6000 PRINT "TAMPOCO DEBE VERSE"
+[JGeneratorSB] 011: 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JGeneratorSB] ⇒ REM --> 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JGeneratorSB] ⇒    10000 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JGeneratorSB] 012: 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JGeneratorSB] ⇒ REM --> 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JGeneratorSB] ⇒    11000 IF A = 1 THEN
+[JGeneratorSB] ⇒    11001 PRINT "IF SIMPLE CON PRINT"
+[JGeneratorSB] ⇒    11002 End If
+[JGeneratorSB] 013: 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JGeneratorSB] ⇒ REM --> 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JGeneratorSB] ⇒    12000 IF A = 1 THEN
+[JGeneratorSB] ⇒    12001 PRINT "UNO"
+[JGeneratorSB] ⇒    12002 PRINT "DOS"
+[JGeneratorSB] ⇒    12003 PRINT "TRES"
+[JGeneratorSB] ⇒    12004 End If
+[JGeneratorSB] 014: 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JGeneratorSB] ⇒ REM --> 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JGeneratorSB] ⇒    13000 IF A = 1 THEN
+[JGeneratorSB] ⇒    13001 IF B = 2 THEN
+[JGeneratorSB] ⇒    13002 PRINT "IF DOBLE"
+[JGeneratorSB] ⇒    13003 End If
+[JGeneratorSB] ⇒    13004 End If
+[JGeneratorSB] 015: 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JGeneratorSB] ⇒ REM --> 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JGeneratorSB] ⇒    14000 IF A = 1 THEN
+[JGeneratorSB] ⇒    14001 IF B = 2 THEN
+[JGeneratorSB] ⇒    14002 IF C = 3 THEN
+[JGeneratorSB] ⇒    14003 PRINT "IF TRIPLE"
+[JGeneratorSB] ⇒    14004 End If
+[JGeneratorSB] ⇒    14005 End If
+[JGeneratorSB] ⇒    14006 End If
+[JGeneratorSB] 016: 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JGeneratorSB] ⇒ REM --> 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JGeneratorSB] ⇒    15000 IF A = 1 THEN
+[JGeneratorSB] ⇒    15001 IF B = 2 THEN
+[JGeneratorSB] ⇒    15002 IF C = 3 THEN
+[JGeneratorSB] ⇒    15003 PRINT "A"
+[JGeneratorSB] ⇒    15004 PRINT "B"
+[JGeneratorSB] ⇒    15005 PRINT "C"
+[JGeneratorSB] ⇒    15006 End If
+[JGeneratorSB] ⇒    15007 End If
+[JGeneratorSB] ⇒    15008 End If
+[JGeneratorSB] 017: 200 FOR I=1 TO 3
+[JGeneratorSB] ⇒ REM --> 200 FOR I=1 TO 3
+[JGeneratorSB] ⇒    20000 FOR I = 1 TO 3
+[JGeneratorSB] 018: 210 PRINT "BUCLE I=";I
+[JGeneratorSB] ⇒ REM --> 210 PRINT "BUCLE I=";I
+[JGeneratorSB] ⇒    21000 PRINT "BUCLE I=";
+[JGeneratorSB] ⇒    21001 PRINT I
+[JGeneratorSB] 019: 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JGeneratorSB] ⇒ REM --> 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JGeneratorSB] ⇒    22000 IF I = 2 THEN
+[JGeneratorSB] ⇒    22001 PRINT "IF DENTRO DEL FOR"
+[JGeneratorSB] ⇒    22002 End If
+[JGeneratorSB] 020: 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JGeneratorSB] ⇒ REM --> 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JGeneratorSB] ⇒    23000 IF I = 2 THEN
+[JGeneratorSB] ⇒    23001 B=4
+[JGeneratorSB] ⇒    23002 GOTO 888800
+[JGeneratorSB] ⇒    23003 A=9
+[JGeneratorSB] ⇒    23004 REM código inalcanzable
+[JGeneratorSB] ⇒    23005 End If
+[JGeneratorSB] 021: 240 PRINT "DESPUES DEL IF EN FOR"
+[JGeneratorSB] ⇒ REM --> 240 PRINT "DESPUES DEL IF EN FOR"
+[JGeneratorSB] ⇒    24000 PRINT "DESPUES DEL IF EN FOR"
+[JGeneratorSB] 022: 250 NEXT I
+[JGeneratorSB] ⇒ REM --> 250 NEXT I
+[JGeneratorSB] ⇒    25000 End For I
+[JGeneratorSB] 023: 300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JGeneratorSB] ⇒ REM --> 300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JGeneratorSB] ⇒    30000 REM --- PRUEBA READ / DATA / RESTORE ---
+[JGeneratorSB] 024: 310 DATA 10,20,30
+[JGeneratorSB] ⇒ REM --> 310 DATA 10,20,30
+[JGeneratorSB] ⇒    31000 DATA 10 , 20 , 30
+[JGeneratorSB] 025: 320 READ X
+[JGeneratorSB] ⇒ REM --> 320 READ X
+[JGeneratorSB] ⇒    32000 READ X
+[JGeneratorSB] 026: 330 PRINT "X=";X
+[JGeneratorSB] ⇒ REM --> 330 PRINT "X=";X
+[JGeneratorSB] ⇒    33000 PRINT "X=";
+[JGeneratorSB] ⇒    33001 PRINT X
+[JGeneratorSB] 027: 340 READ X
+[JGeneratorSB] ⇒ REM --> 340 READ X
+[JGeneratorSB] ⇒    34000 READ X
+[JGeneratorSB] 028: 350 PRINT "X=",X
+[JGeneratorSB] ⇒ REM --> 350 PRINT "X=",X
+[JGeneratorSB] ⇒    35000 PRINT "X=",
+[JGeneratorSB] ⇒    35001 PRINT X
+[JGeneratorSB] 029: 360 RESTORE 310
+[JGeneratorSB] ⇒ REM --> 360 RESTORE 310
+[JGeneratorSB] ⇒    36000 RESTORE 310
+[JGeneratorSB] 030: 370 READ X
+[JGeneratorSB] ⇒ REM --> 370 READ X
+[JGeneratorSB] ⇒    37000 READ X
+[JGeneratorSB] 031: 380 PRINT "X=";X
+[JGeneratorSB] ⇒ REM --> 380 PRINT "X=";X
+[JGeneratorSB] ⇒    38000 PRINT "X=";
+[JGeneratorSB] ⇒    38001 PRINT X
+[JGeneratorSB] 032: 400 REM --- IF CON READ ---
+[JGeneratorSB] ⇒ REM --> 400 REM --- IF CON READ ---
+[JGeneratorSB] ⇒    40000 REM --- IF CON READ ---
+[JGeneratorSB] 033: 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JGeneratorSB] ⇒ REM --> 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JGeneratorSB] ⇒    41000 IF A = 1 THEN
+[JGeneratorSB] ⇒    41001 READ X
+[JGeneratorSB] ⇒    41002 PRINT "READ EN IF=";
+[JGeneratorSB] ⇒    41003 PRINT X
+[JGeneratorSB] ⇒    41004 End If
+[JGeneratorSB] 034: 500 REM --- STOP INTERMEDIO ---
+[JGeneratorSB] ⇒ REM --> 500 REM --- STOP INTERMEDIO ---
+[JGeneratorSB] ⇒    50000 REM --- STOP INTERMEDIO ---
+[JGeneratorSB] 035: 510 STOP
+[JGeneratorSB] ⇒ REM --> 510 STOP
+[JGeneratorSB] ⇒    51000 STOP
+[JGeneratorSB] 036: 520 PRINT "NO DEBE EJECUTARSE"
+[JGeneratorSB] ⇒ REM --> 520 PRINT "NO DEBE EJECUTARSE"
+[JGeneratorSB] ⇒    52000 PRINT "NO DEBE EJECUTARSE"
+[JGeneratorSB] 037: 600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JGeneratorSB] ⇒ REM --> 600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JGeneratorSB] ⇒    60000 REM --- IF MULTIPLE FINAL MALVADO ---
+[JGeneratorSB] 038: 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JGeneratorSB] ⇒ REM --> 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JGeneratorSB] ⇒    61000 IF A = 1 THEN
+[JGeneratorSB] ⇒    61001 IF B > 2 THEN
+[JGeneratorSB] ⇒    61002 IF C <> 3 THEN
+[JGeneratorSB] ⇒    61003 PRINT "X"
+[JGeneratorSB] ⇒    61004 IF A = 1 THEN
+[JGeneratorSB] ⇒    61005 PRINT "Y"
+[JGeneratorSB] ⇒    61006 IF B = 2 THEN
+[JGeneratorSB] ⇒    61007 PRINT "Z"
+[JGeneratorSB] ⇒    61008 End If
+[JGeneratorSB] ⇒    61009 End If
+[JGeneratorSB] ⇒    61010 End If
+[JGeneratorSB] ⇒    61011 End If
+[JGeneratorSB] ⇒    61012 End If
+[JGeneratorSB] 039: 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+[JGeneratorSB] ⇒ REM --> 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+[JGeneratorSB] ⇒    65000 IF A (BX + C +  5   , Z * 4 + F) = C (t * 4) + u AND b <> 0 THEN
+[JGeneratorSB] ⇒    65001 PRINT "OK"
+[JGeneratorSB] ⇒    65002 End If
+[JGeneratorSB] 040: 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JGeneratorSB] ⇒ REM --> 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JGeneratorSB] ⇒    66000 A(BX+C +5, Z * 4+F)=C (t *4)
+[JGeneratorSB] ⇒    66001 B=C ^ 3
+[JGeneratorSB] 041: 700 REM === FIN ===
+[JGeneratorSB] ⇒ REM --> 700 REM === FIN ===
+[JGeneratorSB] ⇒    70000 REM === FIN ===
+[JGeneratorSB] 042: 800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JGeneratorSB] ⇒ REM --> 800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JGeneratorSB] ⇒    80000 AT 10,2
+[JGeneratorSB] ⇒    80001 PRINT "K";
+[JGeneratorSB] ⇒    80002 AT G (10),2
+[JGeneratorSB] ⇒    80003 PRINT ,
+[JGeneratorSB] ⇒    80004 PRINT "L";
+[JGeneratorSB] ⇒    80005 PRINT 4;
+[JGeneratorSB] ⇒    80006 PRINT 3;
+[JGeneratorSB] ⇒    80007 PRINT 45;
+[JGeneratorSB] ⇒    80008 PRINT A(bc+4, C*4),
+[JGeneratorSB] ⇒    80009 PRINT B
+[JGeneratorSB] 043: 810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+[JGeneratorSB] ⇒ REM --> 810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+[JGeneratorSB] ⇒    81000 PRINT TO 10;
+[JGeneratorSB] ⇒    81001 PRINT "A";
+[JGeneratorSB] ⇒    81002 PRINT TO 20;
+[JGeneratorSB] ⇒    81003 PRINT "B";
+[JGeneratorSB] ⇒    81004 AT 1,4
+[JGeneratorSB] ⇒    9000 ::
+[JGeneratorSB] ⇒    9010 REM =========================================
+[JGeneratorSB] ⇒    9020 REM ===== FUNCIONES AUXILIARES ZX BASIC =====
+[JGeneratorSB] ⇒    9030 REM =========================================
+[JGeneratorSB] ⇒    9040 ::
+[JGeneratorSB] ⇒    9050 DEFine PROC ZX2SB_INIT
+[JGeneratorSB] ⇒    9060 MODE 8:WINDOW 512,256,0,0:CLS
+[JGeneratorSB] ⇒    9070 PRINT "######  #     #    #####    #####  ###### "
+[JGeneratorSB] ⇒    9080 PRINT "     #   #   #         #   #       #     #"
+[JGeneratorSB] ⇒    9090 PRINT "    #     # #          #   #       #     #"
+[JGeneratorSB] ⇒    9100 PRINT "   #       #       #####    #####  ###### "
+[JGeneratorSB] ⇒    9110 PRINT "  #       # #      #             # #     #"
+[JGeneratorSB] ⇒    9120 PRINT " #       #   #     #             # #     #"
+[JGeneratorSB] ⇒    9130 PRINT "#       #     #    #             # #     #"
+[JGeneratorSB] ⇒    9140 PRINT "###### #       #   #####    #####  ###### "
+[JGeneratorSB] ⇒    9150 PRINT:PRINT "ZX2SB v0.0α":PRINT "by javu61@hotmail.com"
+[JGeneratorSB] ⇒    9160 PAUSE 75:WINDOW 405,250,52,3:BORDER 5,0,1:PAPER 0:CLS
+[JGeneratorSB] ⇒    9170 End DEFine ZX2SB_INIT
+[JGeneratorSB] ⇒    9190 ::
+[JRenum.1] 002: 1 REM **************************************************************
+[JRenum.1]      → [EQ] 1:1010
+[JRenum.1] 003: 2 REM * PROGRAMA GENERADO POR ZX2SB 0.0α by javu61                 *
+[JRenum.1]      → [EQ] 2:1020
+[JRenum.1] 004: 3 REM **************************************************************
+[JRenum.1]      → [EQ] 3:1030
+[JRenum.1] 005: 4 REM * Si el resultado no es correcto, por favor contacta         *
+[JRenum.1]      → [EQ] 4:1040
+[JRenum.1] 006: 5 REM * javu61@hotmail.com, intentaré solucionarlo                 *
+[JRenum.1]      → [EQ] 5:1050
+[JRenum.1] 007: 6 REM **************************************************************
+[JRenum.1]      → [EQ] 6:1060
+[JRenum.1] 008: 7 ZX2SB_INIT
+[JRenum.1]      → [EQ] 7:1070
+[JRenum.1] 009: 81 ::
+[JRenum.1]      → [EQ] 81:1080
+[JRenum.1] 010: REM --> 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JRenum.1]      → [EQ] 0:1090
+[JRenum.1] 011: 1000 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JRenum.1]      → [EQ] 1000:1100
+[JRenum.1] 012: REM --> 11 PRINT BIN 11100110
+[JRenum.1] 013: 1100 PRINT 11100110
+[JRenum.1]      → [EQ] 1100:1120
+[JRenum.1] 014: REM --> 15 FOR J=1 to 10 : PRINT J : NEXT J
+[JRenum.1] 015: 1500 FOR J = 1 TO 10
+[JRenum.1]      → [EQ] 1500:1140
+[JRenum.1] 016: 1501 PRINT J
+[JRenum.1]      → [EQ] 1501:1150
+[JRenum.1] 017: 1502 End For J
+[JRenum.1]      → [EQ] 1502:1160
+[JRenum.1] 018: REM --> 20 LET A=1: LET B=2: LET C=3
+[JRenum.1] 019: 2000 A=1
+[JRenum.1]      → [EQ] 2000:1180
+[JRenum.1] 020: 2001 B=2
+[JRenum.1]      → [EQ] 2001:1190
+[JRenum.1] 021: 2002 C=3
+[JRenum.1]      → [EQ] 2002:1200
+[JRenum.1] 022: REM --> 25 GO SUB 750
+[JRenum.1] 023: 2500 GOSUB 75000
+[JRenum.1]      → [EQ] 2500:1220
+[JRenum.1] 024: REM --> 30 IF A=1 THEN GO TO 100
+[JRenum.1] 025: 3000 IF A = 1 THEN
+[JRenum.1]      → [EQ] 3000:1240
+[JRenum.1] 026: 3001 GOTO 10000
+[JRenum.1]      → [EQ] 3001:1250
+[JRenum.1] 027: 3002 End If
+[JRenum.1]      → [EQ] 3002:1260
+[JRenum.1] 028: REM --> 40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JRenum.1] 029: 4000 PRINT "ESTO NO DEBE EJECUTARSE"
+[JRenum.1]      → [EQ] 4000:1280
+[JRenum.1] 030: REM --> 50 GOTO 9999 : REM salto inexistente, no error
+[JRenum.1] 031: 5000 GOTO 999900
+[JRenum.1]      → [EQ] 5000:1300
+[JRenum.1] 032: 5001 REM salto inexistente, no error
+[JRenum.1]      → [EQ] 5001:1310
+[JRenum.1] 033: REM --> 60 PRINT "TAMPOCO DEBE VERSE"
+[JRenum.1] 034: 6000 PRINT "TAMPOCO DEBE VERSE"
+[JRenum.1]      → [EQ] 6000:1330
+[JRenum.1] 035: REM --> 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JRenum.1] 036: 10000 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JRenum.1]      → [EQ] 10000:1350
+[JRenum.1] 037: REM --> 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JRenum.1] 038: 11000 IF A = 1 THEN
+[JRenum.1]      → [EQ] 11000:1370
+[JRenum.1] 039: 11001 PRINT "IF SIMPLE CON PRINT"
+[JRenum.1]      → [EQ] 11001:1380
+[JRenum.1] 040: 11002 End If
+[JRenum.1]      → [EQ] 11002:1390
+[JRenum.1] 041: REM --> 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JRenum.1] 042: 12000 IF A = 1 THEN
+[JRenum.1]      → [EQ] 12000:1410
+[JRenum.1] 043: 12001 PRINT "UNO"
+[JRenum.1]      → [EQ] 12001:1420
+[JRenum.1] 044: 12002 PRINT "DOS"
+[JRenum.1]      → [EQ] 12002:1430
+[JRenum.1] 045: 12003 PRINT "TRES"
+[JRenum.1]      → [EQ] 12003:1440
+[JRenum.1] 046: 12004 End If
+[JRenum.1]      → [EQ] 12004:1450
+[JRenum.1] 047: REM --> 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JRenum.1] 048: 13000 IF A = 1 THEN
+[JRenum.1]      → [EQ] 13000:1470
+[JRenum.1] 049: 13001 IF B = 2 THEN
+[JRenum.1]      → [EQ] 13001:1480
+[JRenum.1] 050: 13002 PRINT "IF DOBLE"
+[JRenum.1]      → [EQ] 13002:1490
+[JRenum.1] 051: 13003 End If
+[JRenum.1]      → [EQ] 13003:1500
+[JRenum.1] 052: 13004 End If
+[JRenum.1]      → [EQ] 13004:1510
+[JRenum.1] 053: REM --> 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JRenum.1] 054: 14000 IF A = 1 THEN
+[JRenum.1]      → [EQ] 14000:1530
+[JRenum.1] 055: 14001 IF B = 2 THEN
+[JRenum.1]      → [EQ] 14001:1540
+[JRenum.1] 056: 14002 IF C = 3 THEN
+[JRenum.1]      → [EQ] 14002:1550
+[JRenum.1] 057: 14003 PRINT "IF TRIPLE"
+[JRenum.1]      → [EQ] 14003:1560
+[JRenum.1] 058: 14004 End If
+[JRenum.1]      → [EQ] 14004:1570
+[JRenum.1] 059: 14005 End If
+[JRenum.1]      → [EQ] 14005:1580
+[JRenum.1] 060: 14006 End If
+[JRenum.1]      → [EQ] 14006:1590
+[JRenum.1] 061: REM --> 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JRenum.1] 062: 15000 IF A = 1 THEN
+[JRenum.1]      → [EQ] 15000:1610
+[JRenum.1] 063: 15001 IF B = 2 THEN
+[JRenum.1]      → [EQ] 15001:1620
+[JRenum.1] 064: 15002 IF C = 3 THEN
+[JRenum.1]      → [EQ] 15002:1630
+[JRenum.1] 065: 15003 PRINT "A"
+[JRenum.1]      → [EQ] 15003:1640
+[JRenum.1] 066: 15004 PRINT "B"
+[JRenum.1]      → [EQ] 15004:1650
+[JRenum.1] 067: 15005 PRINT "C"
+[JRenum.1]      → [EQ] 15005:1660
+[JRenum.1] 068: 15006 End If
+[JRenum.1]      → [EQ] 15006:1670
+[JRenum.1] 069: 15007 End If
+[JRenum.1]      → [EQ] 15007:1680
+[JRenum.1] 070: 15008 End If
+[JRenum.1]      → [EQ] 15008:1690
+[JRenum.1] 071: REM --> 200 FOR I=1 TO 3
+[JRenum.1] 072: 20000 FOR I = 1 TO 3
+[JRenum.1]      → [EQ] 20000:1710
+[JRenum.1] 073: REM --> 210 PRINT "BUCLE I=";I
+[JRenum.1] 074: 21000 PRINT "BUCLE I=";
+[JRenum.1]      → [EQ] 21000:1730
+[JRenum.1] 075: 21001 PRINT I
+[JRenum.1]      → [EQ] 21001:1740
+[JRenum.1] 076: REM --> 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JRenum.1] 077: 22000 IF I = 2 THEN
+[JRenum.1]      → [EQ] 22000:1760
+[JRenum.1] 078: 22001 PRINT "IF DENTRO DEL FOR"
+[JRenum.1]      → [EQ] 22001:1770
+[JRenum.1] 079: 22002 End If
+[JRenum.1]      → [EQ] 22002:1780
+[JRenum.1] 080: REM --> 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JRenum.1] 081: 23000 IF I = 2 THEN
+[JRenum.1]      → [EQ] 23000:1800
+[JRenum.1] 082: 23001 B=4
+[JRenum.1]      → [EQ] 23001:1810
+[JRenum.1] 083: 23002 GOTO 888800
+[JRenum.1]      → [EQ] 23002:1820
+[JRenum.1] 084: 23003 A=9
+[JRenum.1]      → [EQ] 23003:1830
+[JRenum.1] 085: 23004 REM código inalcanzable
+[JRenum.1]      → [EQ] 23004:1840
+[JRenum.1] 086: 23005 End If
+[JRenum.1]      → [EQ] 23005:1850
+[JRenum.1] 087: REM --> 240 PRINT "DESPUES DEL IF EN FOR"
+[JRenum.1] 088: 24000 PRINT "DESPUES DEL IF EN FOR"
+[JRenum.1]      → [EQ] 24000:1870
+[JRenum.1] 089: REM --> 250 NEXT I
+[JRenum.1] 090: 25000 End For I
+[JRenum.1]      → [EQ] 25000:1890
+[JRenum.1] 091: REM --> 300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JRenum.1] 092: 30000 REM --- PRUEBA READ / DATA / RESTORE ---
+[JRenum.1]      → [EQ] 30000:1910
+[JRenum.1] 093: REM --> 310 DATA 10,20,30
+[JRenum.1] 094: 31000 DATA 10 , 20 , 30
+[JRenum.1]      → [EQ] 31000:1930
+[JRenum.1] 095: REM --> 320 READ X
+[JRenum.1] 096: 32000 READ X
+[JRenum.1]      → [EQ] 32000:1950
+[JRenum.1] 097: REM --> 330 PRINT "X=";X
+[JRenum.1] 098: 33000 PRINT "X=";
+[JRenum.1]      → [EQ] 33000:1970
+[JRenum.1] 099: 33001 PRINT X
+[JRenum.1]      → [EQ] 33001:1980
+[JRenum.1] 100: REM --> 340 READ X
+[JRenum.1] 101: 34000 READ X
+[JRenum.1]      → [EQ] 34000:2000
+[JRenum.1] 102: REM --> 350 PRINT "X=",X
+[JRenum.1] 103: 35000 PRINT "X=",
+[JRenum.1]      → [EQ] 35000:2020
+[JRenum.1] 104: 35001 PRINT X
+[JRenum.1]      → [EQ] 35001:2030
+[JRenum.1] 105: REM --> 360 RESTORE 310
+[JRenum.1] 106: 36000 RESTORE 310
+[JRenum.1]      → [EQ] 36000:2050
+[JRenum.1] 107: REM --> 370 READ X
+[JRenum.1] 108: 37000 READ X
+[JRenum.1]      → [EQ] 37000:2070
+[JRenum.1] 109: REM --> 380 PRINT "X=";X
+[JRenum.1] 110: 38000 PRINT "X=";
+[JRenum.1]      → [EQ] 38000:2090
+[JRenum.1] 111: 38001 PRINT X
+[JRenum.1]      → [EQ] 38001:2100
+[JRenum.1] 112: REM --> 400 REM --- IF CON READ ---
+[JRenum.1] 113: 40000 REM --- IF CON READ ---
+[JRenum.1]      → [EQ] 40000:2120
+[JRenum.1] 114: REM --> 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JRenum.1] 115: 41000 IF A = 1 THEN
+[JRenum.1]      → [EQ] 41000:2140
+[JRenum.1] 116: 41001 READ X
+[JRenum.1]      → [EQ] 41001:2150
+[JRenum.1] 117: 41002 PRINT "READ EN IF=";
+[JRenum.1]      → [EQ] 41002:2160
+[JRenum.1] 118: 41003 PRINT X
+[JRenum.1]      → [EQ] 41003:2170
+[JRenum.1] 119: 41004 End If
+[JRenum.1]      → [EQ] 41004:2180
+[JRenum.1] 120: REM --> 500 REM --- STOP INTERMEDIO ---
+[JRenum.1] 121: 50000 REM --- STOP INTERMEDIO ---
+[JRenum.1]      → [EQ] 50000:2200
+[JRenum.1] 122: REM --> 510 STOP
+[JRenum.1] 123: 51000 STOP
+[JRenum.1]      → [EQ] 51000:2220
+[JRenum.1] 124: REM --> 520 PRINT "NO DEBE EJECUTARSE"
+[JRenum.1] 125: 52000 PRINT "NO DEBE EJECUTARSE"
+[JRenum.1]      → [EQ] 52000:2240
+[JRenum.1] 126: REM --> 600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JRenum.1] 127: 60000 REM --- IF MULTIPLE FINAL MALVADO ---
+[JRenum.1]      → [EQ] 60000:2260
+[JRenum.1] 128: REM --> 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JRenum.1] 129: 61000 IF A = 1 THEN
+[JRenum.1]      → [EQ] 61000:2280
+[JRenum.1] 130: 61001 IF B > 2 THEN
+[JRenum.1]      → [EQ] 61001:2290
+[JRenum.1] 131: 61002 IF C <> 3 THEN
+[JRenum.1]      → [EQ] 61002:2300
+[JRenum.1] 132: 61003 PRINT "X"
+[JRenum.1]      → [EQ] 61003:2310
+[JRenum.1] 133: 61004 IF A = 1 THEN
+[JRenum.1]      → [EQ] 61004:2320
+[JRenum.1] 134: 61005 PRINT "Y"
+[JRenum.1]      → [EQ] 61005:2330
+[JRenum.1] 135: 61006 IF B = 2 THEN
+[JRenum.1]      → [EQ] 61006:2340
+[JRenum.1] 136: 61007 PRINT "Z"
+[JRenum.1]      → [EQ] 61007:2350
+[JRenum.1] 137: 61008 End If
+[JRenum.1]      → [EQ] 61008:2360
+[JRenum.1] 138: 61009 End If
+[JRenum.1]      → [EQ] 61009:2370
+[JRenum.1] 139: 61010 End If
+[JRenum.1]      → [EQ] 61010:2380
+[JRenum.1] 140: 61011 End If
+[JRenum.1]      → [EQ] 61011:2390
+[JRenum.1] 141: 61012 End If
+[JRenum.1]      → [EQ] 61012:2400
+[JRenum.1] 142: REM --> 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+[JRenum.1] 143: 65000 IF A (BX + C +  5   , Z * 4 + F) = C (t * 4) + u AND b <> 0 THEN
+[JRenum.1]      → [EQ] 65000:2420
+[JRenum.1] 144: 65001 PRINT "OK"
+[JRenum.1]      → [EQ] 65001:2430
+[JRenum.1] 145: 65002 End If
+[JRenum.1]      → [EQ] 65002:2440
+[JRenum.1] 146: REM --> 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JRenum.1] 147: 66000 A(BX+C +5, Z * 4+F)=C (t *4)
+[JRenum.1]      → [EQ] 66000:2460
+[JRenum.1] 148: 66001 B=C ^ 3
+[JRenum.1]      → [EQ] 66001:2470
+[JRenum.1] 149: REM --> 700 REM === FIN ===
+[JRenum.1] 150: 70000 REM === FIN ===
+[JRenum.1]      → [EQ] 70000:2490
+[JRenum.1] 151: REM --> 800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JRenum.1] 152: 80000 AT 10,2
+[JRenum.1]      → [EQ] 80000:2510
+[JRenum.1] 153: 80001 PRINT "K";
+[JRenum.1]      → [EQ] 80001:2520
+[JRenum.1] 154: 80002 AT G (10),2
+[JRenum.1]      → [EQ] 80002:2530
+[JRenum.1] 155: 80003 PRINT ,
+[JRenum.1]      → [EQ] 80003:2540
+[JRenum.1] 156: 80004 PRINT "L";
+[JRenum.1]      → [EQ] 80004:2550
+[JRenum.1] 157: 80005 PRINT 4;
+[JRenum.1]      → [EQ] 80005:2560
+[JRenum.1] 158: 80006 PRINT 3;
+[JRenum.1]      → [EQ] 80006:2570
+[JRenum.1] 159: 80007 PRINT 45;
+[JRenum.1]      → [EQ] 80007:2580
+[JRenum.1] 160: 80008 PRINT A(bc+4, C*4),
+[JRenum.1]      → [EQ] 80008:2590
+[JRenum.1] 161: 80009 PRINT B
+[JRenum.1]      → [EQ] 80009:2600
+[JRenum.1] 162: REM --> 810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+[JRenum.1] 163: 81000 PRINT TO 10;
+[JRenum.1]      → [EQ] 81000:2620
+[JRenum.1] 164: 81001 PRINT "A";
+[JRenum.1]      → [EQ] 81001:2630
+[JRenum.1] 165: 81002 PRINT TO 20;
+[JRenum.1]      → [EQ] 81002:2640
+[JRenum.1] 166: 81003 PRINT "B";
+[JRenum.1]      → [EQ] 81003:2650
+[JRenum.1] 167: 81004 AT 1,4
+[JRenum.1]      → [EQ] 81004:2660
+[JRenum.1] 168: 9000 ::
+[JRenum.1]      → [EQ] 9000:2670
+[JRenum.1] 169: 9010 REM =========================================
+[JRenum.1]      → [EQ] 9010:2680
+[JRenum.1] 170: 9020 REM ===== FUNCIONES AUXILIARES ZX BASIC =====
+[JRenum.1]      → [EQ] 9020:2690
+[JRenum.1] 171: 9030 REM =========================================
+[JRenum.1]      → [EQ] 9030:2700
+[JRenum.1] 172: 9040 ::
+[JRenum.1]      → [EQ] 9040:2710
+[JRenum.1] 173: 9050 DEFine PROC ZX2SB_INIT
+[JRenum.1]      → [EQ] 9050:2720
+[JRenum.1] 174: 9060 MODE 8:WINDOW 512,256,0,0:CLS
+[JRenum.1]      → [EQ] 9060:2730
+[JRenum.1] 175: 9070 PRINT "######  #     #    #####    #####  ###### "
+[JRenum.1]      → [EQ] 9070:2740
+[JRenum.1] 176: 9080 PRINT "     #   #   #         #   #       #     #"
+[JRenum.1]      → [EQ] 9080:2750
+[JRenum.1] 177: 9090 PRINT "    #     # #          #   #       #     #"
+[JRenum.1]      → [EQ] 9090:2760
+[JRenum.1] 178: 9100 PRINT "   #       #       #####    #####  ###### "
+[JRenum.1]      → [EQ] 9100:2770
+[JRenum.1] 179: 9110 PRINT "  #       # #      #             # #     #"
+[JRenum.1]      → [EQ] 9110:2780
+[JRenum.1] 180: 9120 PRINT " #       #   #     #             # #     #"
+[JRenum.1]      → [EQ] 9120:2790
+[JRenum.1] 181: 9130 PRINT "#       #     #    #             # #     #"
+[JRenum.1]      → [EQ] 9130:2800
+[JRenum.1] 182: 9140 PRINT "###### #       #   #####    #####  ###### "
+[JRenum.1]      → [EQ] 9140:2810
+[JRenum.1] 183: 9150 PRINT:PRINT "ZX2SB v0.0α":PRINT "by javu61@hotmail.com"
+[JRenum.1]      → [EQ] 9150:2820
+[JRenum.1] 184: 9160 PAUSE 75:WINDOW 405,250,52,3:BORDER 5,0,1:PAPER 0:CLS
+[JRenum.1]      → [EQ] 9160:2830
+[JRenum.1] 185: 9170 End DEFine ZX2SB_INIT
+[JRenum.1]      → [EQ] 9170:2840
+[JRenum.1] 186: 9190 ::
+[JRenum.1]      → [EQ] 9190:2850
+[JRenum.1]  
+[JRenum.1]      → -- FINALIZADO --
+[JRenum.1]  
+[JRenum.2]      → 1000 REM **************************************************************
+[JRenum.2]      → 1010 REM * PROGRAMA GENERADO POR ZX2SB 0.0α by javu61                 *
+[JRenum.2]      → 1020 REM **************************************************************
+[JRenum.2]      → 1030 REM * Si el resultado no es correcto, por favor contacta         *
+[JRenum.2]      → 1040 REM * javu61@hotmail.com, intentaré solucionarlo                 *
+[JRenum.2]      → 1050 REM **************************************************************
+[JRenum.2]      → 1060 ZX2SB_INIT
+[JRenum.2]      → 1070 ::
+[JRenum.2]      → REM --> 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JRenum.2]      → 1090 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JRenum.2]      → REM --> 11 PRINT BIN 11100110
+[JRenum.2]      → 1100 PRINT 11100110
+[JRenum.2]      → REM --> 15 FOR J=1 to 10 : PRINT J : NEXT J
+[JRenum.2]      → 1110 FOR J = 1 TO 10
+[JRenum.2]      → 1120   PRINT J
+[JRenum.2]      → 1130 End For J
+[JRenum.2]      → REM --> 20 LET A=1: LET B=2: LET C=3
+[JRenum.2]      → 1140 A=1
+[JRenum.2]      → 1150 B=2
+[JRenum.2]      → 1160 C=3
+[JRenum.2]      → REM --> 25 GO SUB 750
+[JRenum.2]      → 1170 GOSUB 2100
+[JRenum.2]      → REM --> 30 IF A=1 THEN GO TO 100
+[JRenum.2]      → 1180 IF A = 1 THEN
+[JRenum.2]      → 1190   GOTO 1250
+[JRenum.2]      → 1200 End If
+[JRenum.2]      → REM --> 40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JRenum.2]      → 1210 PRINT "ESTO NO DEBE EJECUTARSE"
+[JRenum.2]      → REM --> 50 GOTO 9999 : REM salto inexistente, no error
+[JRenum.2]      → 1220 GOTO 2450
+[JRenum.2]      → 1230 REM salto inexistente, no error
+[JRenum.2]      → REM --> 60 PRINT "TAMPOCO DEBE VERSE"
+[JRenum.2]      → 1240 PRINT "TAMPOCO DEBE VERSE"
+[JRenum.2]      → REM --> 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JRenum.2]      → 1250 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JRenum.2]      → REM --> 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JRenum.2]      → 1260 IF A = 1 THEN
+[JRenum.2]      → 1270   PRINT "IF SIMPLE CON PRINT"
+[JRenum.2]      → 1280 End If
+[JRenum.2]      → REM --> 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JRenum.2]      → 1290 IF A = 1 THEN
+[JRenum.2]      → 1300   PRINT "UNO"
+[JRenum.2]      → 1310   PRINT "DOS"
+[JRenum.2]      → 1320   PRINT "TRES"
+[JRenum.2]      → 1330 End If
+[JRenum.2]      → REM --> 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JRenum.2]      → 1340 IF A = 1 THEN
+[JRenum.2]      → 1350   IF B = 2 THEN
+[JRenum.2]      → 1360     PRINT "IF DOBLE"
+[JRenum.2]      → 1370   End If
+[JRenum.2]      → 1380 End If
+[JRenum.2]      → REM --> 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JRenum.2]      → 1390 IF A = 1 THEN
+[JRenum.2]      → 1400   IF B = 2 THEN
+[JRenum.2]      → 1410     IF C = 3 THEN
+[JRenum.2]      → 1420       PRINT "IF TRIPLE"
+[JRenum.2]      → 1430     End If
+[JRenum.2]      → 1440   End If
+[JRenum.2]      → 1450 End If
+[JRenum.2]      → REM --> 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JRenum.2]      → 1460 IF A = 1 THEN
+[JRenum.2]      → 1470   IF B = 2 THEN
+[JRenum.2]      → 1480     IF C = 3 THEN
+[JRenum.2]      → 1490       PRINT "A"
+[JRenum.2]      → 1500       PRINT "B"
+[JRenum.2]      → 1510       PRINT "C"
+[JRenum.2]      → 1520     End If
+[JRenum.2]      → 1530   End If
+[JRenum.2]      → 1540 End If
+[JRenum.2]      → REM --> 200 FOR I=1 TO 3
+[JRenum.2]      → 1550 FOR I = 1 TO 3
+[JRenum.2]      → REM --> 210 PRINT "BUCLE I=";I
+[JRenum.2]      → 1560   PRINT "BUCLE I=";
+[JRenum.2]      → 1570   PRINT I
+[JRenum.2]      → REM --> 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JRenum.2]      → 1580   IF I = 2 THEN
+[JRenum.2]      → 1590     PRINT "IF DENTRO DEL FOR"
+[JRenum.2]      → 1600   End If
+[JRenum.2]      → REM --> 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JRenum.2]      → 1610   IF I = 2 THEN
+[JRenum.2]      → 1620     B=4
+[JRenum.2]      → 1630     GOTO 2450
+[JRenum.2]      → 1640     A=9
+[JRenum.2]      → 1650     REM código inalcanzable
+[JRenum.2]      → 1660   End If
+[JRenum.2]      → REM --> 240 PRINT "DESPUES DEL IF EN FOR"
+[JRenum.2]      → 1670   PRINT "DESPUES DEL IF EN FOR"
+[JRenum.2]      → REM --> 250 NEXT I
+[JRenum.2]      → 1680 End For I
+[JRenum.2]      → REM --> 300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JRenum.2]      → 1690 REM --- PRUEBA READ / DATA / RESTORE ---
+[JRenum.2]      → REM --> 310 DATA 10,20,30
+[JRenum.2]      → 1700 DATA 10 , 20 , 30
+[JRenum.2]      → REM --> 320 READ X
+[JRenum.2]      → 1710 READ X
+[JRenum.2]      → REM --> 330 PRINT "X=";X
+[JRenum.2]      → 1720 PRINT "X=";
+[JRenum.2]      → 1730 PRINT X
+[JRenum.2]      → REM --> 340 READ X
+[JRenum.2]      → 1740 READ X
+[JRenum.2]      → REM --> 350 PRINT "X=",X
+[JRenum.2]      → 1750 PRINT "X=",
+[JRenum.2]      → 1760 PRINT X
+[JRenum.2]      → REM --> 360 RESTORE 310
+[JRenum.2]      → 1770 RESTORE 1090
+[JRenum.2]      → REM --> 370 READ X
+[JRenum.2]      → 1780 READ X
+[JRenum.2]      → REM --> 380 PRINT "X=";X
+[JRenum.2]      → 1790 PRINT "X=";
+[JRenum.2]      → 1800 PRINT X
+[JRenum.2]      → REM --> 400 REM --- IF CON READ ---
+[JRenum.2]      → 1810 REM --- IF CON READ ---
+[JRenum.2]      → REM --> 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JRenum.2]      → 1820 IF A = 1 THEN
+[JRenum.2]      → 1830   READ X
+[JRenum.2]      → 1840   PRINT "READ EN IF=";
+[JRenum.2]      → 1850   PRINT X
+[JRenum.2]      → 1860 End If
+[JRenum.2]      → REM --> 500 REM --- STOP INTERMEDIO ---
+[JRenum.2]      → 1870 REM --- STOP INTERMEDIO ---
+[JRenum.2]      → REM --> 510 STOP
+[JRenum.2]      → 1880 STOP
+[JRenum.2]      → REM --> 520 PRINT "NO DEBE EJECUTARSE"
+[JRenum.2]      → 1890 PRINT "NO DEBE EJECUTARSE"
+[JRenum.2]      → REM --> 600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JRenum.2]      → 1900 REM --- IF MULTIPLE FINAL MALVADO ---
+[JRenum.2]      → REM --> 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JRenum.2]      → 1910 IF A = 1 THEN
+[JRenum.2]      → 1920   IF B > 2 THEN
+[JRenum.2]      → 1930     IF C <> 3 THEN
+[JRenum.2]      → 1940       PRINT "X"
+[JRenum.2]      → 1950       IF A = 1 THEN
+[JRenum.2]      → 1960         PRINT "Y"
+[JRenum.2]      → 1970         IF B = 2 THEN
+[JRenum.2]      → 1980           PRINT "Z"
+[JRenum.2]      → 1990         End If
+[JRenum.2]      → 2000       End If
+[JRenum.2]      → 2010     End If
+[JRenum.2]      → 2020   End If
+[JRenum.2]      → 2030 End If
+[JRenum.2]      → REM --> 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+[JRenum.2]      → 2040 IF A (BX + C +  5   , Z * 4 + F) = C (t * 4) + u AND b <> 0 THEN
+[JRenum.2]      → 2050   PRINT "OK"
+[JRenum.2]      → 2060 End If
+[JRenum.2]      → REM --> 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JRenum.2]      → 2070 A(BX+C +5, Z * 4+F)=C (t *4)
+[JRenum.2]      → 2080 B=C ^ 3
+[JRenum.2]      → REM --> 700 REM === FIN ===
+[JRenum.2]      → 2090 REM === FIN ===
+[JRenum.2]      → REM --> 800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JRenum.2]      → 2100 AT 10,2
+[JRenum.2]      → 2110 PRINT "K";
+[JRenum.2]      → 2120 AT G (10),2
+[JRenum.2]      → 2130 PRINT ,
+[JRenum.2]      → 2140 PRINT "L";
+[JRenum.2]      → 2150 PRINT 4;
+[JRenum.2]      → 2160 PRINT 3;
+[JRenum.2]      → 2170 PRINT 45;
+[JRenum.2]      → 2180 PRINT A(bc+4, C*4),
+[JRenum.2]      → 2190 PRINT B
+[JRenum.2]      → REM --> 810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+[JRenum.2]      → 2200 PRINT TO 10;
+[JRenum.2]      → 2210 PRINT "A";
+[JRenum.2]      → 2220 PRINT TO 20;
+[JRenum.2]      → 2230 PRINT "B";
+[JRenum.2]      → 2240 AT 1,4
+[JRenum.2]      → 2250 ::
+[JRenum.2]      → 2260 REM =========================================
+[JRenum.2]      → 2270 REM ===== FUNCIONES AUXILIARES ZX BASIC =====
+[JRenum.2]      → 2280 REM =========================================
+[JRenum.2]      → 2290 ::
+[JRenum.2]      → 2300 DEFine PROC ZX2SB_INIT
+[JRenum.2]      → 2310   MODE 8:WINDOW 512,256,0,0:CLS
+[JRenum.2]      → 2320   PRINT "######  #     #    #####    #####  ###### "
+[JRenum.2]      → 2330   PRINT "     #   #   #         #   #       #     #"
+[JRenum.2]      → 2340   PRINT "    #     # #          #   #       #     #"
+[JRenum.2]      → 2350   PRINT "   #       #       #####    #####  ###### "
+[JRenum.2]      → 2360   PRINT "  #       # #      #             # #     #"
+[JRenum.2]      → 2370   PRINT " #       #   #     #             # #     #"
+[JRenum.2]      → 2380   PRINT "#       #     #    #             # #     #"
+[JRenum.2]      → 2390   PRINT "###### #       #   #####    #####  ###### "
+[JRenum.2]      → 2400   PRINT:PRINT "ZX2SB v0.0α":PRINT "by javu61@hotmail.com"
+[JRenum.2]      → 2410   PAUSE 75:WINDOW 405,250,52,3:BORDER 5,0,1:PAPER 0:CLS
+[JRenum.2]      → 2420 End DEFine ZX2SB_INIT
+[JRenum.2]      → 2430 ::
+[JRenum.2]      → 2440 REM *** ZX2SB FINAL DEL PROGRAMA ***
+[JRenum.2]      → 2450 STOP
+[JRenum]  
+[JRenum] Finalizado correctamente
