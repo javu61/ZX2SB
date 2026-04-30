@@ -13,9 +13,10 @@ El objetivo es:
 
 ORIGEN
 El origen debe ser un fichero de texto con un programa ZXBasic válido. No se permiten sentencias nuevas, ni sintáxis diferentes a la que admite un
-Spectrum. Solo hay dos cambios permitidos sobre esta norma:
+Spectrum. Solo hay ligeros cambios permitidos sobre esta norma:
 
- - El proceso se saltará las líneas vacías sin dar error, ya que no afectan realmente al progrma fuente, solo aportan legibilidad.
+ - Las variables en ZXBasic admiten letras, números y el espacio en blanco en su nombre, siempre comenzando por una letra. Los espacios en blanco se ignoran, por tanto A B es la misma variable que AB. Esto produce inconsistencias del tipo LET P I = 5 : PRINT P I, PI imprime 5 y 3.14, ya que PI sin espacio es una sentencia válida en ZXBasic. En ZX2SB se cambian los espacios por un subrayado _ para compatibilizar con el QB, y se emite un warning ya que entonces A B se transpila como A_B, y ya no será igual que AB, lo que quizá provoque un error en la ejecución. 
+ - El proceso se saltará las líneas vacías sin dar error, ya que no afectan realmente al programa fuente, solo aportan legibilidad.
  - El proceso añade siempre al final una línea de STOP. Esto sirve para separar el programa de posibles adicciones posteriores al final del mismo,
    de forma que sea sencillo incluirlas pues no alteran el comportamiento del programa original (ver renumerador).
  
@@ -178,7 +179,7 @@ TRATAMIENTO DEL FOR / NEXT
 - No se tratan errores del tipo FOR de una sola línea: FOR I=1 TO 10 : PRINT I
   - Es válido en ZX BASIC
   - Pero no define un bucle por no disponer de un NEXT
-  - Por tanto No genera END FOR y Se emite un warning
+  - Por tanto No genera END FOR y se emite un warning
 
 
 

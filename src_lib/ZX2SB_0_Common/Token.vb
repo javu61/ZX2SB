@@ -44,9 +44,14 @@ Public Structure Token
         End Get
     End Property
 
+    ReadOnly Property Canonico As String
+        Get
+            Return Value.Replace("_", "")
+        End Get
+    End Property
     ReadOnly Property FNMnemonic As String
         Get
-            Return ("ZX2SB_" & Mnemonic).ToUpperInvariant()
+            Return ("ZX2SB_" & Mnemonic)
         End Get
     End Property
 

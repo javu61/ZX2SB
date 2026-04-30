@@ -27,6 +27,8 @@ Public Module Parser
     ' PARSE PRINCIPAL
     ' ============================================================
     Public Function Ejecutar(_opts As CmdOptions) As Integer
+        Dim ant_tok As Token
+        Dim ant_exist As Boolean = False
         NroLineaFichero = 0
         PrimeraLinea = True
         encontradoEOF = False
@@ -36,9 +38,10 @@ Public Module Parser
 
         NroLineaFichero = 0
         NroErrores = 0
+        NroWarnings = 0
 
         Using writer As New StreamWriter(opts.FSalidaPar, False, New UTF8Encoding(False))
-            GuardarTextoIRP(writer, Constantes.PAR_NOMBRE & " " & Constantes.PAR_VERSION)
+            GuardarIRP_Texto(writer, Constantes.PAR_NOMBRE & " " & Constantes.PAR_VERSION)
 
             For Each LineaLeida As String In File.ReadLines(ObtenerFicheroEntrada(opts))
                 ' Eliminar BOM UTF‑8 si existe
@@ -68,7 +71,7 @@ Public Module Parser
                 If LineaLeida.StartsWith(MarcaSRC) Then
                     LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, LineaLeida)
 
-                    GuardarTextoIRP(writer, $"{Constantes.MarcaSRC} {LineaParaMostrar}")
+                    GuardarIRP_Texto(writer, $"{Constantes.MarcaSRC} {LineaParaMostrar}")
                     Continue For
                 End If
 
@@ -76,7 +79,27 @@ Public Module Parser
                 ' Token normal
                 ' --------------------------------------------
                 Dim tok As New Token(LineaLeida)
-                bufferLinea.Add(tok)
+
+
+                If ant_exist AndAlso
+                   ant_tok.ID = TokenID.TES_IDENT AndAlso
+                   tok.ID = TokenID.TES_IDENT Then
+
+                    ' Concatenar identificadores
+                    Dim idx As Integer = bufferLinea.Count - 1
+                    Dim tkaux As Token = bufferLinea(idx)
+                    tkaux.Value &= "_" & tok.Value
+                    bufferLinea(idx) = tkaux
+
+                    ' El último token válido es el acumulado
+                    ant_tok = tkaux
+
+                Else
+                    bufferLinea.Add(tok)
+                    ant_tok = tok
+                    ant_exist = True
+                End If
+
 
                 ' --------------------------------------------
                 ' EOF explícito del fichero TOK
@@ -92,6 +115,7 @@ Public Module Parser
                 If tok.ID = TokenID.TCO_EOL Then
                     ParsearLineaTokens(bufferLinea, NroLineaFichero, writer)
                     bufferLinea.Clear()
+                    ant_exist = False
                 End If
             Next
 
@@ -101,7 +125,7 @@ Public Module Parser
             End If
 
 
-            GuardarIRP(writer, TokenID.TCO_EOF)
+            GuardarIRP_Token(writer, TokenID.TCO_EOF)
             writer.Close()
         End Using
 
@@ -130,7 +154,7 @@ Public Module Parser
         Dim numLinea As Integer = Integer.Parse(TokenValor())
         NextToken()
 
-        GuardarIRP(writer, TokenID.TCO_LINE, $"{numLinea}")
+        GuardarIRP_Token_Valor(writer, TokenID.TCO_LINE, $"{numLinea}")
 
         ' --------------------------------------------
         ' Parsear sentencias hasta EOL
@@ -158,7 +182,7 @@ Public Module Parser
 
         End While
 
-        GuardarIRP(writer, TokenID.TCO_EOL)
+        GuardarIRP_Token(writer, TokenID.TCO_EOL)
     End Sub
 
 
@@ -212,7 +236,7 @@ Public Module Parser
         If tok.IsStatementStart() Then
             Select Case tok.ID
                 Case TokenID.TK_LET : ParseLet(writer) : Exit Sub
-                Case TokenID.TK_PRINT : ParsePrint(writer) : Exit Sub
+                Case TokenID.TK_PRINT : ParsePRINT(writer) : Exit Sub
                 Case TokenID.TK_IF : ParseIf(writer) : Exit Sub
                 Case TokenID.TK_GO : ParseGo(writer) : Exit Sub   'GO TO o GO SUB
                 Case TokenID.TK_GOTO : ParseGoto(writer) : Exit Sub
@@ -278,7 +302,7 @@ Public Module Parser
             NextToken()
         End If
 
-        GuardarIRP(Writer, TokenID.TK_REM, comentario)
+        GuardarIRP_Token_Valor(Writer, TokenID.TK_REM, comentario)
 
         ' consumir hasta EOL por seguridad
         While Tid() <> TokenID.TCO_EOL AndAlso idx < tokensLinea.Count
@@ -287,12 +311,12 @@ Public Module Parser
     End Sub
 
     Private Sub ParseReturn(writer As StreamWriter)
-        GuardarIRP(writer, TokenID.TK_RETURN)
+        GuardarIRP_Token(writer, TokenID.TK_RETURN)
         NextToken()
     End Sub
 
     Private Sub ParseStop(writer As StreamWriter)
-        GuardarIRP(writer, TokenID.TK_STOP)
+        GuardarIRP_Token(writer, TokenID.TK_STOP)
         NextToken()
     End Sub
 
@@ -315,9 +339,9 @@ Public Module Parser
 
         ' Generamos la expresión para el CLEAR, según sea solo variables o ramtopAhoe
         If expr <> "" Then
-            GuardarIRP(writer, TokenID.TK_CLEAR_RAM)
+            GuardarIRP_Token(writer, TokenID.TK_CLEAR_RAM)
         Else
-            GuardarIRP(writer, TokenID.TK_CLEAR)
+            GuardarIRP_Token(writer, TokenID.TK_CLEAR)
         End If
     End Sub
 
@@ -380,7 +404,7 @@ Public Module Parser
         NextToken()
 
         ' Emitir IRP
-        GuardarIRP(writer, TokenID.TK_DIM, String.Join(",", dims))
+        GuardarIRP_Token_Valor(writer, TokenID.TK_DIM, String.Join(",", dims))
 
     End Sub
 
@@ -392,7 +416,7 @@ Public Module Parser
         End If
 
 
-        ' Parsear l‑value (variable o elemento de array)
+        ' Parte izquierda de la asignación
         Dim lvalue As String = Nothing
         If Not ParseLValue(writer, lvalue) Then
             Exit Sub
@@ -407,14 +431,14 @@ Public Module Parser
         ' Consumir '='
         NextToken()
 
-        ' Parsear expresión a texto
-        Dim expr As String = Nothing
-        If Not ParseExprTexto(writer, False, expr) Then
+        ' Parte Derecha de la asignación
+        Dim rvalue As String = Nothing
+        If Not ParseExprTexto(writer, False, rvalue) Then
             Return
         End If
 
         ' Emitir IRP
-        GuardarIRP(writer, TokenID.TK_LET, $"{lvalue} = {expr}")
+        GuardarIRP_Token_Valor(writer, TokenID.TK_LET, $"{lvalue} = {rvalue}")
 
     End Sub
 
@@ -450,7 +474,7 @@ Public Module Parser
 
         ' RANDOMIZE solo
         If Tid() = TokenID.TCO_EOL OrElse Tid() = TokenID.TSP_DOSPUNTOS Then
-            GuardarIRP(writer, TokenID.TK_RANDOMIZE)
+            GuardarIRP_Token(writer, TokenID.TK_RANDOMIZE)
             Exit Sub
         End If
 
@@ -461,7 +485,7 @@ Public Module Parser
             Dim expr As String = Nothing
             If Not ParseExprTexto(writer, False, expr) Then Exit Sub
 
-            GuardarIRP(writer, TokenID.TK_RANDOMIZE_USR, $"{expr}")
+            GuardarIRP_Token_Valor(writer, TokenID.TK_RANDOMIZE_USR, $"{expr}")
             Exit Sub
         End If
 
@@ -469,7 +493,7 @@ Public Module Parser
         Dim seed As String = Nothing
         If Not ParseExprTexto(writer, False, seed) Then Exit Sub
 
-        GuardarIRP(writer, TokenID.TK_RANDOMIZE, $"{seed}")
+        GuardarIRP_Token_Valor(writer, TokenID.TK_RANDOMIZE, $"{seed}")
 
     End Sub
 
@@ -489,8 +513,8 @@ Public Module Parser
         ' TK_PRINT ya consumido
 
         While idx < tokensLinea.Count AndAlso
-          Tid() <> TokenID.TCO_EOL AndAlso
-          Tid() <> TokenID.TSP_DOSPUNTOS
+              Tid() <> TokenID.TCO_EOL AndAlso
+              Tid() <> TokenID.TSP_DOSPUNTOS
 
             Select Case Tid()
                 ' ===============================
@@ -498,13 +522,16 @@ Public Module Parser
                 ' ===============================
                 Case TokenID.TK_AT
                     Dim item = ParseAT(writer)
-                    If item.ItemType = TokenID.TCO_UNKNOWN Then Return False
+                    If item.ID = TokenID.TCO_UNKNOWN Then Return False
 
                     ' AHORA miramos el separador real de PRINT
                     If Tid() = TokenID.TSP_PUNTOYCOMA Then
                         item.Separator = PrintSeparator.P
                         NextToken()
                     ElseIf Tid() = TokenID.TSP_COMA Then
+                        ' Caso raro: coma tras AT
+                        ' debe afectar al siguiente PRINT, pero seguramente es un error
+                        WarningSintactico(writer, TokenColumna(), $"'Posible error: coma tras un AT")
                         item.Separator = PrintSeparator.C
                         NextToken()
                     Else
@@ -535,8 +562,8 @@ Public Module Parser
 
                 Case Else
                     ' Token normal
-                    If actual.ItemType = TokenID.TCO_UNKNOWN AndAlso Tid() <> TokenID.TK_PRINT Then
-                        actual.ItemType = Tid()
+                    If actual.ID = TokenID.TCO_UNKNOWN AndAlso Tid() <> TokenID.TK_PRINT Then
+                        actual.ID = Tid()
                     End If
 
                     actual.Value &= ReconstruirToken(Tid(), TokenValor())
@@ -554,7 +581,7 @@ Public Module Parser
 
         'Guardar la lista del PRINT
         For Each pItem In items
-            GuardarIRP(writer, pItem)
+            GuardarIRP_PRINT(writer, pItem)
         Next
 
         Return True
@@ -648,7 +675,7 @@ Public Module Parser
         Dim valorAT As String = exprX & "," & exprY
 
         ' Crear PrintItem (separator se decide FUERA)
-        PrintItem.ItemType = TokenID.TK_AT
+        PrintItem.ID = TokenID.TK_AT
         PrintItem.Value = valorAT
         PrintItem.Separator = PrintSeparator.N
 
@@ -917,7 +944,7 @@ Public Module Parser
         NextToken()
 
         ' ✅ Emitir SOLO el IF, como sentencia independiente
-        GuardarIRP(writer, TokenID.TK_IF, $"{condicion}")
+        GuardarIRP_Token_Valor(writer, TokenID.TK_IF, $"{condicion}")
 
         ' ❗ MUY IMPORTANTE:
         ' NO consumir aquí el cuerpo
@@ -950,7 +977,7 @@ Public Module Parser
         NextToken()
         Dim ln As String = TokenValor()
         NextToken()
-        GuardarIRP(writer, TokenID.TK_GOTO, $"{ln}")
+        GuardarIRP_Token_Valor(writer, TokenID.TK_GOTO, $"{ln}")
     End Sub
 
 
@@ -958,7 +985,7 @@ Public Module Parser
         NextToken()
         Dim ln As String = TokenValor()
         NextToken()
-        GuardarIRP(writer, TokenID.TK_GOSUB, $"{ln}")
+        GuardarIRP_Token_Valor(writer, TokenID.TK_GOSUB, $"{ln}")
     End Sub
 
     ' ------------------------------------------------------------
@@ -1020,7 +1047,7 @@ Public Module Parser
             sb.Append(aux)
         End If
 
-        GuardarIRP(writer, TokenID.TK_FOR, sb.ToString())
+        GuardarIRP_Token_Valor(writer, TokenID.TK_FOR, sb.ToString())
 
     End Sub
 
@@ -1038,7 +1065,7 @@ Public Module Parser
             sb = TokenValor()
             NextToken()
         End If
-        GuardarIRP(writer, TokenID.TK_NEXT, sb.ToString())
+        GuardarIRP_Token_Valor(writer, TokenID.TK_NEXT, sb.ToString())
 
     End Sub
 
@@ -1051,9 +1078,9 @@ Public Module Parser
         If Tid() = TokenID.TES_NUMBER Then
             Dim ln As String = TokenValor()
             NextToken()
-            GuardarIRP(writer, TokenID.TK_RESTORE, $"{ln}")
+            GuardarIRP_Token_Valor(writer, TokenID.TK_RESTORE, $"{ln}")
         Else
-            GuardarIRP(writer, TokenID.TK_RESTORE)
+            GuardarIRP_Token(writer, TokenID.TK_RESTORE)
         End If
 
     End Sub
@@ -1085,7 +1112,7 @@ Public Module Parser
             NextToken()
         End While
 
-        GuardarIRP(writer, TokenID.TK_READ, sb.ToString())
+        GuardarIRP_Token_Valor(writer, TokenID.TK_READ, sb.ToString())
 
     End Sub
 
@@ -1121,7 +1148,7 @@ Public Module Parser
             NextToken()
         End While
 
-        GuardarIRP(writer, TokenID.TK_DATA, sb.ToString())
+        GuardarIRP_Token_Valor(writer, TokenID.TK_DATA, sb.ToString())
 
     End Sub
 
@@ -1149,29 +1176,29 @@ Public Module Parser
         If Not ParseExprTexto(writer, False, expr) Then Return
         sb.Append(expr)
 
-        GuardarIRP(writer, TokenID.TK_BEEP, sb.ToString())
+        GuardarIRP_Token_Valor(writer, TokenID.TK_BEEP, sb.ToString())
 
     End Sub
 
     Private Sub ParseRun(writer As StreamWriter)
         NextToken()
         If Tid() = TokenID.TCO_EOL OrElse Tid() = TokenID.TSP_DOSPUNTOS Then
-            GuardarIRP(writer, TokenID.TK_RUN)
+            GuardarIRP_Token(writer, TokenID.TK_RUN)
         Else
             Dim expr As String = Nothing
             If Not ParseExprTexto(writer, True, expr) Then Return
-            GuardarIRP(writer, TokenID.TK_RUN, $"{expr}")
+            GuardarIRP_Token_Valor(writer, TokenID.TK_RUN, $"{expr}")
         End If
     End Sub
 
     Private Sub ParseList(writer As StreamWriter)
         NextToken()
         If Tid() = TokenID.TCO_EOL OrElse Tid() = TokenID.TSP_DOSPUNTOS Then
-            GuardarIRP(writer, TokenID.TK_LIST)
+            GuardarIRP_Token(writer, TokenID.TK_LIST)
         Else
             Dim expr As String = Nothing
             If Not ParseExprTexto(writer, True, expr) Then Return
-            GuardarIRP(writer, TokenID.TK_LIST, $"{expr}")
+            GuardarIRP_Token_Valor(writer, TokenID.TK_LIST, $"{expr}")
         End If
     End Sub
 
@@ -1189,12 +1216,12 @@ Public Module Parser
         NextToken()
         Dim expr As String = Nothing
         If Not ParseExprTexto(writer, True, expr) Then Return
-        GuardarIRP(writer, id, $"{expr}")
+        GuardarIRP_Token_Valor(writer, id, $"{expr}")
     End Sub
 
     Private Sub ParseSimpleStmt(writer As StreamWriter, id As TokenID)
         NextToken()
-        GuardarIRP(writer, id)
+        GuardarIRP_Token(writer, id)
     End Sub
 
     Private Sub ParseUnaryStmt(writer As StreamWriter, id As TokenID)
@@ -1204,7 +1231,7 @@ Public Module Parser
         Dim expr As String = Nothing
         If Not ParseExprTexto(writer, True, expr) Then Return
 
-        GuardarIRP(writer, id, $"{expr}")
+        GuardarIRP_Token_Valor(writer, id, $"{expr}")
 
     End Sub
 
@@ -1231,15 +1258,13 @@ Public Module Parser
         If Not ParseExprTexto(writer, False, expr) Then Return
         sb.Append(expr)
 
-        GuardarIRP(writer, id, sb.ToString())
+        GuardarIRP_Token_Valor(writer, id, sb.ToString())
 
     End Sub
 
     ' ============================================================
-    ' PARSE DE EXPRESIONES (FORMA TEXTO, SE RESOLVERÁ EN SEMANTIC)
+    ' PARSE DE EXPRESIONES en RPN
     ' ============================================================
-
-
     Private Function ParseExprTexto(writer As StreamWriter,
                                     permiteComaExterior As Boolean,
                                     ByRef resultado As String,
@@ -1405,50 +1430,43 @@ Public Module Parser
 
     End Sub
 
-    Private Sub GuardarIRP(writer As StreamWriter, ID As TokenID)
-        Dim token As New Token(ID, "")
-        Dim pi As New PrintItem(TokenID.TCO_UNKNOWN)
-        GuardarIRP(writer, token, pi)
+    Private Sub GuardarIRP_Token(writer As StreamWriter, ID As TokenID)
+        GuardarIRP(writer, New Token(ID, ""), New PrintItem(TokenID.TCO_UNKNOWN))
     End Sub
 
-    Private Sub GuardarIRP(writer As StreamWriter, ID As TokenID, valor As String)
-        Dim token As New Token(ID, valor)
-        Dim pi As New PrintItem(TokenID.TCO_UNKNOWN)
-        GuardarIRP(writer, token, pi)
+    Private Sub GuardarIRP_Token_Valor(writer As StreamWriter, ID As TokenID, valor As String)
+        GuardarIRP(writer, New Token(ID, valor), New PrintItem(TokenID.TCO_UNKNOWN))
     End Sub
 
-    Private Sub GuardarIRP(writer As StreamWriter, pi As PrintItem)
-        Dim token As New Token(TokenID.TK_PRINT)
-        GuardarIRP(writer, token, pi)
+    Private Sub GuardarIRP_PRINT(writer As StreamWriter, pi As PrintItem)
+        GuardarIRP(writer, New Token(TokenID.TK_PRINT), pi)
     End Sub
 
     Private Sub GuardarIRP(writer As StreamWriter, tok As Token, pi As PrintItem)
         Dim idNum As Integer = CInt(tok.ID)
         Dim value As String = If(tok.Value IsNot Nothing, tok.Value, "")
-        Dim printVal As String = pi.ToText
         Dim Linea As String = ""
         Dim Comentario As String = ""
-        If pi.ItemType = TokenID.TCO_UNKNOWN Then
+
+        If pi.ID = TokenID.TCO_UNKNOWN Then
             Linea = $"{idNum} {value}"
             Comentario = $"{tok.ID.ToString()}"
         Else
-            Linea = $"{idNum} {printVal} {value}"
-            Comentario = $"{tok.ID.ToString()} {pi.ItemType.ToString()}"
+            Linea = $"{idNum} {pi.ToText} {value}"
+            Comentario = $"{tok.ID.ToString()} {pi.ID.ToString()}"
         End If
 
-        If opts.Verbose Then
-            If Len(Linea) < 49 Then
+        If Len(Linea) < 49 Then
                 Linea &= Space(50 - Len(Linea)) & $"{Constantes.MarcaComentario} {Comentario}"
-                GuardarTextoIRP(writer, Linea)
+                GuardarIRP_Texto(writer, Linea)
             Else
-                GuardarTextoIRP(writer, Linea)
+                GuardarIRP_Texto(writer, Linea)
                 Linea = Space(50) & $"{Constantes.MarcaComentario} {Comentario}"
-                GuardarTextoIRP(writer, Linea)
+                GuardarIRP_Texto(writer, Linea)
             End If
-        End If
     End Sub
 
-    Private Sub GuardarTextoIRP(writer As StreamWriter, linea As String)
+    Private Sub GuardarIRP_Texto(writer As StreamWriter, linea As String)
         writer.WriteLine(linea)
         If opts.Verbose Then
             MostrarVerbose(opts, linea)

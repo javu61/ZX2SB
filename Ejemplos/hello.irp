@@ -5,7 +5,19 @@ IRP 1.0
 9901                                               ; --  TCO_EOL
 -- SRC:  11 PRINT BIN 11100110
 9902 11                                            ; --  TCO_LINE
-2150 3217,N,11100110                               ; --  TK_PRINT TK_BIN
+2150 3222,N,11100110                               ; --  TK_PRINT TK_BIN
+9901                                               ; --  TCO_EOL
+-- SRC:  12 LET A B=5 : PRINT A B, AB
+9902 12                                            ; --  TCO_LINE
+2142 A_B = 5                                       ; --  TK_LET
+2150 1700,C,A_B                                    ; --  TK_PRINT TES_IDENT
+2150 1700,N,AB                                     ; --  TK_PRINT TES_IDENT
+9901                                               ; --  TCO_EOL
+-- SRC:  13 LET P I=3 : PRINT P I, PI
+9902 13                                            ; --  TCO_LINE
+2142 P_I = 3                                       ; --  TK_LET
+2150 1700,C,P_I                                    ; --  TK_PRINT TES_IDENT
+2150 1207,N,                                       ; --  TK_PRINT TK_PI
 9901                                               ; --  TCO_EOL
 -- SRC:  15 FOR J=1 to 10 : PRINT J : NEXT J
 9902 15                                            ; --  TCO_LINE
@@ -188,7 +200,7 @@ IRP 1.0
 9901                                               ; --  TCO_EOL
 -- SRC:  650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
 9902 650                                           ; --  TCO_LINE
-2140 A (BX + C +  5   , Z * 4 + F) = C (t * 4) + u AND b <> 0
+2140 A (BX + C +  5   , Z * 4 + F) = C (t * 4) + u_AND_b <> 0
                                                    ; --  TK_IF
 2150 1702,N,"OK"                                   ; --  TK_PRINT TES_STRING
 9901                                               ; --  TCO_EOL
@@ -203,22 +215,22 @@ IRP 1.0
 9901                                               ; --  TCO_EOL
 -- SRC:  800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
 9902 800                                           ; --  TCO_LINE
-2150 1600,P,10,2                                   ; --  TK_PRINT TK_AT
+2150 1601,P,10,2                                   ; --  TK_PRINT TK_AT
 2150 1702,P,"K"                                    ; --  TK_PRINT TES_STRING
-2150 1600,C,G (10),2                               ; --  TK_PRINT TK_AT
+2150 1601,C,G (10),2                               ; --  TK_PRINT TK_AT
 2150 1702,P,"L"                                    ; --  TK_PRINT TES_STRING
-2150 1206,P,4                                      ; --  TK_PRINT TK_INK
-2150 1211,P,3                                      ; --  TK_PRINT TK_PAPER
+2150 1604,P,4                                      ; --  TK_PRINT TK_INK
+2150 1607,P,3                                      ; --  TK_PRINT TK_PAPER
 2150 1701,P,45                                     ; --  TK_PRINT TES_NUMBER
 2150 1700,C,A(bc+4, C*4)                           ; --  TK_PRINT TES_IDENT
 2150 1700,N,B                                      ; --  TK_PRINT TES_IDENT
 9901                                               ; --  TCO_EOL
 -- SRC:  810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
 9902 810                                           ; --  TCO_LINE
-2150 1601,P,10                                     ; --  TK_PRINT TK_TAB
+2150 1600,P,10                                     ; --  TK_PRINT TK_TAB
 2150 1702,P,"A"                                    ; --  TK_PRINT TES_STRING
-2150 1601,P,(20)                                   ; --  TK_PRINT TK_TAB
+2150 1600,P,(20)                                   ; --  TK_PRINT TK_TAB
 2150 1702,P,"B"                                    ; --  TK_PRINT TES_STRING
-2150 1600,N,1,4                                    ; --  TK_PRINT TK_AT
+2150 1601,N,1,4                                    ; --  TK_PRINT TK_AT
 9901                                               ; --  TCO_EOL
 9900                                               ; --  TCO_EOF

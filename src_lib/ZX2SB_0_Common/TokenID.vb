@@ -136,40 +136,51 @@ Public Enum TokenID As Integer
     ' =====================================================
     ' ATRIBUTOS PRINT
     ' =====================================================
-    TK_AT = TokenFamily.TF_GENERAL + TokenTipo.TT_DIRECTIVA + 0
-    TK_TAB = TokenFamily.TF_GENERAL + TokenTipo.TT_DIRECTIVA + 1
+    TK_TAB = TokenFamily.TF_GENERAL + TokenTipo.TT_DIRECTIVA + 0    'Es la única que ahora puede ir dentro del print
+
+    TK_AT = TokenFamily.TF_GENERAL + TokenTipo.TT_DIRECTIVA + 1
+    TK_BRIGHT = TokenFamily.TF_GENERAL + TokenTipo.TT_DIRECTIVA + 2
+    TK_FLASH = TokenFamily.TF_GENERAL + TokenTipo.TT_DIRECTIVA + 3
+    TK_INK = TokenFamily.TF_GENERAL + TokenTipo.TT_DIRECTIVA + 4
+    TK_INVERSE = TokenFamily.TF_GENERAL + TokenTipo.TT_DIRECTIVA + 5
+    TK_OVER = TokenFamily.TF_GENERAL + TokenTipo.TT_DIRECTIVA + 6
+    TK_PAPER = TokenFamily.TF_GENERAL + TokenTipo.TT_DIRECTIVA + 7
 
     ' =====================================================
     ' FUNCIONES ZX BASIC
     ' =====================================================
     TK_ABS = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 0
     TK_ATTR = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 1
-    TK_BRIGHT = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 2
-    TK_CHR_S = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 3
-    TK_CODE = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 4
-    TK_FLASH = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 5
-    TK_INK = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 6
-    TK_INKEY_S = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 7
-    TK_INVERSE = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 8
-    TK_LEN = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 9
-    TK_OVER = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 10
-    TK_PAPER = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 11
-    TK_PI = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 12
-    TK_POINT = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 13
-    TK_RND = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 14
-    TK_SCREEN_S = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 15
-    TK_VAL = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 16
+    TK_CHR_S = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 2
+    TK_CODE = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 3
+    TK_INKEY_S = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 4
+    TK_INT = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 5
+    TK_LEN = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 6
+    TK_PI = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 7
+    TK_POINT = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 8
+    TK_RND = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 9
+    TK_SCREEN_S = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 10
+    TK_SGN = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 11
+    TK_VAL = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 12
+    TK_COS = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 13
+    TK_SIN = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 14
+    TK_TAN = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 15
+    TK_ASN = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 16
+    TK_ACS = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 17
+    TK_ATN = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 18
+    TK_LN = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 19
+    TK_EXP = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 20
+    TK_SQR = TokenFamily.TF_GENERAL + TokenTipo.TT_FUNCION + 21
 
-    TK_BIN = TokenFamily.TF_GENERAFN + TokenTipo.TT_FUNCION + 17
-    TK_STR_S = TokenFamily.TF_GENERAFN + TokenTipo.TT_FUNCION + 18
-    TK_VAL_S = TokenFamily.TF_GENERAFN + TokenTipo.TT_FUNCION + 19
+    TK_BIN = TokenFamily.TF_GENERAFN + TokenTipo.TT_FUNCION + 22
+    TK_STR_S = TokenFamily.TF_GENERAFN + TokenTipo.TT_FUNCION + 23
+    TK_VAL_S = TokenFamily.TF_GENERAFN + TokenTipo.TT_FUNCION + 24
+    TK_RANDOMIZE_USR = TokenFamily.TF_GENERAFN + TokenTipo.TT_FUNCION + 25 ' ESPECIALES PARA SEPARAR EN DOS ALGUN TIPO
+    TK_CLEAR_RAM = TokenFamily.TF_GENERAFN + TokenTipo.TT_FUNCION + 26
 
-    TK_RANDOMIZE_USR = TokenFamily.TF_GENERAFN + TokenTipo.TT_FUNCION + 20 ' ESPECIALES PARA SEPARAR EN DOS ALGUN TIPO
-    TK_CLEAR_RAM = TokenFamily.TF_GENERAFN + TokenTipo.TT_FUNCION + 21
-
-    TK_IN = TokenFamily.TF_NOSOPORTADO + TokenTipo.TT_FUNCION + 22
-    TK_PEEK = TokenFamily.TF_NOSOPORTADO + TokenTipo.TT_FUNCION + 23
-    TK_USR = TokenFamily.TF_NOSOPORTADO + TokenTipo.TT_FUNCION + 24
+    TK_IN = TokenFamily.TF_NOSOPORTADO + TokenTipo.TT_FUNCION + 27
+    TK_PEEK = TokenFamily.TF_NOSOPORTADO + TokenTipo.TT_FUNCION + 28
+    TK_USR = TokenFamily.TF_NOSOPORTADO + TokenTipo.TT_FUNCION + 29
 
     ' =====================================================
     ' PROCEDIMIENTOS ZX BASIC

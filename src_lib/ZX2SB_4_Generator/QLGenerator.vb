@@ -151,11 +151,10 @@ Public Module QLGenerator
                 GenerarConBloques(writer, tk, numeroLineaActual)
 
             Case TokenFamily.TF_GENERAFN,
-                 TokenFamily.TF_NOSOPORTADO
-                EmitirLinea(writer, EmitirFN(tk), False)
+                 TokenFamily.TF_NOSOPORTADO,
+                 TokenFamily.TF_GENERAL
+                EmitirLinea(writer, SentenciaSimpleQL(writer, tk), False)
 
-            Case TokenFamily.TF_GENERAL
-                GenerarDirecto(writer, tk)
 
             Case TokenFamily.TF_ESPECIALES
                 ' Esto son EOL, EOF, LINE, no generan nada aquí
@@ -166,21 +165,51 @@ Public Module QLGenerator
         End Select
     End Sub
 
-    Private Sub GenerarDirecto(writer As StreamWriter, tk As Token)
+    Private Function SentenciaSimpleQL(writer As StreamWriter, tk As Token) As String
         Dim cmd As String = tk.Mnemonic
-        Dim resto As String = tk.Value
+        Dim stmt As String = tk.Value
 
-        If (tk.ID = TokenID.TK_GOTO) OrElse (tk.ID = TokenID.TK_GOSUB) Then
-            If IsNumeric(resto) Then
-                resto = resto & "00"
-            End If
-        End If
-        If resto = "" Then
-            EmitirLinea(writer, cmd, False)
-        Else
-            EmitirLinea(writer, $"{cmd} {resto}", False)
-        End If
-    End Sub
+        Select Case Token.GetFamily(tk.ID)
+            Case TokenFamily.TF_GENERAFN,
+                 TokenFamily.TF_NOSOPORTADO
+
+                ' REGISTRAR SIEMPRE EL USO DE LA FN
+                FuncionesFNUsadas.Add(tk)
+
+                If tk.IsFunction Then
+                    ' FUNCIÓN
+                    If stmt <> "" Then
+                        Return $"{tk.FNMnemonic}({stmt})"
+                    Else
+                        Return $"{tk.FNMnemonic}"
+                    End If
+                Else
+                    ' PROCEDIMIENTO o SENTENCIA
+                    If stmt <> "" Then
+                        Return $"{tk.FNMnemonic} {stmt}"
+                    Else
+                        Return $"{tk.FNMnemonic}"
+                    End If
+                End If
+
+            Case TokenFamily.TF_GENERAL
+                If (tk.ID = TokenID.TK_GOTO) OrElse (tk.ID = TokenID.TK_GOSUB) Then
+                    If IsNumeric(stmt) Then
+                        stmt = stmt & "00"
+                    End If
+                End If
+                If stmt = "" Then
+                    Return cmd
+                Else
+                    Return $"{cmd} {stmt}"
+                End If
+
+            Case Else
+                'No puede llegar nada, pero por si acaso
+                EmitirError(writer, 0, "Sentencias por bloques no soportadas")
+        End Select
+        Return ""
+    End Function
 
     Private Sub GenerarConBloques(writer As StreamWriter, tk As Token, numeroLineaActual As Integer)
         Select Case tk.ID
@@ -426,29 +455,28 @@ Public Module QLGenerator
     ' =========================================================
     Private Sub GenerarPRINT(writer As StreamWriter, numeroLineaActual As Integer, tk As Token)
         Dim item As New PrintItem(tk.Value)
-        Dim sb As New StringBuilder
+        Dim tkaux As New Token(item.ID, item.Value)
         Dim Comando As String = "PRINT "
 
-        sb.Clear()
+        'Las directivas ya no van dentro del print, salto TAB
+        If tk.IsPrintDirective And tk.ID <> TokenID.TK_TAB Then
+            EmitirLinea(writer, $"{tkaux.Mnemonic} {tkaux.Value}", False)
 
-        'El AT ahora ya no va dentro del PRINT, lo trato por separado
-        If item.ItemType = TokenID.TK_AT Then
-            sb.Append(EmitirAT(writer, item.Value))
-            EmitirLinea(writer, sb.ToString(), False)
-
-            'El AT solo necesita separador si es coma
+            'Solo necesitas añadir un separador si es coma, e irá en linea aparte
             If item.Separator = PrintSeparator.C Then
                 EmitirLinea(writer, Comando & ",", False)
             End If
+
         Else
+            Dim sb As New StringBuilder
             sb.Append(Comando)
 
             'TAB debe cambiarse en el QL
-            If item.ItemType = TokenID.TK_TAB Then
+            If item.ID = TokenID.TK_TAB Then
                 sb.Append(EmitirTAB(writer, item.Value))
             Else
                 'El resto van directas
-                sb.Append(item.Value)
+                sb.Append(SentenciaSimpleQL(writer, tkaux))
             End If
 
             ' Aplicar separador
@@ -467,9 +495,6 @@ Public Module QLGenerator
 
     End Sub
 
-    Private Function EmitirAT(writer As StreamWriter, value As String) As String
-        Return ("AT " & value)
-    End Function
 
     Private Function EmitirTAB(writer As StreamWriter, value As String) As String
         Dim v = value.Trim()
@@ -482,100 +507,6 @@ Public Module QLGenerator
         Return ("TO " & v)
     End Function
 
-    Private Function NormalizarAT(texto As String) As String
-        Dim t As String = texto.Trim()
-        t = t.Replace("AT", "", StringComparison.OrdinalIgnoreCase).Trim()
-
-        Dim partes() = t.Split(","c)
-        If partes.Length >= 2 Then
-            Return $"AT {partes(0).Trim()},{partes(1).Trim()}"
-        End If
-
-        ' fallback seguro
-        Return "AT " & t
-    End Function
-
-    Private Function ConvertirTABaTO(texto As String) As String
-        ' TAB(5) / TAB 5  → TO 5
-        Dim t As String = texto.Trim().ToUpperInvariant()
-        t = t.Replace("TAB", "").Trim()
-        t = t.TrimStart("("c).TrimEnd(")"c)
-        Return $"TO {t}"
-    End Function
-
-    ' --- Reescribir la parde derecha de la expresión
-    'Private Function ReescribirExpresion(expr As String, isLet As Boolean) As String
-
-    '    ' Seguridad: aquí no debe haber asignaciones
-    '    If (Not isLet) AndAlso ContieneIgualFueraDeCadena(expr) Then
-    '        Throw New InvalidOperationException("ReescribirExpresion recibió una expresión con '=' fuera de cadena: " & expr)
-    '    End If
-
-    '    expr = expr.Trim()
-    '    If expr = "" Then Return expr
-
-    '    ' Separar en tokens por espacios
-    '    Dim partes() As String = expr.Split(New Char() {" "c}, StringSplitOptions.RemoveEmptyEntries)
-
-    '    ' Caso: BIN 1110011, PEEK 45, IN 7, USR 1234, etc.
-    '    Dim nombre As String = partes(0).ToUpperInvariant()
-
-    '    If ReservedFunctions.Contains(nombre) Then
-
-    '        ' Reconstruir parámetros (todo lo que sigue)
-    '        Dim parametros As String = String.Join(",", partes.Skip(1))
-
-    '        Return EmitirFN(nombre, parametros)
-
-    '    End If
-
-    '    ' No es función reservada → dejar tal cual
-    '    Return expr
-    'End Function
-
-    Private Function ContieneIgualFueraDeCadena(expr As String) As Boolean
-        Dim enCadena As Boolean = False
-
-        For i As Integer = 0 To expr.Length - 1
-            If expr(i) = Constantes.C_COMILLAS Then
-                enCadena = Not enCadena
-            ElseIf expr(i) = "="c AndAlso Not enCadena Then
-                Return True
-            End If
-        Next
-
-        Return False
-    End Function
-
-    ' =========================================================
-    ' Emisión de funciones auxiliares ZX → QL
-    ' =========================================================
-    Private Function EmitirFN(tk As Token) As String
-        Dim stmt As String = tk.Value
-        'stmt = stmt.Replace(" ", "")
-        Dim Linea As String = ""
-
-        ' ✅ REGISTRAR SIEMPRE EL USO DE LA FN
-        FuncionesFNUsadas.Add(tk)
-
-        If tk.IsFunction Then
-            ' FUNCIÓN
-            If stmt <> "" Then
-                Linea = $"{tk.FNMnemonic}({stmt})"
-            Else
-                Linea = $"{tk.FNMnemonic}"
-            End If
-        Else
-            ' PROCEDIMIENTO o SENTENCIA
-            If stmt <> "" Then
-                Linea = $"{tk.FNMnemonic} {stmt}"
-            Else
-                Linea = $"{tk.FNMnemonic}"
-            End If
-        End If
-
-        Return Linea
-    End Function
 
     Private Sub EmitirFuncionesAuxiliares(writer As StreamWriter)
 
