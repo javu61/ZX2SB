@@ -17,6 +17,8 @@ Public Structure PrintItem
     Public ID As TokenID
     Public Value As String
     Public Separator As PrintSeparator
+    Public Expr1 As List(Of RPN.RPN_Node)
+    Public Expr2 As List(Of RPN.RPN_Node)
 
     Public Sub New(type As TokenID, valor As String, sep As PrintSeparator)
         Me.ID = type

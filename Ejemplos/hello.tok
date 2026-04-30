@@ -390,13 +390,29 @@ TOK 1.0
 9902 [40,1] 650                                    ; -- TCO_LINE
 2140 [40,5]                                        ; -- TK_IF
 1700 [40,8] A                                      ; -- TES_IDENT
-1703 [40,10] BX + C +  5   , Z * 4 + F             ; -- TES_GREXPR
+1514 [40,10]                                       ; -- TSP_PAR_ABIERTO
+1700 [40,12] BX                                    ; -- TES_IDENT
+1400 [40,15]                                       ; -- TOP_PLUS
+1700 [40,17] C                                     ; -- TES_IDENT
+1400 [40,19]                                       ; -- TOP_PLUS
+1701 [40,22] 5                                     ; -- TES_NUMBER
+1516 [40,26]                                       ; -- TSP_COMA
+1700 [40,28] Z                                     ; -- TES_IDENT
+1402 [40,30]                                       ; -- TOP_MUL
+1701 [40,32] 4                                     ; -- TES_NUMBER
+1400 [40,34]                                       ; -- TOP_PLUS
+1700 [40,36] F                                     ; -- TES_IDENT
+1515 [40,37]                                       ; -- TSP_PAR_CERRADO
 1405 [40,39]                                       ; -- TOP_EQ
 1700 [40,41] C                                     ; -- TES_IDENT
-1703 [40,43] t * 4                                 ; -- TES_GREXPR
+1514 [40,43]                                       ; -- TSP_PAR_ABIERTO
+1700 [40,45] t                                     ; -- TES_IDENT
+1402 [40,47]                                       ; -- TOP_MUL
+1701 [40,49] 4                                     ; -- TES_NUMBER
+1515 [40,51]                                       ; -- TSP_PAR_CERRADO
 1400 [40,52]                                       ; -- TOP_PLUS
 1700 [40,53] u                                     ; -- TES_IDENT
-1700 [40,55] AND                                   ; -- TES_IDENT
+1411 [40,55]                                       ; -- TK_AND
 1700 [40,59] b                                     ; -- TES_IDENT
 1406 [40,61]                                       ; -- TOP_NE
 1701 [40,64] 0                                     ; -- TES_NUMBER
@@ -408,10 +424,26 @@ TOK 1.0
 9902 [41,1] 660                                    ; -- TCO_LINE
 2142 [41,5]                                        ; -- TK_LET
 1700 [41,11] A                                     ; -- TES_IDENT
-1703 [41,14] BX+C +5, Z * 4+F                      ; -- TES_GREXPR
+1514 [41,14]                                       ; -- TSP_PAR_ABIERTO
+1700 [41,16] BX                                    ; -- TES_IDENT
+1400 [41,18]                                       ; -- TOP_PLUS
+1700 [41,19] C                                     ; -- TES_IDENT
+1400 [41,21]                                       ; -- TOP_PLUS
+1701 [41,22] 5                                     ; -- TES_NUMBER
+1516 [41,23]                                       ; -- TSP_COMA
+1700 [41,25] Z                                     ; -- TES_IDENT
+1402 [41,27]                                       ; -- TOP_MUL
+1701 [41,29] 4                                     ; -- TES_NUMBER
+1400 [41,30]                                       ; -- TOP_PLUS
+1700 [41,31] F                                     ; -- TES_IDENT
+1515 [41,32]                                       ; -- TSP_PAR_CERRADO
 1405 [41,33]                                       ; -- TOP_EQ
 1700 [41,34] C                                     ; -- TES_IDENT
-1703 [41,36] t *4                                  ; -- TES_GREXPR
+1514 [41,36]                                       ; -- TSP_PAR_ABIERTO
+1700 [41,37] t                                     ; -- TES_IDENT
+1402 [41,39]                                       ; -- TOP_MUL
+1701 [41,40] 4                                     ; -- TES_NUMBER
+1515 [41,41]                                       ; -- TSP_PAR_CERRADO
 1518 [41,43]                                       ; -- TSP_DOSPUNTOS
 2142 [41,45]                                       ; -- TK_LET
 1700 [41,49] B                                     ; -- TES_IDENT
@@ -437,7 +469,9 @@ TOK 1.0
 1517 [43,22]                                       ; -- TSP_PUNTOYCOMA
 1601 [43,23]                                       ; -- TK_AT
 1700 [43,26] G                                     ; -- TES_IDENT
-1703 [43,27] 10                                    ; -- TES_GREXPR
+1514 [43,27]                                       ; -- TSP_PAR_ABIERTO
+1701 [43,28] 10                                    ; -- TES_NUMBER
+1515 [43,30]                                       ; -- TSP_PAR_CERRADO
 1516 [43,31]                                       ; -- TSP_COMA
 1701 [43,32] 2                                     ; -- TES_NUMBER
 1516 [43,33]                                       ; -- TSP_COMA
@@ -452,7 +486,15 @@ TOK 1.0
 1701 [43,52] 45                                    ; -- TES_NUMBER
 1517 [43,54]                                       ; -- TSP_PUNTOYCOMA
 1700 [43,55] A                                     ; -- TES_IDENT
-1703 [43,56] bc+4, C*4                             ; -- TES_GREXPR
+1514 [43,56]                                       ; -- TSP_PAR_ABIERTO
+1700 [43,57] bc                                    ; -- TES_IDENT
+1400 [43,59]                                       ; -- TOP_PLUS
+1701 [43,60] 4                                     ; -- TES_NUMBER
+1516 [43,61]                                       ; -- TSP_COMA
+1700 [43,63] C                                     ; -- TES_IDENT
+1402 [43,64]                                       ; -- TOP_MUL
+1701 [43,65] 4                                     ; -- TES_NUMBER
+1515 [43,66]                                       ; -- TSP_PAR_CERRADO
 1516 [43,67]                                       ; -- TSP_COMA
 1700 [43,68] B                                     ; -- TES_IDENT
 9901 [43,0]                                        ; -- TCO_EOL
@@ -465,7 +507,9 @@ TOK 1.0
 1702 [44,18] A                                     ; -- TES_STRING
 1517 [44,21]                                       ; -- TSP_PUNTOYCOMA
 1600 [44,22]                                       ; -- TK_TAB
-1703 [44,25] 20                                    ; -- TES_GREXPR
+1514 [44,25]                                       ; -- TSP_PAR_ABIERTO
+1701 [44,26] 20                                    ; -- TES_NUMBER
+1515 [44,28]                                       ; -- TSP_PAR_CERRADO
 1517 [44,29]                                       ; -- TSP_PUNTOYCOMA
 1702 [44,30] B                                     ; -- TES_STRING
 1517 [44,33]                                       ; -- TSP_PUNTOYCOMA

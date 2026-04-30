@@ -60,7 +60,7 @@ Public Enum TokenID As Integer
     TES_IDENT = TokenFamily.TF_GENERAL + TokenTipo.TT_AGRUPACIONES + 0   'Un identificador
     TES_NUMBER = TokenFamily.TF_GENERAL + TokenTipo.TT_AGRUPACIONES + 1  'Un número
     TES_STRING = TokenFamily.TF_GENERAL + TokenTipo.TT_AGRUPACIONES + 2  'Una cadena
-    TES_GREXPR = TokenFamily.TF_GENERAL + TokenTipo.TT_AGRUPACIONES + 3  'Un grupo entre paréntesis
+    'TES_GREXPR = TokenFamily.TF_GENERAL + TokenTipo.TT_AGRUPACIONES + 3  'Un grupo entre paréntesis
 
     ' =====================================================
     ' OPERADORES Y SIMBOLOS

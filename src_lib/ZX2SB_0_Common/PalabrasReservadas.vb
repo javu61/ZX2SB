@@ -5,9 +5,9 @@ Public Module ReservedWords
     Public Function GetTokenID(lexema As String, ByRef id As TokenID) As Boolean
 
         Select Case lexema.ToUpperInvariant()
-            ' ===============================
-            ' SENTENCIAS ZX BASIC
-            ' ===============================
+                ' ===============================
+                ' SENTENCIAS ZX BASIC
+                ' ===============================
             Case "CLEAR" : id = TokenID.TK_CLEAR
             Case "CLS" : id = TokenID.TK_CLS
             Case "CONTINUE" : id = TokenID.TK_CONTINUE
@@ -39,15 +39,15 @@ Public Module ReservedWords
             Case "SUB" : id = TokenID.TK_SUB
             Case "RANDOMIZE" : id = TokenID.TK_RANDOMIZE
 
-            ' ===============================
-            ' ATRIBUTOS DE PRINT (ZX BASIC)
-            ' ===============================
+                ' ===============================
+                ' ATRIBUTOS DE PRINT (ZX BASIC)
+                ' ===============================
             Case "AT" : id = TokenID.TK_AT
             Case "TAB" : id = TokenID.TK_TAB
 
-            ' ===============================
-            ' FUNCIONES ZX BASIC
-            ' ===============================
+                ' ===============================
+                ' FUNCIONES ZX BASIC
+                ' ===============================
             Case "ABS" : id = TokenID.TK_ABS
             Case "ATTR" : id = TokenID.TK_ATTR
             Case "BIN" : id = TokenID.TK_BIN
@@ -69,14 +69,21 @@ Public Module ReservedWords
             Case "VAL" : id = TokenID.TK_VAL
             Case "VAL$" : id = TokenID.TK_VAL_S
 
-            ' ===============================
-            ' PROCEDIMIENTOS ZX BASIC
-            ' ===============================
+                ' ===============================
+                ' PROCEDIMIENTOS ZX BASIC
+                ' ===============================
             Case "BORDER" : id = TokenID.TK_BORDER
             Case "BEEP" : id = TokenID.TK_BEEP
             Case "CIRCLE" : id = TokenID.TK_CIRCLE
             Case "DRAW" : id = TokenID.TK_DRAW
             Case "PLOT" : id = TokenID.TK_PLOT
+
+                ' ===============================
+                ' OPERADORES LOGICOS
+                ' ===============================
+            Case "AND" : id = TokenID.TK_AND
+            Case "OR" : id = TokenID.TK_OR
+            Case "NOT" : id = TokenID.TK_NOT
 
                 ' ===============================
                 ' NO ES PALABRA RESERVADA

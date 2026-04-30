@@ -66,10 +66,6 @@ Public Structure Token
             Select Case Me.ID
                 Case TokenID.TES_STRING
                     Return ($"{Constantes.C_COMILLAS}{Me.Value}{Constantes.C_COMILLAS}")
-
-                Case TokenID.TES_GREXPR
-                    Return ($"{Constantes.C_PAR_APE}{Me.Value}{Constantes.C_PAR_CIE}")
-
                 Case Else
                     Return Me.Value
             End Select

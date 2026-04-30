@@ -95,14 +95,7 @@ Public Module Lexer
                 Continue While
             End If
 
-
-            If c = Constantes.C_PAR_APE Then
-                Dim col = pos + 1
-                Dim tok = ConsumirGrexpr(writer, col, LineaAnalizar)
-                GuardaSalida(writer, tok.TokToLine())
-                Continue While
-            End If
-
+            ' Operadores y símbolos
             Dim colOp = pos + 1
             Dim tokOp = ConsumirOperadorOSimbolo(writer, colOp, LineaAnalizar)
             GuardaSalida(writer, tokOp.TokToLine())
@@ -303,71 +296,7 @@ Public Module Lexer
 
     End Function
 
-    Private Function ConsumirGrexpr(writer As StreamWriter, col As Integer, LineaAnalizar As String) As Token
 
-        ' Consumimos el paréntesis inicial '('
-        Avanzar()
-
-        Dim sb As New StringBuilder()
-        Dim nivel As Integer = 1
-        Dim cerrado As Boolean = False
-
-        While pos < LineaAnalizar.Length
-
-            Dim ch = LineaAnalizar(pos)
-
-            ' Subnivel de paréntesis
-            If ch = "("c Then
-                nivel += 1
-                sb.Append(ch)
-                Avanzar()
-                Continue While
-            End If
-
-            ' Cierre de paréntesis
-            If ch = ")"c Then
-                nivel -= 1
-                If nivel = 0 Then
-                    Avanzar() ' consumir ')'
-                    cerrado = True
-                    Exit While
-                End If
-                sb.Append(ch)
-                Avanzar()
-                Continue While
-            End If
-
-            ' Cadena dentro de paréntesis
-            If ch = Constantes.C_COMILLAS Then
-                Dim t As Token = ConsumirStringLiteral(writer, col + pos, LineaAnalizar)
-
-                If t.ID = TokenID.TCO_UNKNOWN Then
-                    Return New Token(TokenID.TCO_UNKNOWN, "", -1, -1)
-                End If
-
-                sb.Append(Constantes.C_COMILLAS)
-                sb.Append(t.Value)
-                sb.Append(Constantes.C_COMILLAS)
-                Continue While
-            End If
-
-            ' Cualquier otro carácter
-            sb.Append(ch)
-            Avanzar()
-        End While
-
-        ' Paréntesis sin cerrar
-        If Not cerrado Then
-            ErrorLexico(writer, col, "Paréntesis sin cerrar (desbalanceados)")
-            Return Nothing
-        End If
-
-        Return New Token(TokenID.TES_GREXPR,
-                     sb.ToString().Trim(),
-                     NroLineaFichero,
-                     col)
-
-    End Function
 
 
     Private Sub ConsumirComentario(writer As StreamWriter, LineaAnalizar As String)

@@ -190,6 +190,10 @@ Public Module Parser
     ' FUNCIONES AUXILIARES DE TOKEN (STRING-BASED)
     ' ============================================================
 
+    Private Function Ttk() As Token
+        Return tokensLinea(idx)
+    End Function
+
     Private Function Tid() As TokenID
         Return tokensLinea(idx).ID
     End Function
@@ -324,33 +328,31 @@ Public Module Parser
         'CLEAR        ; borra variables
         'CLEAR n      ; borra variables y fija RAMTOP = n
 
-        ' Consumimos la palabra clave CLEAR
+
+
+        ' Consumir CLEAR
         NextToken()
 
-        Dim expr As String = ""
+        ' Argumento opcional
+        Dim expr As List(Of RPN.RPN_Node) = Nothing
 
-        ' Si no estamos al final de la sentencia, hay argumento
         If Tid() <> TokenID.TCO_EOL AndAlso Tid() <> TokenID.TSP_DOSPUNTOS Then
-            ' Parsear expresión a texto
             If Not ParseExprTexto(writer, False, expr) Then
-                Return
+                Exit Sub
             End If
         End If
 
-        ' Generamos la expresión para el CLEAR, según sea solo variables o ramtopAhoe
-        If expr <> "" Then
-            GuardarIRP_Token(writer, TokenID.TK_CLEAR_RAM)
-        Else
-            GuardarIRP_Token(writer, TokenID.TK_CLEAR)
-        End If
+        ' Emitir IR estructural
+        GuardarIRP_CLEAR(writer, expr)
     End Sub
+
 
     Private Sub ParseDim(writer As StreamWriter)
 
         ' Consumir DIM
         NextToken()
 
-        ' Esperar identificador (nombre del array)
+        ' Nombre del array
         If Tid() <> TokenID.TES_IDENT Then
             ErrorSintactico(writer, TokenColumna, "Se esperaba nombre de array en DIM")
             Exit Sub
@@ -359,147 +361,148 @@ Public Module Parser
         Dim arrayName As String = TokenValor()
         NextToken()
 
-        ' Debe seguir '('
+        ' Debe venir '('
         If Tid() <> TokenID.TSP_PAR_ABIERTO Then
             ErrorSintactico(writer, TokenColumna, "Se esperaba '(' en DIM")
             Exit Sub
         End If
+        NextToken()
 
-        NextToken() ' consumir '('
-
-        ' Parsear lista de dimensiones como texto
-        Dim dims As New List(Of String)
+        ' Lista de dimensiones (cada una es RPN)
+        Dim dims As New List(Of List(Of RPN.RPN_Node))
 
         Do
-            Dim expr As String = Nothing
+            Dim exprDim As List(Of RPN.RPN_Node) = Nothing
 
-            If Not ParseExprTexto(writer, False, expr, ",)") Then
+            If Not ParseExprTexto(writer, False, exprDim, ",)") Then
                 Exit Sub
             End If
 
-            dims.Add(expr)
+            dims.Add(exprDim)
 
-            ' Caso 1: coma → siguiente dimensión
+            ' ¿Otra dimensión?
             If Tid() = TokenID.TSP_COMA Then
                 NextToken()
                 Continue Do
             End If
 
-            ' Caso 2: cierre de paréntesis → fin de DIM
-            If Tid() = TokenID.TSP_PAR_CERRADO Then
-                Exit Do
-            End If
-
-            ' Caso 3: error sintáctico
-            ErrorSintactico(writer, TokenColumna, "Se esperaba ',' o ')' en DIM")
-            Exit Sub
+            Exit Do
         Loop
 
-        ' Consumir ')'
-        If Tid() <> TokenID.TSP_PAR_ABIERTO Then
+        ' Debe cerrar ')'
+        If Tid() <> TokenID.TSP_PAR_CERRADO Then
             ErrorSintactico(writer, TokenColumna, "Se esperaba ')' en DIM")
             Exit Sub
         End If
-
         NextToken()
 
-        ' Emitir IRP
-        GuardarIRP_Token_Valor(writer, TokenID.TK_DIM, String.Join(",", dims))
-
+        ' Emitir IR DIM estructural
+        GuardarIRP_DIM(writer, arrayName, dims)
     End Sub
 
     Private Sub ParseLet(writer As StreamWriter)
 
         ' Consumir LET solo si es explícito
-        If tokensLinea(idx).ID = TokenID.TK_LET Then
+        If Tid() = TokenID.TK_LET Then
             NextToken()
         End If
 
+        ' Lado izquierdo (variable o array)
+        Dim name As String = Nothing
+        Dim indices As List(Of List(Of RPN.RPN_Node)) = Nothing
 
-        ' Parte izquierda de la asignación
-        Dim lvalue As String = Nothing
-        If Not ParseLValue(writer, lvalue) Then
-            Exit Sub
-        End If
+        If Not ParseLValue(writer, name, indices) Then Exit Sub
 
-        ' Esperar '='
+        ' Debe venir '='
         If Tid() <> TokenID.TOP_EQ Then
             ErrorSintactico(writer, TokenColumna, "Se esperaba '=' en LET")
             Exit Sub
         End If
+        NextToken() ' consumir '='
 
-        ' Consumir '='
-        NextToken()
+        ' Lado derecho: expresión RPN tipada
+        Dim rpn As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, False, rpn) Then Exit Sub
 
-        ' Parte Derecha de la asignación
-        Dim rvalue As String = Nothing
-        If Not ParseExprTexto(writer, False, rvalue) Then
-            Return
-        End If
-
-        ' Emitir IRP
-        GuardarIRP_Token_Valor(writer, TokenID.TK_LET, $"{lvalue} = {rvalue}")
-
+        ' Emitir IR estructural
+        GuardarIRP_LET(writer, name, indices, rpn)
     End Sub
 
-    Private Function ParseLValue(writer As StreamWriter, ByRef lvalue As String) As Boolean
+    Private Function ParseLValue(writer As StreamWriter,
+                                 ByRef name As String,
+                                 ByRef indices As List(Of List(Of RPN.RPN_Node))
+                                ) As Boolean
+
+        indices = New List(Of List(Of RPN.RPN_Node))
 
         ' Debe empezar por identificador
-        If Tid() <> TokenID.TES_IDENT OrElse
-       Not Char.IsLetter(TokenValor()(0)) Then
+        If Tid() <> TokenID.TES_IDENT OrElse Not Char.IsLetter(TokenValor()(0)) Then
             ErrorSintactico(writer, TokenColumna, "Nombre de variable inválido")
             Return False
         End If
 
-        Dim sb As New StringBuilder()
-        sb.Append(TokenValor())
+        name = TokenValor()
         NextToken()
 
-        ' ✅ NUEVO: acceso a array mediante TES_GREXPR
-        If Tid() = TokenID.TES_GREXPR Then
-            '+++sb.Append("("c)
-            sb.Append(TokenValor())
-            '+++sb.Append(")"c)
+        ' ¿Acceso a array?
+        If Tid() = TokenID.TSP_PAR_ABIERTO Then
+            NextToken() ' consumir '('
+
+            Do
+                Dim exprIdx As List(Of RPN.RPN_Node) = Nothing
+
+                ' Cada índice es una expresión RPN
+                If Not ParseExprTexto(writer, False, exprIdx, ",)") Then
+                    Return False
+                End If
+
+                indices.Add(exprIdx)
+
+                ' ¿Más dimensiones?
+                If Tid() = TokenID.TSP_COMA Then
+                    NextToken()
+                    Continue Do
+                End If
+
+                Exit Do
+            Loop
+
+            ' Debe cerrar ')'
+            If Tid() <> TokenID.TSP_PAR_CERRADO Then
+                ErrorSintactico(writer, TokenColumna, "Se esperaba ')'")
+                Return False
+            End If
             NextToken()
         End If
 
-        lvalue = sb.ToString()
         Return True
     End Function
 
-
     Private Sub ParseRandomize(writer As StreamWriter)
 
-        NextToken() ' consumir RANDOMIZE
+        ' Consumir RANDOMIZE
+        NextToken()
 
-        ' RANDOMIZE solo
+        Dim modoUSR As Boolean = False
+        Dim expr As List(Of RPN.RPN_Node) = Nothing
+
+        ' ¿RANDOMIZE solo?
         If Tid() = TokenID.TCO_EOL OrElse Tid() = TokenID.TSP_DOSPUNTOS Then
-            GuardarIRP_Token(writer, TokenID.TK_RANDOMIZE)
+            GuardarIRP_RANDOMIZE(writer, False, Nothing)
             Exit Sub
         End If
 
-        ' RANDOMIZE USR <expr>
-        If Tid() = TokenID.TK_RANDOMIZE AndAlso TokenValor() = "USR" Then
-            NextToken() ' consumir USR
-
-            Dim expr As String = Nothing
-            If Not ParseExprTexto(writer, False, expr) Then Exit Sub
-
-            GuardarIRP_Token_Valor(writer, TokenID.TK_RANDOMIZE_USR, $"{expr}")
-            Exit Sub
+        ' ¿RANDOMIZE USR ... ?
+        If Tid() = TokenID.TK_USR Then
+            modoUSR = True
+            NextToken()
         End If
 
-        ' RANDOMIZE <expr>
-        Dim seed As String = Nothing
-        If Not ParseExprTexto(writer, False, seed) Then Exit Sub
+        ' Argumento obligatorio si no era RANDOMIZE solo
+        If Not ParseExprTexto(writer, False, expr) Then Exit Sub
 
-        GuardarIRP_Token_Valor(writer, TokenID.TK_RANDOMIZE, $"{seed}")
-
+        GuardarIRP_RANDOMIZE(writer, modoUSR, expr)
     End Sub
-
-
-
-
 
 
 
@@ -589,6 +592,12 @@ Public Module Parser
 
     Private Function ReconstruirToken(id As TokenID, valor As String) As String
 
+        'Si es un operador lo procesamos directo, no tiene valor
+        valor = GetTextoOperador(id)
+        If (valor <> "") Then
+            Return (valor)
+        End If
+
         Select Case id
 
         ' ===== Literales =====
@@ -598,32 +607,6 @@ Public Module Parser
 
             Case TokenID.TES_NUMBER
                 Return valor
-
-        ' ===== Expresión agrupada =====
-            Case TokenID.TES_GREXPR
-                ' IMPORTANTE:
-                ' El valor ya contiene TODO, incluidas comas internas.
-                ' Se añaden los paréntesis aquí.
-                Return valor
-
-        ' ===== Operadores aritméticos =====
-            Case TokenID.TOP_PLUS : Return "+"
-            Case TokenID.TOP_MINUS : Return "-"
-            Case TokenID.TOP_MUL : Return "*"
-            Case TokenID.TOP_DIV : Return "/"
-            Case TokenID.TOP_POW : Return "^"
-
-        ' ===== Operadores relacionales =====
-            Case TokenID.TOP_EQ : Return "="
-            Case TokenID.TOP_NE : Return "<>"
-            Case TokenID.TOP_LT : Return "<"
-            Case TokenID.TOP_GT : Return ">"
-            Case TokenID.TOP_LE : Return "<="
-            Case TokenID.TOP_GE : Return ">="
-
-        ' ===== Operadores lógicos =====
-            Case TokenID.TK_AND : Return "AND"
-            Case TokenID.TK_OR : Return "OR"
 
         ' ===== Identificadores y keywords =====
             Case TokenID.TES_IDENT
@@ -647,291 +630,48 @@ Public Module Parser
     End Function
 
     Private Function ParseAT(writer As StreamWriter) As PrintItem
-        Dim PrintItem As New PrintItem(TokenID.TCO_UNKNOWN)
 
-        NextToken() ' consumir AT
+        Dim pi As New PrintItem(TokenID.TK_AT)
 
-        Dim exprX As String = Nothing
-        Dim exprY As String = Nothing
+        ' Consumir AT
+        NextToken()
 
-        ' Primera expresión (obligatoria, hasta coma)
-        If Not ParseExprTexto(writer, False, exprX, ",") Then
-            Return PrintItem
+        ' Primera expresión (Y)
+        Dim exprY As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, False, exprY, ",") Then
+            Return pi
         End If
 
+        ' Coma obligatoria
         If Tid() <> TokenID.TSP_COMA Then
             ErrorSintactico(writer, TokenColumna, "Se esperaba ',' en AT")
-            Return PrintItem
+            Return pi
+        End If
+        NextToken()
+
+        ' Segunda expresión (X)
+        Dim exprX As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, False, exprX, ",;") Then
+            Return pi
         End If
 
-        NextToken() ' consumir coma
+        ' Guardar estructura en el PrintItem
+        pi.Expr1 = exprY
+        pi.Expr2 = exprX
+        pi.Separator = PrintSeparator.N
 
-        ' Segunda expresión (hasta ; , : o EOL)
-        If Not ParseExprTexto(writer, False, exprY, ",;") Then
-            Return PrintItem
-        End If
-
-        ' Construir el valor FINAL del AT
-        Dim valorAT As String = exprX & "," & exprY
-
-        ' Crear PrintItem (separator se decide FUERA)
-        PrintItem.ID = TokenID.TK_AT
-        PrintItem.Value = valorAT
-        PrintItem.Separator = PrintSeparator.N
-
-        Return PrintItem
-
+        Return pi
     End Function
 
 
-
-
-
-
-
-
-
-    'Private Sub ParsePrint1(writer As StreamWriter)
-
-    '    NextToken() ' consumir PRINT
-    '    Dim sbActual As New StringBuilder()
-
-    '    While idx < tokensLinea.Count AndAlso
-    '          Tid() <> TokenID.TCO_EOL AndAlso
-    '          Tid() <> TokenID.TSP_DOSPUNTOS
-
-    '        Dim tok = tokensLinea(idx)
-
-    '        ' ===============================
-    '        ' MODIFICADOR AT (CASO ESPECIAL)
-    '        ' ===============================
-    '        If tok.ID = TokenID.TK_AT Then
-    '            parseAT(writer, tok, sbActual)
-    '            Continue While
-    '        End If
-
-    '        ' ===============================
-    '        ' MODIFICADOR TAB (CASO ESPECIAL)
-    '        ' ===============================
-    '        If tok.ID = TokenID.TK_TAB Then
-    '            parseTAB(writer, tok, sbActual)
-    '            Continue While
-    '        End If
-
-    '        ' ==============================================
-    '        ' MODIFICADORES PRINT (TAB, INK, PAPER, etc.)
-    '        ' ==============================================
-    '        If tok.EsModificadorPrint() Then
-    '            ' Cerrar PRINT previo si existe
-    '            SavePrint(writer, sbActual, False)
-
-    '            ' Nombre del modificador
-    '            sbActual.Append(tok.Mnemonic)
-    '            NextToken()
-
-    '            ' Argumento (una expresión simple o GREXPR)
-    '            If Tid() <> TokenID.TCO_EOL AndAlso Tid() <> TokenID.TSP_DOSPUNTOS Then
-    '                sbActual.Append(" ")
-
-    '                Select Case Tid()
-    '                    Case TokenID.TES_GREXPR
-    '                        sbActual.Append("("c)
-    '                        sbActual.Append(TokenValor())
-    '                        sbActual.Append(")"c)
-    '                        NextToken()
-
-    '                    Case Else
-    '                        sbActual.Append(TokenValor())
-    '                        NextToken()
-    '                End Select
-    '            End If
-
-    '            ' ✅ CONSUMIR separador final si existe
-    '            If Tid() = TokenID.TSP_PUNTOYCOMA Then
-    '                sbActual.Append(";")
-    '                NextToken()
-    '            ElseIf Tid() = TokenID.TSP_COMA Then
-    '                sbActual.Append(",")
-    '                NextToken()
-    '            End If
-
-    '            SavePrint(writer, sbActual, False)
-    '            Continue While
-    '        End If
-
-    '        ' --- Separadores PRINT ---
-    '        If tok.ID = TokenID.TSP_PUNTOYCOMA OrElse tok.ID = TokenID.TSP_COMA Then
-    '            ' ✅ CONSUMIR separador final si existe
-    '            If Tid() = TokenID.TSP_PUNTOYCOMA Then
-    '                sbActual.Append(";")
-    '                NextToken()
-    '            ElseIf Tid() = TokenID.TSP_COMA Then
-    '                sbActual.Append(",")
-    '                NextToken()
-    '            End If
-
-    '            SavePrint(writer, sbActual, False)
-    '            NextToken()
-    '            Continue While
-    '        End If
-
-    '        ' --- Token imprimible normal ---
-    '        ConsumirHastaSeparador(writer, sbActual)
-
-    '        ' aquí el elemento YA está completo
-    '        ' ahora miramos si hay separador
-    '        If Tid() = TokenID.TSP_PUNTOYCOMA Then
-    '            sbActual.Append(";")
-    '            NextToken()
-    '        ElseIf Tid() = TokenID.TSP_COMA Then
-    '            sbActual.Append(",")
-    '            NextToken()
-    '        End If
-
-    '        SavePrint(writer, sbActual, False)
-
-    '    End While
-
-    '    ' Cerrar PRINT previo si existe
-    '    SavePrint(writer, sbActual, False)
-
-
-    'End Sub
-
-    '' ================================================
-    '' CONSUMIR AT y TAB (CASOS ESPECIALES DEL PRINT)
-    '' ================================================
-    'Private Sub parseAT(writer As StreamWriter, tok As Token, ByVal sbactual As StringBuilder)
-    '    ' Cerrar PRINT previo si existe
-    '    SavePrint(writer, sbactual, False)
-
-    '    NextToken() ' consumir AT
-
-    '    Dim exprX As String = Nothing
-    '    Dim exprY As String = Nothing
-
-
-    '    ' Primera expresión (obligatoria, termina en coma)
-    '    If Not ParseExprTexto(writer, False, exprX, ",") Then Exit Sub
-
-    '    If Tid() <> TokenID.TSP_COMA Then
-    '        ErrorSintactico(writer, TokenColumna, "Se esperaba ',' en AT")
-    '        Exit Sub
-    '    End If
-
-    '    NextToken() ' consumir coma
-
-
-    '    ' Segunda expresión (termina en ; , : o EOL)
-    '    If Not ParseExprTexto(writer, False, exprY, ",;") Then Exit Sub
-
-
-    '    Dim sbAT As New StringBuilder()
-    '    sbAT.Append("AT ")
-    '    sbAT.Append(exprX)
-    '    sbAT.Append(",")
-    '    sbAT.Append(exprY)
-    '    GuardarIRP(writer, TokenID.TK_AT, sbAT.ToString())
-
-    '    ' Separador final (si existe)
-    '    If Tid() = TokenID.TSP_PUNTOYCOMA Then
-    '        ' ; no tiene efecto en SuperBASIC → se ignora
-    '        NextToken()
-
-    '    ElseIf Tid() = TokenID.TSP_COMA Then
-    '        ' Caso raro: coma tras AT
-
-    '        ' , debe afectar al siguiente PRINT, pero seguramente es un error
-    '        WarningSintactico(writer, tok.Col, $"'Posible error: coma tras un AT")
-    '        GuardarIRP(writer, TokenID.TK_PRINT, ",")
-    '        NextToken()
-    '    End If
-
-
-    'End Sub
-
-
-    'Private Sub parseTAB(writer As StreamWriter, tok As Token, ByVal sbactual As StringBuilder)
-    '    ' Cerrar PRINT previo si existe
-    '    SavePrint(writer, sbactual, False)
-
-    '    NextToken() ' consumir TAB
-    '    sbactual.Append("TO ")
-
-    '    ' ahora TAB consume un token más con el nro de columna TES_NUMBER
-    '    sbactual.Append(TokenValor())
-    '    NextToken()
-
-    '    '  SavePrint(writer, sbactual, False)
-
-    '    Dim sepTrasAT As Char = ChrW(0)
-
-    '    If Tid() = TokenID.TSP_PUNTOYCOMA Then
-    '        sbactual.Append(";")
-    '        SavePrint(writer, sbactual, False)
-    '        NextToken()
-
-    '    ElseIf Tid() = TokenID.TSP_COMA Then
-    '        ' , debe afectar al siguiente PRINT, pero seguramente es un error
-    '        WarningSintactico(writer, tok.Col, $"'Posible error: coma tras un TAB")
-
-    '        sbactual.Append(",")
-    '        SavePrint(writer, sbactual, False)
-    '        NextToken()
-    '    End If
-
-    'End Sub
-
-
-    'Private Sub ConsumirHastaSeparador(writer As StreamWriter, sb As StringBuilder)
-    '    While idx < tokensLinea.Count AndAlso
-    '      Tid() <> TokenID.TCO_EOL AndAlso
-    '      Tid() <> TokenID.TSP_DOSPUNTOS AndAlso
-    '      Tid() <> TokenID.TSP_PUNTOYCOMA AndAlso
-    '      Tid() <> TokenID.TSP_COMA
-
-    '        Dim tok = tokensLinea(idx)
-
-    '        Select Case tok.ID
-    '            Case TokenID.TES_STRING, TokenID.TES_GREXPR
-    '                sb.Append(tok.GetValor)
-    '                '    sb.Append($"{Constantes.C_COMILLAS}{tok.Value}{Constantes.C_COMILLAS}")
-
-    '                'Case TokenID.TES_GREXPR
-    '                '    sb.Append($"{Constantes.C_PAR_APE}{tok.Value}{Constantes.C_PAR_CIE}")
-
-    '            Case Else
-    '                If Not tok.CanAppearInPrint() Then
-    '                    ErrorSintactico(writer, tok.Col, $"'{tok.Value}' no es válido dentro de PRINT")
-    '                    Exit Sub
-    '                End If
-    '                sb.Append(tok.GetValor)
-    '        End Select
-
-    '        sb.Append(" ")
-    '        NextToken()
-    '    End While
-    'End Sub
-
-
-    'Private Sub SavePrint(writer As StreamWriter, ByRef sb As StringBuilder, esAT As Boolean)
-    '    Dim aux As String = sb.ToString.Trim
-
-    '    If aux.Length > 0 Then
-    '        GuardarIRP(writer, If(esAT, TokenID.TK_AT, TokenID.TK_PRINT), aux)
-    '    End If
-    '    sb.Clear()
-    'End Sub
-
     Private Sub ParseIf(writer As StreamWriter)
-
         ' Consumir IF
         NextToken()
 
-        ' Parsear condición
-        Dim condicion As String = Nothing
+        ' Parsear condición como RPN tipado
+        Dim condicion As List(Of RPN.RPN_Node) = Nothing
         If Not ParseExprTexto(writer, False, condicion) Then
-            Return
+            Exit Sub
         End If
 
         ' Debe venir THEN
@@ -943,13 +683,10 @@ Public Module Parser
         ' Consumir THEN
         NextToken()
 
-        ' ✅ Emitir SOLO el IF, como sentencia independiente
-        GuardarIRP_Token_Valor(writer, TokenID.TK_IF, $"{condicion}")
+        ' Emitir IF como sentencia independiente, con condición RPN
+        GuardarIRP_IF(writer, condicion)
 
-        ' ❗ MUY IMPORTANTE:
-        ' NO consumir aquí el cuerpo
-        ' El cuerpo lo parseará el bucle general de sentencias,
-        ' exactamente igual que si no estuviéramos en un IF.
+        ' Importante: el cuerpo del IF NO se consume aquí
         UltimaFueIF = True
     End Sub
 
@@ -992,63 +729,50 @@ Public Module Parser
     ' FOR I = expr TO expr [STEP expr]
     ' ------------------------------------------------------------
     Private Sub ParseFor(writer As StreamWriter)
-        Dim aux As String = Nothing
 
         ' Consumir FOR
         NextToken()
 
         ' Variable de control
         If Tid() <> TokenID.TES_IDENT Then
-            ErrorSintactico(writer, TokenColumna, "Se esperaba variable en FOR")
+            ErrorSintactico(writer, TokenColumna, "Se esperaba variable de control en FOR")
             Exit Sub
         End If
 
         Dim varName As String = TokenValor()
         NextToken()
 
-        ' =
-        If Not IsEqual(Tid()) Then
+        ' Debe venir '='
+        If Tid() <> TokenID.TOP_EQ Then
             ErrorSintactico(writer, TokenColumna, "Se esperaba '=' en FOR")
             Exit Sub
         End If
-        NextToken()
+        NextToken() ' consumir '='
 
-        Dim sb As New StringBuilder()
-        sb.Append(varName)
-        sb.Append(" = ")
+        ' Expresión inicial
+        Dim exprInit As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, True, exprInit) Then Exit Sub
 
-        ' Expr inicial
-        If Not ParseExprTexto(writer, True, aux) Then
-            Return
-        End If
-        sb.Append(aux)
-
-        ' TO
+        ' Debe venir TO
         If Tid() <> TokenID.TK_TO Then
             ErrorSintactico(writer, TokenColumna, "Se esperaba TO en FOR")
             Exit Sub
         End If
-        sb.Append(" TO ")
         NextToken()
 
-        ' Expr final
-        If Not ParseExprTexto(writer, True, aux) Then
-            Return
-        End If
-        sb.Append(aux)
+        ' Expresión límite
+        Dim exprLimit As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, True, exprLimit) Then Exit Sub
 
         ' STEP opcional
+        Dim exprStep As List(Of RPN.RPN_Node) = Nothing
         If Tid() = TokenID.TK_STEP Then
-            sb.Append(" STEP ")
             NextToken()
-            If Not ParseExprTexto(writer, True, aux) Then
-                Return
-            End If
-            sb.Append(aux)
+            If Not ParseExprTexto(writer, True, exprStep) Then Exit Sub
         End If
 
-        GuardarIRP_Token_Valor(writer, TokenID.TK_FOR, sb.ToString())
-
+        ' Emitir IR FOR (estructural, no textual)
+        GuardarIRP_FOR(writer, varName, exprInit, exprLimit, exprStep)
     End Sub
 
     ' ------------------------------------------------------------
@@ -1121,85 +845,113 @@ Public Module Parser
         ' Consumir DATA
         NextToken()
 
-        Dim sb As New StringBuilder()
-        While idx < tokensLinea.Count AndAlso
-          Tid() <> TokenID.TCO_EOL
+        Dim items As New List(Of List(Of RPN.RPN_Node))
 
-            Select Case Tid()
+        ' DATA puede ir hasta EOL (no ":" como separador de sentencias)
+        While idx < tokensLinea.Count AndAlso Tid() <> TokenID.TCO_EOL
 
-                Case TokenID.TES_NUMBER, TokenID.TES_STRING, TokenID.TES_GREXPR
-                    sb.Append(TokenValor())
+            Dim expr As List(Of RPN.RPN_Node) = Nothing
 
-                'Case TokenID.TES_STRING
-                '    sb.Append($"{Constantes.C_COMILLAS}{TokenValor()}{Constantes.C_COMILLAS}")
+            ' Cada elemento es una expresión
+            If Not ParseExprTexto(writer, False, expr, ",") Then
+                Exit Sub
+            End If
 
-                'Case TokenID.TES_GREXPR
-                '    sb.Append($"{Constantes.C_PAR_APE}{TokenValor()}{Constantes.C_PAR_CIE}")
+            items.Add(expr)
 
-                Case TokenID.TSP_COMA
-                    sb.Append(" , ")
+            ' ¿Más elementos?
+            If Tid() = TokenID.TSP_COMA Then
+                NextToken()
+                Continue While
+            End If
 
-                Case Else
-                    ErrorSintactico(writer, TokenColumna, "Sintaxis inválida en DATA")
-                    Exit Sub
-
-            End Select
-
-            NextToken()
+            Exit While
         End While
 
-        GuardarIRP_Token_Valor(writer, TokenID.TK_DATA, sb.ToString())
-
+        ' Emitir IR DATA estructural
+        GuardarIRP_DATA(writer, items)
     End Sub
 
     Private Sub ParseBeep(writer As StreamWriter)
 
-        NextToken() ' consumir BEEP
-
-        Dim sb As New StringBuilder()
-        Dim expr As String = Nothing
-
-        ' 1er parámetro: permitir coma EXTERIOR
-        If Not ParseExprTexto(writer, True, expr, ",") Then Return
-        sb.Append(expr)
-
-        ' Coma obligatoria entre parámetros
-        If Tid() <> TokenID.TSP_COMA Then
-            ErrorSintactico(writer, TokenColumna, "Se esperaba ',' en BEEP")
-            Return
-        End If
-
-        sb.Append(" , ")
+        ' Consumir BEEP
         NextToken()
 
-        ' 2º parámetro
-        If Not ParseExprTexto(writer, False, expr) Then Return
-        sb.Append(expr)
+        ' Primer argumento: duración
+        Dim exprDuration As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, False, exprDuration, ",") Then
+            Exit Sub
+        End If
 
-        GuardarIRP_Token_Valor(writer, TokenID.TK_BEEP, sb.ToString())
+        ' Coma obligatoria
+        If Tid() <> TokenID.TSP_COMA Then
+            ErrorSintactico(writer, TokenColumna, "Se esperaba ',' en BEEP")
+            Exit Sub
+        End If
+        NextToken()
 
+        ' Segundo argumento: tono
+        Dim exprPitch As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, False, exprPitch) Then
+            Exit Sub
+        End If
+
+        ' Emitir IR BEEP estructural
+        GuardarIRP_BEEP(writer, exprDuration, exprPitch)
     End Sub
 
     Private Sub ParseRun(writer As StreamWriter)
+
+        ' Consumir RUN
         NextToken()
+
+        ' ¿RUN sin argumento?
         If Tid() = TokenID.TCO_EOL OrElse Tid() = TokenID.TSP_DOSPUNTOS Then
-            GuardarIRP_Token(writer, TokenID.TK_RUN)
-        Else
-            Dim expr As String = Nothing
-            If Not ParseExprTexto(writer, True, expr) Then Return
-            GuardarIRP_Token_Valor(writer, TokenID.TK_RUN, $"{expr}")
+            GuardarIRP_RUN(writer, Nothing)
+            Exit Sub
         End If
+
+        ' RUN con expresión (línea de inicio)
+        Dim expr As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, True, expr) Then
+            Exit Sub
+        End If
+
+        GuardarIRP_RUN(writer, expr)
     End Sub
 
     Private Sub ParseList(writer As StreamWriter)
+
+        ' Consumir LIST
         NextToken()
+
+        ' LIST sin argumentos
         If Tid() = TokenID.TCO_EOL OrElse Tid() = TokenID.TSP_DOSPUNTOS Then
-            GuardarIRP_Token(writer, TokenID.TK_LIST)
-        Else
-            Dim expr As String = Nothing
-            If Not ParseExprTexto(writer, True, expr) Then Return
-            GuardarIRP_Token_Valor(writer, TokenID.TK_LIST, $"{expr}")
+            GuardarIRP_LIST(writer, Nothing, Nothing)
+            Exit Sub
         End If
+
+        ' Primer argumento (línea inicial)
+        Dim exprStart As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, True, exprStart, ",") Then
+            Exit Sub
+        End If
+
+        ' ¿Rango?
+        If Tid() = TokenID.TSP_COMA Then
+            NextToken()
+
+            Dim exprEnd As List(Of RPN.RPN_Node) = Nothing
+            If Not ParseExprTexto(writer, True, exprEnd) Then
+                Exit Sub
+            End If
+
+            GuardarIRP_LIST(writer, exprStart, exprEnd)
+            Exit Sub
+        End If
+
+        ' Solo una expresión
+        GuardarIRP_LIST(writer, exprStart, Nothing)
     End Sub
 
     Private Sub ParseLoad(writer As StreamWriter)
@@ -1213,10 +965,18 @@ Public Module Parser
     End Sub
 
     Private Sub ParseFileStmt(writer As StreamWriter, id As TokenID)
+
+        ' Consumir LOAD / SAVE / MERGE
         NextToken()
-        Dim expr As String = Nothing
-        If Not ParseExprTexto(writer, True, expr) Then Return
-        GuardarIRP_Token_Valor(writer, id, $"{expr}")
+
+        ' Argumento obligatorio: expresión (nombre de fichero)
+        Dim expr As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, True, expr) Then
+            Exit Sub
+        End If
+
+        ' Emitir IR estructural
+        GuardarIRP_FILE(writer, id, expr)
     End Sub
 
     Private Sub ParseSimpleStmt(writer As StreamWriter, id As TokenID)
@@ -1226,135 +986,217 @@ Public Module Parser
 
     Private Sub ParseUnaryStmt(writer As StreamWriter, id As TokenID)
 
+        ' Consumir la palabra clave (INK, PAPER, BRIGHT, etc.)
         NextToken()
 
-        Dim expr As String = Nothing
-        If Not ParseExprTexto(writer, True, expr) Then Return
+        ' Argumento obligatorio: una expresión
+        Dim expr As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, True, expr) Then
+            Exit Sub
+        End If
 
-        GuardarIRP_Token_Valor(writer, id, $"{expr}")
-
+        ' Emitir IR estructural
+        GuardarIRP_UNARY(writer, id, expr)
     End Sub
 
     Private Sub ParseBinaryStmt(writer As StreamWriter, id As TokenID)
 
-        NextToken() ' consumir POKE u OUT
-
-        Dim sb As New StringBuilder()
-        Dim expr As String = Nothing
+        ' Consumir la palabra clave (POKE, OUT, etc.)
+        NextToken()
 
         ' Primer argumento
-        If Not ParseExprTexto(writer, False, expr) Then Return
-        sb.Append(expr)
+        Dim exprLeft As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, False, exprLeft, ",") Then
+            Exit Sub
+        End If
 
         ' Coma obligatoria
         If Tid() <> TokenID.TSP_COMA Then
             ErrorSintactico(writer, TokenColumna, $"Se esperaba ',' en {id}")
-            Return
+            Exit Sub
         End If
-        sb.Append(" , ")
         NextToken()
 
         ' Segundo argumento
-        If Not ParseExprTexto(writer, False, expr) Then Return
-        sb.Append(expr)
+        Dim exprRight As List(Of RPN.RPN_Node) = Nothing
+        If Not ParseExprTexto(writer, False, exprRight) Then
+            Exit Sub
+        End If
 
-        GuardarIRP_Token_Valor(writer, id, sb.ToString())
-
+        ' Emitir IR estructural
+        GuardarIRP_BINARY(writer, id, exprLeft, exprRight)
     End Sub
+
 
     ' ============================================================
     ' PARSE DE EXPRESIONES en RPN
     ' ============================================================
-    Private Function ParseExprTexto(writer As StreamWriter,
-                                    permiteComaExterior As Boolean,
-                                    ByRef resultado As String,
-                                    Optional stopTokens As String = "") As Boolean
+    Private Function ParseExprTexto(
+    writer As StreamWriter,
+    permiteComaExterior As Boolean,
+    ByRef resultado As List(Of RPN.RPN_Node),
+    Optional stopTokens As String = ""
+) As Boolean
 
-        Dim sb As New StringBuilder()
+        resultado = New List(Of RPN.RPN_Node)()
+
+        Dim operators As New Stack(Of RPN.RPN_Node)
         Dim nivelParentesis As Integer = 0
+        Dim ultimoFueOperando As Boolean = False
 
         While idx < tokensLinea.Count AndAlso
           Tid() <> TokenID.TCO_EOL AndAlso
           Tid() <> TokenID.TSP_DOSPUNTOS AndAlso
           Not IsControlKeyword(Tid())
 
-            ' 🔹 NUEVO: parada por tokens externos configurables
+            ' Parada por token externo
+            If nivelParentesis = 0 AndAlso TokenEsStopChar(stopTokens) Then Exit While
 
-            If nivelParentesis = 0 AndAlso TokenEsStopChar(stopTokens) Then
-                Exit While   ' NO consumir el token
-            End If
-
-            ' ❌ Punto y coma solo es error si NO es stopToken
-            If Tid() = TokenID.TSP_PUNTOYCOMA AndAlso
-               (stopTokens = "" OrElse Not TokenEsStopChar(stopTokens)) Then
-                ErrorSintactico(writer, TokenColumna, "Expresión no válida")
-                Return False
-            End If
-
-            ' ❌ Coma no permitida a nivel superior si NO es stopToken
+            ' Coma exterior no permitida
             If Tid() = TokenID.TSP_COMA AndAlso
-               nivelParentesis = 0 AndAlso
-               Not permiteComaExterior AndAlso
-               (stopTokens = "" OrElse Not TokenEsStopChar(stopTokens)) Then
+           nivelParentesis = 0 AndAlso
+           Not permiteComaExterior AndAlso
+           (stopTokens = "" OrElse Not TokenEsStopChar(stopTokens)) Then
                 Exit While
             End If
 
-            ' Control de paréntesis
-            If Tid() = TokenID.TSP_PAR_ABIERTO Then
-                nivelParentesis += 1
-            ElseIf Tid() = TokenID.TSP_PAR_CERRADO Then
-                nivelParentesis -= 1
-            End If
-
-            ' Construcción textual
-
             Select Case Tid()
 
-                ' LITERALES
-                Case TokenID.TES_STRING, TokenID.TES_GREXPR, TokenID.TES_NUMBER, TokenID.TES_IDENT
-                    '    sb.Append($"{Constantes.C_COMILLAS}{TokenValor()}{Constantes.C_COMILLAS}")
+            ' =====================================================
+            ' IDENTIFICADOR (variable o llamada / array)
+            ' =====================================================
+                Case TokenID.TES_IDENT
 
-                    'Case TokenID.TES_GREXPR
-                    '    sb.Append($"{Constantes.C_PAR_APE}{TokenValor()}{Constantes.C_PAR_CIE}")
+                    Dim nombre As String = TokenValor()
+                    NextToken()
 
-                    'Case TokenID.TES_NUMBER
-                    '    sb.Append(TokenValor())
+                    ' ¿Llamada / indexación?
+                    If Tid() = TokenID.TSP_PAR_ABIERTO Then
+                        NextToken() ' consumir '('
 
-                    'Case TokenID.TES_IDENT
-                    sb.Append(TokenValor())
+                        Dim args As New List(Of RPN.RPN_Node)
+                        Dim exprArg As List(Of RPN.RPN_Node)
 
-                ' OPERADORES RELACIONALES / ASIGNACIÓN
-                Case TokenID.TOP_EQ : sb.Append("=")
-                Case TokenID.TOP_NE : sb.Append("<>")
-                Case TokenID.TOP_LT : sb.Append("<")
-                Case TokenID.TOP_GT : sb.Append(">")
-                Case TokenID.TOP_LE : sb.Append("<=")
-                Case TokenID.TOP_GE : sb.Append(">=")
+                        Do
+                            If Not ParseExprTexto(writer, False, exprArg, ",)") Then
+                                Return False
+                            End If
+                            args.AddRange(exprArg)
 
-                ' OPERADORES ARITMÉTICOS
-                Case TokenID.TOP_PLUS : sb.Append("+")
-                Case TokenID.TOP_MINUS : sb.Append("-")
-                Case TokenID.TOP_MUL : sb.Append("*")
-                Case TokenID.TOP_DIV : sb.Append("/")
-                Case TokenID.TOP_POW : sb.Append("^")
+                            If Tid() = TokenID.TSP_COMA Then
+                                NextToken()
+                                Continue Do
+                            End If
+                            Exit Do
+                        Loop
 
-                ' OPERADORES LOGICOS
-                Case TokenID.TK_AND : sb.Append("AND")
-                Case TokenID.TK_NOT : sb.Append("NOT")
-                Case TokenID.TK_OR : sb.Append("OR")
+                        If Tid() <> TokenID.TSP_PAR_CERRADO Then
+                            ErrorSintactico(writer, TokenColumna, "Se esperaba ')'")
+                            Return False
+                        End If
+                        NextToken()
 
-                ' ESTRUCTURA
-                Case TokenID.TSP_PAR_ABIERTO : sb.Append("(")
-                Case TokenID.TSP_PAR_CERRADO : sb.Append(")")
-                Case TokenID.TSP_COMA : sb.Append(",")
+                        ' Insertar argumentos RPN
+                        resultado.AddRange(args)
 
+                        ' Insertar nodo CALLFUN
+                        resultado.Add(New RPN.RPN_Node With {
+                        .Kind = RPN.RPNKind.CALLFUN,
+                        .TokenID = TokenID.TES_IDENT,
+                        .Value = nombre,
+                        .Arity = args.Count
+                    })
+
+                        ultimoFueOperando = True
+
+                    Else
+                        ' Variable simple
+                        resultado.Add(New RPN.RPN_Node With {
+                        .Kind = RPN.RPNKind.VAR,
+                        .TokenID = TokenID.TES_IDENT,
+                        .Value = nombre,
+                        .Arity = 0
+                    })
+                        ultimoFueOperando = True
+                    End If
+
+            ' =====================================================
+            ' CONSTANTES
+            ' =====================================================
+                Case TokenID.TES_NUMBER, TokenID.TES_STRING
+                    resultado.Add(New RPN.RPN_Node With {
+                    .Kind = RPN.RPNKind.CTE,
+                    .TokenID = Tid(),
+                    .Value = TokenValor(),
+                    .Arity = 0
+                })
+                    ultimoFueOperando = True
+                    NextToken()
+
+            ' =====================================================
+            ' PARÉNTESIS
+            ' =====================================================
+                Case TokenID.TSP_PAR_ABIERTO
+                    operators.Push(New RPN.RPN_Node With {.Value = "("})
+                    nivelParentesis += 1
+                    ultimoFueOperando = False
+                    NextToken()
+
+                Case TokenID.TSP_PAR_CERRADO
+                    nivelParentesis -= 1
+                    While operators.Count > 0 AndAlso operators.Peek().Value <> "("
+                        resultado.Add(operators.Pop())
+                    End While
+                    If operators.Count = 0 Then
+                        ErrorSintactico(writer, TokenColumna, "Paréntesis desequilibrados")
+                        Return False
+                    End If
+                    operators.Pop() ' quitar "("
+                    ultimoFueOperando = True
+                    NextToken()
+
+                    ' =====================================================
+                    ' OPERADORES
+                    ' =====================================================
                 Case Else
-                    ' No debería llegar nada importante aquí
+                    If Ttk().IsOperator() Then
+                        Dim opToken As TokenID = Tid()
+                        Dim opText As String = GetTextoOperador(opToken)
+                        Dim kind As RPN.RPNKind
+                        Dim arity As Integer
+
+                        If opToken = TokenID.TOP_MINUS AndAlso Not ultimoFueOperando Then
+                            kind = RPN.RPNKind.OPE_UNARY
+                            arity = 1
+                            opText = "UNARY_MINUS"
+                        ElseIf opToken = TokenID.TK_NOT Then
+                            kind = RPN.RPNKind.OPE_UNARY
+                            arity = 1
+                        Else
+                            kind = RPN.RPNKind.OPE_BINARY
+                            arity = 2
+                        End If
+
+                        Dim node As New RPN.RPN_Node With {
+                        .Kind = kind,
+                        .TokenID = opToken,
+                        .Value = opText,
+                        .Arity = arity
+                    }
+
+                        While operators.Count > 0 AndAlso
+                          operators.Peek().Value <> "(" AndAlso
+                          Precedencia(operators.Peek().Value) >= Precedencia(opText)
+                            resultado.Add(operators.Pop())
+                        End While
+
+                        operators.Push(node)
+                        ultimoFueOperando = False
+                        NextToken()
+                    Else
+                        Exit While
+                    End If
             End Select
-
-
-            sb.Append(" ") 'Revisar si es No necesario
-            NextToken()
         End While
 
         If nivelParentesis <> 0 Then
@@ -1362,10 +1204,60 @@ Public Module Parser
             Return False
         End If
 
-        resultado = sb.ToString().Trim()
-        Return True
+        While operators.Count > 0
+            If operators.Peek().Value = "(" Then
+                ErrorSintactico(writer, TokenColumna, "Paréntesis desequilibrados en expresión")
+                Return False
+            End If
+            resultado.Add(operators.Pop())
+        End While
 
+        Return True
     End Function
+
+
+    Private Function GetTextoOperador(tid As TokenID) As String
+        Select Case tid
+        ' ===== Operadores aritméticos =====
+            Case TokenID.TOP_PLUS : Return "+"
+            Case TokenID.TOP_MINUS : Return "-"
+            Case TokenID.TOP_MUL : Return "*"
+            Case TokenID.TOP_DIV : Return "/"
+            Case TokenID.TOP_POW : Return "^"
+
+        ' ===== Operadores relacionales =====
+            Case TokenID.TOP_EQ : Return "="
+            Case TokenID.TOP_NE : Return "<>"
+            Case TokenID.TOP_LT : Return "<"
+            Case TokenID.TOP_GT : Return ">"
+            Case TokenID.TOP_LE : Return "<="
+            Case TokenID.TOP_GE : Return ">="
+
+        ' ===== Operadores lógicos =====
+            Case TokenID.TK_AND : Return "AND"
+            Case TokenID.TK_OR : Return "OR"
+        End Select
+        Return ""
+    End Function
+
+
+    Private Function Precedencia(op As String) As Integer
+        Select Case op
+
+            Case "^" : Return 7
+            Case "UNARY_MINUS" : Return 6
+            Case "*", "/" : Return 5
+            Case "+", "-" : Return 4
+            Case "=", "<>", "<", ">", "<=", ">=" : Return 3
+            Case "NOT" : Return 2
+            Case "AND" : Return 1
+            Case "OR" : Return 0
+
+        End Select
+        Return -1
+    End Function
+
+
 
     ' ----------------------------------------------------------
     ' Helpers
@@ -1473,5 +1365,116 @@ Public Module Parser
         End If
 
     End Sub
+
+    '*************************************************************
+    '* GUARDAR LOS IRP DE CADA TIPO
+    '*************************************************************
+
+    Private Function RPN_ToText(rpn As List(Of RPN.RPN_Node)) As String
+        Dim sb As New StringBuilder()
+
+        For Each n In rpn
+            Select Case n.Kind
+                Case RPNKind.VAR
+                    sb.Append($"VAR({n.Value}) ")
+
+                Case RPNKind.CTE
+                    sb.Append($"CTE({n.Value}) ")
+
+                Case RPNKind.OPE_UNARY
+                    sb.Append($"OP({n.Value}) ")
+
+                Case RPNKind.OPE_BINARY
+                    sb.Append($"OP({n.Value}) ")
+
+                Case RPNKind.CALLFUN
+                    sb.Append($"CALL({n.Value},{n.Arity}) ")
+            End Select
+        Next
+
+        Return sb.ToString().Trim()
+    End Function
+
+    Private Sub GuardarIRP_LET(writer As StreamWriter,
+                               name As String,
+                               indices As List(Of List(Of RPN.RPN_Node)),
+                               expr As List(Of RPN.RPN_Node)
+                               )
+
+        Dim sb As New StringBuilder()
+
+        ' --- LValue ---
+        sb.Append($"VAR({name})")
+
+        If indices IsNot Nothing AndAlso indices.Count > 0 Then
+            sb.Append(" IDX(")
+            For i = 0 To indices.Count - 1
+                If i > 0 Then sb.Append(",")
+                sb.Append(RPN_ToText(indices(i)))
+            Next
+            sb.Append(")")
+        End If
+
+        ' --- Asignación ---
+        sb.Append(" := ")
+
+        ' --- RValue ---
+        sb.Append(RPN_ToText(expr))
+
+        ' Emitir IR textual tipado
+        GuardarIRP_Token_Valor(writer, TokenID.TK_LET, sb.ToString())
+
+    End Sub
+
+    Private Sub GuardarIRP_IF(writer As StreamWriter, condicion As List(Of RPN.RPN_Node))
+
+    End Sub
+
+    Private Sub GuardarIRP_FOR(writer As StreamWriter, varName As String, exprInit As List(Of RPN.RPN_Node),
+                               exprLimit As List(Of RPN.RPN_Node), exprStep As List(Of RPN.RPN_Node))
+
+    End Sub
+
+    Private Sub GuardarIRP_CLEAR(writer As StreamWriter, expr As List(Of RPN.RPN_Node))
+
+    End Sub
+
+    Private Sub GuardarIRP_DIM(writer As StreamWriter, arrayName As String, dims As List(Of List(Of RPN.RPN_Node)))
+
+    End Sub
+
+    Private Sub GuardarIRP_RANDOMIZE(writer As StreamWriter, modoUSR As Boolean, expr As List(Of RPN.RPN_Node))
+
+    End Sub
+
+    Private Sub GuardarIRP_DATA(writer As StreamWriter, items As List(Of List(Of RPN.RPN_Node)))
+
+    End Sub
+
+    Private Sub GuardarIRP_BEEP(writer As StreamWriter, exprDuration As List(Of RPN.RPN_Node), exprPitch As List(Of RPN.RPN_Node))
+
+    End Sub
+
+    Private Sub GuardarIRP_RUN(writer As StreamWriter, expr As List(Of RPN.RPN_Node))
+
+    End Sub
+
+    Private Sub GuardarIRP_LIST(writer As StreamWriter, exprStart As List(Of RPN.RPN_Node), exprEnd As List(Of RPN.RPN_Node))
+
+    End Sub
+
+    Private Sub GuardarIRP_FILE(writer As StreamWriter, id As TokenID, expr As List(Of RPN.RPN_Node))
+
+    End Sub
+
+    Private Sub GuardarIRP_UNARY(writer As StreamWriter, id As TokenID, expr As List(Of RPN.RPN_Node))
+
+    End Sub
+
+    Private Sub GuardarIRP_BINARY(writer As StreamWriter, id As TokenID, exprLeft As List(Of RPN.RPN_Node),
+                                  exprRight As List(Of RPN.RPN_Node))
+
+    End Sub
+
 
 End Module
