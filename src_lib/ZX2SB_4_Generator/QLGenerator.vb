@@ -19,6 +19,9 @@ Public Module QLGenerator
     Dim NroLineaFichero As Integer = 0
     Dim LineaZXActual As Integer = -1
     Dim ContadorLineaInterna As Integer = 0
+    Dim EncontradoEOF As Boolean = False
+    Dim stReader As StreamReader
+    Dim stWriter As StreamWriter
 
     ' --- Estado del IF ZX en curso ---
     Dim IFContador As Integer = 0       ' Cuantos IF tenemos abiertos
@@ -36,97 +39,98 @@ Public Module QLGenerator
     ' Punto de entrada
     ' ============================================================
     Public Function Ejecutar(_Opts As CmdOptions) As Integer
-        Dim EncontradoEOF As Boolean = False
+        stWriter = New StreamWriter(ObtenerFicheroSalida(opts), False, New UTF8Encoding(False))
+        stReader = New StreamReader(ObtenerFicheroEntrada(opts))
         opts = _Opts
         NroErrores = 0
 
         FuncionesFNUsadas.Clear()
         AuxFN = New QLFnLibrary()
 
-        Using writer As New StreamWriter(opts.FSalidaGSB, False, New UTF8Encoding(False)) '✅ UTF‑8 sin BOM
-            writer.NewLine = ChrW(10)   ' Fín de línea para el QL es solo LF (ASCII 10)
+        stWriter.NewLine = ChrW(10)   ' Fín de línea para el QL es solo LF (ASCII 10)
 
-            'Cabecera del programa
-            Dim startLine As Integer = 1
-            GrabarFuncion(writer, startLine, AuxFN.GenerateProgramInit())
+        'Cabecera del programa
+        Dim startLine As Integer = 1
+        GrabarFuncion(stWriter, startLine, AuxFN.GenerateProgramInit())
 
 
-            For Each LineaLeida As String In File.ReadLines(opts.FSalidaSem)
-                If String.IsNullOrWhiteSpace(LineaLeida) Then Continue For
+        While Not stReader.EndOfStream
+            Dim LineaLeida As String = stReader.ReadLine()
+            If String.IsNullOrWhiteSpace(LineaLeida) Then Continue While
 
-                ' ----------------------------------------------------------
-                ' Primera línea, Debe contener tipo y versión del fichero
-                ' ----------------------------------------------------------
-                If PrimeraLinea Then
-                    If Not LineaLeida.StartsWith(Constantes.SEM_NOMBRE) Then
-                        EmitirError(writer, 0, "[ERROR] No es un fichero " & Constantes.SEM_NOMBRE & ": " & LineaLeida)
-                        Return (1)
-                    End If
-
-                    If Not LineaLeida.StartsWith(Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION) Then
-                        EmitirError(writer, 0, "[ERROR] Versión incorrecta del fichero " & Constantes.LEX_NOMBRE & ": " & LineaLeida)
-                        Return (1)
-                    End If
-                    PrimeraLinea = False
-                    Continue For
+            ' ----------------------------------------------------------
+            ' Primera línea, Debe contener tipo y versión del fichero
+            ' ----------------------------------------------------------
+            If PrimeraLinea Then
+                If Not LineaLeida.StartsWith(Constantes.SEM_NOMBRE) Then
+                    EmitirError(stWriter, 0, "[ERROR] No es un fichero " & Constantes.SEM_NOMBRE & ": " & LineaLeida)
+                    Return (1)
                 End If
 
-                ' --------------------------------------------
-                ' Línea fuente original (contexto de error)
-                ' --------------------------------------------
-                If LineaLeida.StartsWith(MarcaSRC) Then
-                    CerrarIF(writer)
-
-                    ContadorLineaInterna = 0
-                    LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, LineaZXActual, LineaLeida)
-
-                    ' ⚠️ TODA sentencia debe llevar número de línea, pero estas las dejamos sin nro para
-                    '    verlas en el fichero generado pero no en el QL, solo si estamos en modo debug
-                    If (opts.ModoDebug) Then
-                        GrabarSalida(writer, "REM --> " & LineaParaMostrar, False)
-                    End If
-                    Continue For
+                If Not LineaLeida.StartsWith(Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION) Then
+                    EmitirError(stWriter, 0, "[ERROR] Versión incorrecta del fichero " & Constantes.LEX_NOMBRE & ": " & LineaLeida)
+                    Return (1)
                 End If
-
-                ' ----------------------------------------------------------------------------
-                ' Línea del IR, montar Token auxliar para descomponer la línea correctamente
-                ' ----------------------------------------------------------------------------
-                Dim auxTok As New Token(LineaLeida)
-
-                Select Case auxTok.ID
-                    Case TokenID.TCO_EOL
-                        CerrarIF(writer)
-                    Case TokenID.TCO_EOF
-                        EncontradoEOF = True
-                        CerrarIF(writer)
-                    Case TokenID.TCO_LINE
-                        ' Nro de línea
-                        If Not Integer.TryParse(auxTok.Value, LineaZXActual) Then
-                            EmitirError(writer, 0, $"Número de línea ZX inválido: '{auxTok.Value}'")
-                            LineaZXActual = -1
-                        End If
-                    Case Else
-                        ' Sentencia ejecutable
-                        GenerarSentenciaQL(writer, LineaZXActual, auxTok)
-                End Select
-
-            Next
-
-            ' -----------------------------------------
-            ' Funciones auxiliares FN
-            ' -----------------------------------------
-            EmitirFuncionesAuxiliares(writer)
-
-            ' -----------------------------------------
-            ' Cierre final
-            ' -----------------------------------------
-            If Not EncontradoEOF Then
-                EmitirError(writer, 0, "[ERROR GENERADOR] Fichero IRS incompleto: falta EOF, posible fichero truncado")
-                Return 1
+                PrimeraLinea = False
+                Continue While
             End If
 
-        End Using
+            ' --------------------------------------------
+            ' Línea fuente original (contexto de error)
+            ' --------------------------------------------
+            If LineaLeida.StartsWith(MarcaSRC) Then
+                CerrarIF(stWriter)
 
+                ContadorLineaInterna = 0
+                LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, LineaZXActual, LineaLeida)
+
+                ' ⚠️ TODA sentencia debe llevar número de línea, pero estas las dejamos sin nro para
+                '    verlas en el fichero generado pero no en el QL, solo si estamos en modo debug
+                If (opts.ModoDebug) Then
+                    GrabarSalida(stWriter, "REM --> " & LineaParaMostrar, False)
+                End If
+                Continue While
+            End If
+
+            ' ----------------------------------------------------------------------------
+            ' Línea del IR, montar Token auxliar para descomponer la línea correctamente
+            ' ----------------------------------------------------------------------------
+            Dim auxTok As New Token(LineaLeida)
+
+            Select Case auxTok.ID
+                Case TokenID.TCO_EOL
+                    CerrarIF(stWriter)
+                Case TokenID.TCO_EOF
+                    EncontradoEOF = True
+                    CerrarIF(stWriter)
+                Case TokenID.TCO_LINE
+                    ' Nro de línea
+                    If Not Integer.TryParse(auxTok.Value, LineaZXActual) Then
+                        EmitirError(stWriter, 0, $"Número de línea ZX inválido: '{auxTok.Value}'")
+                        LineaZXActual = -1
+                    End If
+                Case Else
+                    ' Sentencia ejecutable
+                    GenerarSentenciaQL(stWriter, LineaZXActual, auxTok)
+            End Select
+
+        End While
+
+        ' -----------------------------------------
+        ' Funciones auxiliares FN
+        ' -----------------------------------------
+        EmitirFuncionesAuxiliares(stWriter)
+
+        ' -----------------------------------------
+        ' Cierre final
+        ' -----------------------------------------
+        If Not EncontradoEOF Then
+            EmitirError(stWriter, 0, "[ERROR GENERADOR] Fichero IRS incompleto: falta EOF, posible fichero truncado")
+            Return 1
+        End If
+
+        stReader.Close()
+        stWriter.Close()
         Return 0
 
     End Function
@@ -454,7 +458,7 @@ Public Module QLGenerator
     ' Emisión de PRINT (ZX → SuperBASIC QL)
     ' =========================================================
     Private Sub GenerarPRINT(writer As StreamWriter, numeroLineaActual As Integer, tk As Token)
-        Dim item As New PrintItem(tk.Value)
+        Dim item As New PrintItem(tk)
         Dim tkaux As New Token(item.ID, item.Value)
         Dim Comando As String = "PRINT "
 
@@ -555,7 +559,7 @@ Public Module QLGenerator
             columna = columna - 1
         End If
 
-        MostrarError(opts, writer, NroLineaFichero, columna, LineaParaMostrar,
+        MostrarError(opts, stReader, stWriter, NroLineaFichero, columna, LineaParaMostrar,
                      New String(" "c, columna) & "^ " & descripcion)
     End Sub
 
@@ -564,7 +568,7 @@ Public Module QLGenerator
 
         ' 1) Aviso por consola
         If Not opts.Silencioso Then
-            MostrarWarning(opts, writer, NroLineaFichero, 0, $"[WARNING {NroWarnings}] {mensaje}", "")
+            MostrarWarning(opts, stReader, stwriter, NroLineaFichero, 0, $"[WARNING {NroWarnings}] {mensaje}", "")
         End If
 
         ' 2) Aviso dentro del código SuperBASIC

@@ -36,18 +36,12 @@ Module Program_Parser
             Else
                 ' Nunca propagamos excepciones
                 MostrarMensaje(opts, " ")
-                MostrarError(opts, Nothing, 0, 0, ex.Message, "")
+                MostrarError(opts, Nothing, Nothing, 0, 0, ex.Message, "")
                 NroErrores += 1
             End If
         End Try
 
-
-        If NroErrores = 0 Then
-            MostrarMensaje(opts, "Finalizado correctamente")
-        Else
-            MostrarError(opts, Nothing, 0, 0, $"Finalizado con {NroErrores} " & If(NroErrores = 1, "error", "errores"), "")
-        End If
-
+        MensajeFinal(opts, NroErrores)
         Environment.Exit(NroErrores)
 
     End Sub

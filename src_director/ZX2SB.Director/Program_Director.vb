@@ -18,7 +18,7 @@ Module Program_Director
     ' ===============================
     ' Punto de entrada del Director
     ' ===============================
-    Sub Main1(args As String())
+    Sub Main(args As String())
 
         ' --- UTF-8 siempre ---
         Console.OutputEncoding = Encoding.UTF8
@@ -31,15 +31,25 @@ Module Program_Director
             ' --- Procesar argumentos ---
             ProcesarArgs(Constantes.MDir, args, opts)
             opts.DesdeDirector = True
-
+            NroErrores = 0
             ' ====================================================
-            ' 1. LEXER
+            ' 1a. LEXER
             ' ====================================================
             'ProcesarArgs(Constantes.MLex, args, opts)
             opts.Modulo = Constantes.MLex
-            NroErrores = Lexer.Ejecutar(opts)
+            NroErrores += Lexer.Ejecutar(opts)
             If NroErrores <> 0 Then
                 Throw New ApplicationException("Errores en el Lexer")
+            End If
+
+            ' ====================================================
+            ' 1b. Normalizador
+            ' ====================================================
+            'ProcesarArgs(Constantes.MLex, args, opts)
+            opts.Modulo = Constantes.MNor
+            NroErrores += NormalizadorZX.Ejecutar(opts)
+            If NroErrores <> 0 Then
+                Throw New ApplicationException("Errores en el Normalizador")
             End If
 
             ' ====================================================
@@ -47,7 +57,7 @@ Module Program_Director
             ' ====================================================
             'ProcesarArgs(Constantes.MPar, args, opts)
             opts.Modulo = Constantes.MPar
-            NroErrores = Parser.Ejecutar(opts)
+            NroErrores += Parser.Ejecutar(opts)
             If NroErrores <> 0 Then
                 Throw New ApplicationException("Errores en el Parser")
             End If
@@ -56,22 +66,19 @@ Module Program_Director
             ' 3. SEMÁNTICO
             ' ====================================================
             'ProcesarArgs(Constantes.MSem, args, opts)
-            Try
-                opts.Modulo = Constantes.MSem
-                NroErrores = Semantic.Ejecutar(opts)
-                If NroErrores <> 0 Then
-                    Throw New ApplicationException("Errores semánticos")
-                End If
-            Catch er As Exception
-                Console.WriteLine(er.ToString)
-            End Try
+
+            opts.Modulo = Constantes.MSem
+            NroErrores += Semantic.Ejecutar(opts)
+            If NroErrores <> 0 Then
+                Throw New ApplicationException("Errores semánticos")
+            End If
 
             ' ====================================================
             ' 4. GENERACIÓN DE CÓDIGO (lógico, sin numerar)
             ' ====================================================
             'ProcesarArgs(Constantes.MGSB, args, opts)
             opts.Modulo = Constantes.MGSB
-            NroErrores = Generator.Ejecutar(opts)
+            NroErrores += Generator.Ejecutar(opts)
             If NroErrores <> 0 Then
                 Throw New ApplicationException("Errores generando")
             End If
@@ -81,20 +88,10 @@ Module Program_Director
             ' ====================================================
             'ProcesarArgs(Constantes.MRen, args, opts)
             opts.Modulo = Constantes.MRen
-            NroErrores = Renumerador.Ejecutar(opts)
+            NroErrores += Renumerador.Ejecutar(opts)
             If NroErrores <> 0 Then
                 Throw New ApplicationException("Errores generando")
             End If
-
-            ' ====================================================
-            ' 6. INICIALIZACIÓN DEL BACKEND
-            ' ====================================================
-            'programa = InicializadorDriver.Aplicar(programa, opts)
-
-            ' ====================================================
-            ' 7. SALIDA FINAL
-            ' ====================================================
-            ''EscritorSalida.Escribir(programa, opts)
 
         Catch ex As Exception
             If opts.ModoDebug Then
@@ -107,19 +104,12 @@ Module Program_Director
             Else
                 ' Nunca propagamos excepciones
                 MostrarMensaje(opts, " ")
-                MostrarError(opts, Nothing, 0, 0, ex.Message, "")
+                MostrarError(opts, Nothing, Nothing, 0, 0, ex.Message, "")
                 NroErrores += 1
             End If
         End Try
 
-        MostrarMensaje(opts, " ")
-
-        If NroErrores = 0 Then
-            MostrarMensaje(opts, "Finalizado correctamente")
-        Else
-            MostrarError(opts, Nothing, 0, 0, $"Finalizado con {NroErrores} " & If(NroErrores = 1, "error", "errores"), "")
-        End If
-
+        MensajeFinal(opts, NroErrores)
         Environment.Exit(NroErrores)
 
     End Sub

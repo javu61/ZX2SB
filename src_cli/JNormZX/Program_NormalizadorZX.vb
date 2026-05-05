@@ -3,9 +3,10 @@ Imports System.IO
 Imports System.Text
 Imports ZX2SB
 Imports ZX2SB.Constantes
+Imports ZX2SB.Lexer
 
 
-Module Program_Lexer
+Module Program_NormalizadorZX
 
     ' ===============================
     ' Punto de entrada del Lexer
@@ -20,11 +21,11 @@ Module Program_Lexer
         Dim NroErrores As Integer
 
         ' --- Procesar argumentos ---
-        ProcesarArgs(Constantes.MLex, args, opts)
+        ProcesarArgs(Constantes.MNor, args, opts)
 
-        ' --- Llamada al LEXER REAL ---
+        ' --- Llamada al NORMALIZADOR REAL ---
         Try
-            NroErrores = Lexer.Ejecutar(opts)
+            NroErrores = NormalizadorZX.Ejecutar(opts)
         Catch ex As Exception
             If opts.ModoDebug Then
                 'Mostrar la traza completa

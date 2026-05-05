@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<AssemblyName>JLexer</AssemblyName>
-		<RootNamespace>CLI_Lexer</RootNamespace>
+		<AssemblyName>JNorZX</AssemblyName>
+		<RootNamespace>CLI_NormalizadorZX</RootNamespace>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net8.0</TargetFramework>
 
@@ -12,7 +12,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\src_lib\ZX2SB_0_Common\ZX2SB_0_Common.vbproj" />
-		<ProjectReference Include="..\..\src_lib\ZX2SB_1_Lexer\ZX2SB_1_Lexer.vbproj" />
+		<ProjectReference Include="..\..\src_lib\ZX2SB_1_Normalizador\ZX2SB_1_NormalizadorZX.vbproj" />
 	</ItemGroup>
 
 </Project>

@@ -16,7 +16,6 @@ Public Module ReservedWords
             Case "ELSE" : id = TokenID.TK_ELSE
             Case "FN" : id = TokenID.TK_FN
             Case "FOR" : id = TokenID.TK_FOR
-            Case "GO" : id = TokenID.TK_GO
             Case "GOSUB" : id = TokenID.TK_GOSUB
             Case "GOTO" : id = TokenID.TK_GOTO
             Case "IF" : id = TokenID.TK_IF
@@ -36,7 +35,6 @@ Public Module ReservedWords
             Case "TO" : id = TokenID.TK_TO
             Case "VERIFY" : id = TokenID.TK_VERIFY
             Case "END" : id = TokenID.TK_END
-            Case "SUB" : id = TokenID.TK_SUB
             Case "RANDOMIZE" : id = TokenID.TK_RANDOMIZE
 
                 ' ===============================

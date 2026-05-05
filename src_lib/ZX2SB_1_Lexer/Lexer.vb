@@ -2,44 +2,58 @@
 Option Explicit On
 
 Imports System
+Imports System.Diagnostics.Eventing
 Imports System.IO
 Imports System.Text
+Imports System.Xml
 
-Public Module Lexer
+Public Module NormalizadorZX
+
     Dim opts As CmdOptions
     Dim pos As Integer
     Dim NroErrores As Integer = 0
     Dim LineaParaMostrar As String = ""
     Dim NroLineaPrograma As Integer = 0
     Dim NroLineaFichero As Integer = 0
+    Dim stWriter As StreamWriter
+    Dim stReader As StreamReader
 
     ' ============================================================
     ' Punto de entrada
     ' ============================================================
     Public Function Ejecutar(_opts As CmdOptions) As Integer
         opts = _opts
+        stWriter = New StreamWriter(ObtenerFicheroSalida(opts), False, New UTF8Encoding(False))
+        stReader = New StreamReader(ObtenerFicheroEntrada(opts))
         NroLineaFichero = 0
         NroErrores = 0
 
-        Using writer As New StreamWriter(opts.FSalidaLex, False, New UTF8Encoding(False))
-            writer.WriteLine(Constantes.LEX_NOMBRE & " " & Constantes.LEX_VERSION)
+        Dim PrimeraLinea As Boolean = True
+        While Not stReader.EndOfStream
+            Dim LineaLeida As String = stReader.ReadLine()
 
-            For Each linea As String In File.ReadLines(ObtenerFicheroEntrada(opts))
-                ' 🔒 Ignorar líneas en blanco o solo con espacios
-                If String.IsNullOrWhiteSpace(linea) Then
-                    Continue For
-                End If
+            ' Ignorar líneas en blanco o solo con espacios
+            If String.IsNullOrWhiteSpace(LineaLeida) Then
+                Continue While
+            End If
 
-                LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, linea)
 
-                GuardaSalida(writer, $"{Constantes.MarcaSRC} {LineaParaMostrar}")
-                AnalizarLinea(linea, NroLineaFichero, writer)
-            Next
+            ' ----------------------------------------------------------
+            ' Primera línea
+            ' ----------------------------------------------------------
+            If PrimeraLinea Then
+                GuardaSalida($"{Constantes.LEX_NOMBRE} {Constantes.LEX_VERSION}")
+                PrimeraLinea = False
+            End If
 
-            Dim eofToken As New Token(TokenID.TCO_EOF, "", NroLineaFichero, 0)
-            GuardaSalida(writer, eofToken.TokToLine())
+            LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, LineaLeida)
+            GuardaSalida($"{Constantes.MarcaSRC} {LineaParaMostrar}")
+            AnalizarLinea(LineaLeida, NroLineaFichero)
+        End While
 
-        End Using
+        AddTokenEOFL()
+        stReader.Close()
+        stWriter.Close()
 
         Return NroErrores
     End Function
@@ -47,12 +61,12 @@ Public Module Lexer
     ' ============================================================
     ' Analizar UNA línea ZX
     ' ============================================================
-    Public Sub AnalizarLinea(LineaAnalizar As String, numLinea As Integer, writer As StreamWriter)
+    Public Sub AnalizarLinea(LineaAnalizar As String, numLinea As Integer)
         pos = 0
 
         ' Número de línea obligatorio
-        If Not ConsumirNumeroDeLinea(writer, LineaAnalizar) Then
-            AddTokenEOL(writer)
+        If Not ConsumirNumeroDeLinea(LineaAnalizar) Then
+            AddTokenEOL()
             Return
         End If
 
@@ -66,7 +80,7 @@ Public Module Lexer
             End If
 
             If EsInicioREM(LineaAnalizar) Then
-                ConsumirComentario(writer, LineaAnalizar)
+                ConsumirComentario(LineaAnalizar)
                 Exit While
             End If
 
@@ -75,8 +89,8 @@ Public Module Lexer
                (c = "."c AndAlso pos + 1 < LineaAnalizar.Length AndAlso Char.IsDigit(LineaAnalizar(pos + 1))) Then
 
                 Dim col = pos + 1
-                Dim tok = ConsumirNumero(writer, col, LineaAnalizar)
-                GuardaSalida(writer, tok.TokToLine())
+                Dim tok = ConsumirNumero(col, LineaAnalizar)
+                GuardaToken(tok)
                 Continue While
             End If
 
@@ -84,34 +98,31 @@ Public Module Lexer
             If Char.IsLetter(c) Then
                 Dim col = pos + 1
                 Dim tok = ConsumirIdentificador(col, LineaAnalizar)
-                GuardaSalida(writer, tok.TokToLine())
+                GuardaToken(tok)
                 Continue While
             End If
 
             If c = Constantes.C_COMILLAS Then
                 Dim col = pos + 1
-                Dim tok = ConsumirStringLiteral(writer, col, LineaAnalizar)
-                GuardaSalida(writer, tok.TokToLine())
+                Dim tok = ConsumirStringLiteral(col, LineaAnalizar)
+                GuardaToken(tok)
                 Continue While
             End If
 
             ' Operadores y símbolos
             Dim colOp = pos + 1
-            Dim tokOp = ConsumirOperadorOSimbolo(writer, colOp, LineaAnalizar)
-            GuardaSalida(writer, tokOp.TokToLine())
+            Dim tokOp = ConsumirOperadorOSimbolo(colOp, LineaAnalizar)
+            GuardaToken(tokOp)
         End While
 
-        AddTokenEOL(writer)
+        AddTokenEOL()
     End Sub
 
 
     ' ============================================================
     ' Consumir número de línea ZX
     ' ============================================================
-    Private Function ConsumirNumeroDeLinea(
-                        writer As StreamWriter,
-                        LineaAnalizar As String
-                    ) As Boolean
+    Private Function ConsumirNumeroDeLinea(LineaAnalizar As String) As Boolean
 
         NroLineaPrograma = 0
 
@@ -122,7 +133,7 @@ Public Module Lexer
 
         ' Debe empezar por dígito
         If pos >= LineaAnalizar.Length OrElse Not Char.IsDigit(LineaAnalizar(pos)) Then
-            ErrorLexico(writer, 1, "Sentencia sin número de línea")
+            ErrorLexico(1, "Sentencia sin número de línea")
             Return False
         End If
 
@@ -141,14 +152,14 @@ Public Module Lexer
         If pos < LineaAnalizar.Length Then
             Dim ch As Char = LineaAnalizar(pos)
             If Not Char.IsWhiteSpace(ch) Then
-                ErrorLexico(writer, pos + 1, "Falta espacio entre número de línea y sentencia")
+                ErrorLexico(pos + 1, "Falta espacio entre número de línea y sentencia")
                 Return False
             End If
         End If
 
         ' Emitir token LINE
         Dim tLinea As New Token(TokenID.TCO_LINE, NroLineaPrograma.ToString(), NroLineaFichero, 1)
-        GuardaSalida(writer, tLinea.TokToLine())
+        GuardaToken(tLinea)
 
         ' Consumir espacios / tabs tras el número
         While pos < LineaAnalizar.Length AndAlso Char.IsWhiteSpace(LineaAnalizar(pos))
@@ -187,11 +198,10 @@ Public Module Lexer
     End Function
 
 
-    Private Function ConsumirNumero(writer As StreamWriter, col As Integer, LineaAnalizar As String) As Token
+    Private Function ConsumirNumero(col As Integer, LineaAnalizar As String) As Token
 
         Dim sb As New StringBuilder()
         Dim puntos As Integer = 0
-        Dim inicio As Integer = pos
 
         ' Caso especial: número que empieza por punto (.2)
         If LineaAnalizar(pos) = "."c Then
@@ -208,7 +218,7 @@ Public Module Lexer
             ElseIf ch = "."c Then
                 puntos += 1
                 If puntos > 1 Then
-                    ErrorLexico(writer, col, "Número mal formado")
+                    ErrorLexico(col, "Número mal formado")
                     Return Nothing
                 End If
 
@@ -226,35 +236,79 @@ Public Module Lexer
 
 
     ' ============================================================
-    ' Consumir identificador o palabra reservada
+    ' Consumir identificador o palabra reservada (estrategia final)
     ' ============================================================
     Private Function ConsumirIdentificador(col As Integer, LineaAnalizar As String) As Token
-        Dim start As Integer = pos
+        Dim sb As New StringBuilder()
+        Dim posInicial As Integer = pos
 
-        ' Letras, dígitos, _, $
-        While pos < LineaAnalizar.Length AndAlso
-          (Char.IsLetterOrDigit(LineaAnalizar(pos)) _
-           OrElse LineaAnalizar(pos) = "_"c _
-           OrElse LineaAnalizar(pos) = "$"c)
-            Avanzar()
+        ' ---------------------------------------------
+        ' 1. Consumir letras / dígitos / $
+        ' ---------------------------------------------
+        While pos < LineaAnalizar.Length
+            Dim ch As Char = LineaAnalizar(pos)
+
+            If Char.IsLetterOrDigit(ch) OrElse ch = "$"c Then
+                sb.Append(ch)
+                Avanzar()
+            Else
+                Exit While
+            End If
         End While
 
-        Dim lexema As String = LineaAnalizar.Substring(start, pos - start)
+        '' --------------------------------------------------------
+        '' 2. Caso especial: GO TO / GO SUB separados por espacio
+        '' --------------------------------------------------------
+        'If sb.ToString().ToUpperInvariant() = "GO" Then
+        '    If pos < LineaAnalizar.Length AndAlso LineaAnalizar(pos) = " "c Then
 
-        ' ¿Corresponde a un TokenID canónico?
+        '        Dim savePos As Integer = pos
+        '        Avanzar() ' consumir espacio
+
+        '        ' Leer siguiente palabra (TO / SUB)
+        '        Dim sb2 As New StringBuilder()
+        '        While pos < LineaAnalizar.Length AndAlso Char.IsLetter(LineaAnalizar(pos))
+        '            sb2.Append(Char.ToUpperInvariant(LineaAnalizar(pos)))
+        '            Avanzar()
+        '        End While
+
+        '        Select Case sb2.ToString()
+        '            Case "TO"
+        '                Return New Token(TokenID.TK_GOTO, "", NroLineaFichero, col)
+
+        '            Case "SUB"
+        '                Return New Token(TokenID.TK_GOSUB, "", NroLineaFichero, col)
+
+        '            Case Else
+        '                ' No era GO TO / GO SUB → volver atrás
+        '                pos = savePos
+        '        End Select
+        '    End If
+        'End If
+
+        ' ---------------------------------------------
+        ' 3. Clasificación normal
+        ' ---------------------------------------------
+        Dim lexeme As String = sb.ToString()
+        If lexeme = "" Then
+            ErrorLexico(col, "identificador vacío")
+            Return Nothing
+        End If
+
+        Dim upper As String = lexeme.ToUpperInvariant()
         Dim id As TokenID
-        If ReservedWords.GetTokenID(lexema, id) Then
-            ' Palabra reservada: sin payload
+
+        ' Palabra reservada
+        If ReservedWords.GetTokenID(upper, id) Then
             Return New Token(id, "", NroLineaFichero, col)
         End If
 
-        ' Identificador normal (con payload)
-        Return New Token(TokenID.TES_IDENT, lexema, NroLineaFichero, col)
+        ' Identificador normal
+        Return New Token(TokenID.TES_IDENT, upper.ToLowerInvariant(), NroLineaFichero, col)
+
     End Function
 
-
-
-    Private Function ConsumirStringLiteral(writer As StreamWriter, col As Integer, LineaAnalizar As String) As Token
+    Private Function ConsumirStringLiteral(col As Integer, LineaAnalizar As String) As Token
 
         ' Consumimos la comilla inicial
         Avanzar()
@@ -288,7 +342,7 @@ Public Module Lexer
 
         ' Cadena sin cerrar (comillas desbalanceadas)
         If Not cerrado Then
-            ErrorLexico(writer, col, "Cadena sin cerrar (comillas desbalanceadas)")
+            ErrorLexico(col, "Cadena sin cerrar (comillas desbalanceadas)")
             Return New Token(TokenID.TCO_UNKNOWN, "", -1, -1)
         End If
 
@@ -299,7 +353,7 @@ Public Module Lexer
 
 
 
-    Private Sub ConsumirComentario(writer As StreamWriter, LineaAnalizar As String)
+    Private Sub ConsumirComentario(LineaAnalizar As String)
 
         Dim col As Integer = pos + 1
 
@@ -320,8 +374,8 @@ Public Module Lexer
         ' Token STRING con el texto del comentario
         Dim tCom As New Token(TokenID.TES_STRING, texto, NroLineaFichero, pos + 1)
 
-        GuardaSalida(writer, tRem.TokToLine())
-        GuardaSalida(writer, tCom.TokToLine())
+        GuardaToken(tRem)
+        GuardaToken(tCom)
 
         ' Fin de línea
         pos = LineaAnalizar.Length
@@ -329,7 +383,7 @@ Public Module Lexer
     End Sub
 
 
-    Private Function ConsumirOperadorOSimbolo(writer As StreamWriter, col As Integer, LineaAnalizar As String) As Token
+    Private Function ConsumirOperadorOSimbolo(col As Integer, LineaAnalizar As String) As Token
 
         ' --------------------------------------------
         ' Operadores de dos caracteres
@@ -376,7 +430,7 @@ Public Module Lexer
             Case ":"c : Return New Token(TokenID.TSP_DOSPUNTOS, "", NroLineaFichero, col)
 
             Case Else
-                ErrorLexico(writer, col, "Carácter no válido: '" & c & "'")
+                ErrorLexico(col, "Carácter no válido: '" & c & "'")
                 Return New Token(TokenID.TCO_UNKNOWN, c.ToString(), NroLineaFichero, col)
         End Select
 
@@ -388,8 +442,33 @@ Public Module Lexer
     End Sub
 
 
-    Private Sub GuardaSalida(writer As StreamWriter, linea As String)
-        writer.WriteLine(linea)
+    Private Sub ErrorLexico(columna As Integer, descripcion As String)
+        NroErrores += 1
+        If (columna <> 0) Then
+            columna = columna - 1
+        End If
+        MostrarError(opts, stReader, stWriter, NroLineaPrograma, columna, LineaParaMostrar,
+                     New String(" "c, columna) & "^ " & descripcion)
+    End Sub
+
+    Private Sub AddTokenEOL()
+        Dim tEOL As New Token(TokenID.TCO_EOL, "", NroLineaFichero, 0)
+        GuardaToken(tEOL)
+    End Sub
+
+    Private Sub AddTokenEOFL()
+        Dim tEOF As New Token(TokenID.TCO_EOF, "", NroLineaFichero, 0)
+        GuardaToken(tEOF)
+    End Sub
+
+    Private Sub GuardaToken(tk As Token)
+        GuardaSalida(tk.TokToLine())
+    End Sub
+
+
+    Private Sub GuardaSalida(linea As String)
+
+        stWriter.WriteLine(linea)
 
         If opts.Verbose Then
             MostrarVerbose(opts, linea)
@@ -397,17 +476,5 @@ Public Module Lexer
     End Sub
 
 
-    Private Sub ErrorLexico(writer As StreamWriter, columna As Integer, descripcion As String)
-        NroErrores += 1
-        If (columna <> 0) Then
-            columna = columna - 1
-        End If
-        MostrarError(opts, writer, NroLineaFichero, columna, LineaParaMostrar,
-                     New String(" "c, columna) & "^ " & descripcion)
-    End Sub
 
-    Private Sub AddTokenEOL(writer As StreamWriter)
-        Dim tEOL As New Token(TokenID.TCO_EOL, "", NroLineaFichero, 0)
-        GuardaSalida(writer, tEOL.TokToLine)
-    End Sub
 End Module

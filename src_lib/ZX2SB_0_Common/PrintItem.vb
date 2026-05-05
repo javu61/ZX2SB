@@ -16,9 +16,9 @@ Public Structure PrintItem
 
     Public ID As TokenID
     Public Value As String
-    Public Separator As PrintSeparator
     Public Expr1 As List(Of RPN.RPN_Node)
     Public Expr2 As List(Of RPN.RPN_Node)
+    Public Separator As PrintSeparator
 
     Public Sub New(type As TokenID, valor As String, sep As PrintSeparator)
         Me.ID = type
@@ -33,10 +33,11 @@ Public Structure PrintItem
         Me.Separator = PrintSeparator.N
     End Sub
 
-    Public Sub New(linea As String)
-        Dim p = FromText(linea)
+    Public Sub New(tk As Token)
+        Dim p = FromToken(tk)
         Me.ID = p.ID
         Me.Value = p.Value
+        Me.Expr1 = p.Expr1
         Me.Separator = p.Separator
     End Sub
 
@@ -48,26 +49,23 @@ Public Structure PrintItem
         Return $"{CInt(Me.ID)},{Me.Separator},{Me.Value}"
     End Function
 
-    Public Shared Function FromText(text As String) As PrintItem
-        Dim c1 As Integer = text.IndexOf(","c)
-        If c1 < 0 Then
-            Throw New FormatException($"PrintItem inválido: {text}")
+
+    Public Shared Function FromToken(tk As Token) As PrintItem
+        If tk.ID = TokenID.TCO_UNKNOWN Then
+            Throw New ArgumentNullException(NameOf(tk))
         End If
 
-        Dim c2 As Integer = text.IndexOf(","c, c1 + 1)
-        If c2 < 0 Then
-            Throw New FormatException($"PrintItem inválido: {text}")
+        If tk.RPN Is Nothing OrElse tk.RPN.Count = 0 Then
+            Throw New FormatException($"PRINT inválido: RPN vacía")
         End If
 
-        Dim id As TokenID = CType(Integer.Parse(text.Substring(0, c1)), TokenID)
-        Dim valueText As String = text.Substring(c2 + 1)
-        Dim sepText As String = text.Substring(c1 + 1, c2 - c1 - 1)
-        Dim sep As PrintSeparator = CType([Enum].Parse(GetType(PrintSeparator), sepText), PrintSeparator)
-
-        Dim result As New PrintItem With {.ID = id, .Value = valueText, .Separator = sep}
-
-        Return result
+        Return New PrintItem With {
+            .ID = tk.ID,
+            .Expr1 = tk.RPN
+        }
     End Function
+
+
 
 
 End Structure

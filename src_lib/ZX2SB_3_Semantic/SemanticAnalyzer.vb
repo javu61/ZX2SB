@@ -20,13 +20,17 @@ Public Module SemanticAnalyzer
     Dim ForStack As New Stack(Of String)
     Dim GosubStack As New Stack(Of Integer)
 
-    ReadOnly RegexIdentificador As New Text.RegularExpressions.Regex("^[A-Z][A-Z0-9]*\$?$", Text.RegularExpressions.RegexOptions.IgnoreCase)
+    'Writer del fichero de salida
+    Dim stReader As StreamReader
+    Dim stWriter As StreamWriter
 
     ' ============================================================
     ' Punto de entrada
     ' ============================================================
     Public Function Ejecutar(_opts As CmdOptions) As Integer
         opts = _opts
+        stWriter = New StreamWriter(ObtenerFicheroSalida(opts), False, New UTF8Encoding(False))
+        'stReader = New StreamReader(ObtenerFicheroEntrada(opts))
         NroLineaFichero = 0
         NroErrores = 0
 
@@ -37,7 +41,7 @@ Public Module SemanticAnalyzer
         ' PRIMERA PASADA (Recolección estructural)
         ' ============================================================
         opts.Pasada = 1
-        ProcesarIR(Nothing)
+        ProcesarIR()
         If NroErrores <> 0 Then
             Return 1
         End If
@@ -46,18 +50,20 @@ Public Module SemanticAnalyzer
         ' SEGUNDA PASADA (Análisis semántico + generación IRS)
         ' ============================================================
         opts.Pasada = 2
-        Using writer As New StreamWriter(opts.FSalidaSem, False, New UTF8Encoding(False))
-            GuardarIRS_Texto(writer, Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION)
-            ProcesarIR(writer)
-            If NroErrores <> 0 Then
-                Return 1
-            End If
-            GuardarIRP_Token(writer, New Token(TokenID.TCO_EOF))
-            GuardarVarAndData()
-        End Using
+
+
+        GuardarIRS_Texto(Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION)
+        ProcesarIR()
+        If NroErrores <> 0 Then
+            Return 1
+        End If
+
+        GuardarIRP_Token(New Token(TokenID.TCO_EOF))
+        GuardarVarAndData()
 
         ' Los avisos de variables son warnings
         EmitirWarningsVariables()
+
 
         Return 0
 
@@ -78,14 +84,16 @@ Public Module SemanticAnalyzer
     ' BUCLE PRINCIPAL DE LECTURA DEL IR
     ' ============================================================
 
-    Private Sub ProcesarIR(writer As StreamWriter)
+    Private Sub ProcesarIR()
         Dim primeralinea As Boolean = True
         Dim EOFRecibido As Boolean = False
+
         NroLineaFichero = 0
+        stReader = New StreamReader(ObtenerFicheroEntrada(opts))
+        While Not stReader.EndOfStream
+            Dim LineaLeida As String = stReader.ReadLine()
 
-        For Each LineaLeida As String In File.ReadLines(opts.FSalidaPar)
-
-            If String.IsNullOrWhiteSpace(LineaLeida) Then Continue For
+            If String.IsNullOrWhiteSpace(LineaLeida) Then Continue While
 
             ' ---------------------------------------------
             ' Cabecera IRP
@@ -93,16 +101,16 @@ Public Module SemanticAnalyzer
             If primeralinea Then
                 MostrarMensaje(opts, LineaLeida)
                 If Not LineaLeida.StartsWith(Constantes.PAR_NOMBRE) Then
-                    ErrorSemantico(writer, 0, "[ERROR] No es un fichero " & Constantes.PAR_NOMBRE & ": " & LineaLeida)
+                    ErrorSemantico("[ERROR] No es un fichero " & Constantes.PAR_NOMBRE & ": " & LineaLeida)
                     Exit Sub
                 End If
 
                 If Not LineaLeida.StartsWith(Constantes.PAR_NOMBRE & " " & Constantes.PAR_VERSION) Then
-                    ErrorSemantico(writer, 0, "[ERROR] Versión incorrecta del fichero " & Constantes.PAR_NOMBRE & ": " & LineaLeida)
+                    ErrorSemantico("[ERROR] Versión incorrecta del fichero " & Constantes.PAR_NOMBRE & ": " & LineaLeida)
                     Exit Sub
                 End If
                 primeralinea = False
-                Continue For
+                Continue While
             End If
 
             ' ---------------------------------------------
@@ -111,9 +119,9 @@ Public Module SemanticAnalyzer
             If LineaLeida.StartsWith(MarcaSRC) Then
                 LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, LineaLeida)
                 If opts.Pasada = 2 Then
-                    GuardarIRS_Texto(writer, $"{Constantes.MarcaSRC} {LineaParaMostrar}")
+                    GuardarIRS_Texto($"{Constantes.MarcaSRC} {LineaParaMostrar}")
                 End If
-                Continue For
+                Continue While
             End If
 
             ' ----------------------------------------------------------------------------
@@ -127,6 +135,7 @@ Public Module SemanticAnalyzer
                 Case TokenID.TCO_EOF
                     ' fin del fichero
                     EOFRecibido = True
+                    Exit While
                 Case TokenID.TCO_LINE
                     ' LINE n
                     Select Case opts.Pasada
@@ -136,30 +145,32 @@ Public Module SemanticAnalyzer
                                 If opts.Pasada = 1 Then
                                     ' Validación de numeración correlativa en ZX BASIC
                                     If n <= UltimaLineaZX Then
-                                        ErrorSemantico(Nothing, 0, $"Numeración de líneas no válida: la línea {n} aparece después de {UltimaLineaZX}")
+                                        ErrorSemantico($"Numeración de líneas no válida: la línea {n} aparece después de {UltimaLineaZX}")
                                     End If
                                     UltimaLineaZX = n
                                 End If
                             Else
-                                ErrorSemantico(Nothing, 0, $"LINE inválido en IRP: {LineaLeida}")
+                                ErrorSemantico($"LINE inválido en IRP: {LineaLeida}")
                             End If
                         Case 2
-                            P2_AnalizarYEmitirStmt(auxTok, LineaParaMostrar, writer)
+                            P2_AnalizarYEmitirStmt(auxTok, LineaParaMostrar)
                     End Select
                 Case Else
                     Select Case opts.Pasada
                         Case 1
                             P1_RecolectarDesdeStmt(auxTok)
                         Case 2
-                            P2_AnalizarYEmitirStmt(auxTok, LineaParaMostrar, writer)
+                            P2_AnalizarYEmitirStmt(auxTok, LineaParaMostrar)
                         Case Else
                             Throw New InvalidOperationException("Pasada semántica desconocida")
                     End Select
             End Select
-        Next
+        End While
+
+        'Console.WriteLine($"EOF....{EOFRecibido}")
 
         If Not EOFRecibido Then
-            ErrorSemantico(Nothing, 0, $"El contenido no termina por un EOF, posible fichero inválido")
+            ErrorSemantico($"El contenido no termina por un EOF, posible fichero inválido")
         End If
     End Sub
 
@@ -172,54 +183,186 @@ Public Module SemanticAnalyzer
     ' - Registrar DATA
     ' - Marcar flags de uso (PRINT, READ, etc.)
     Private Sub P1_RecolectarDesdeStmt(tk As Token)
+        Select Case tk.ID
+            Case TokenID.TK_LET
+                RecolectarLET(tk)
 
-        If tk.ID = TokenID.TK_LET Then
-            RecolectarLET(tk)
-            Return
-        End If
+            Case TokenID.TK_FOR
+                RecolectarFOR(tk)
 
-        If tk.ID = TokenID.TK_DIM Then
-            RecolectarDIM(tk)
-            Return
-        End If
+            Case TokenID.TK_IF
+                RecolectarIF(tk)
 
-        If tk.ID = TokenID.TK_PRINT Then
-            RecolectarPrint(tk)
-            Return
-        End If
+            Case TokenID.TK_DIM
+                RecolectarDIM(tk)
 
-        If tk.ID = TokenID.TK_DATA Then
-            RecolectarDATA(tk)
-            Return
-        End If
+            Case TokenID.TK_PRINT
+                RecolectarPRINT(tk)
 
-        If tk.ID = TokenID.TK_READ Then
-            RecolectarREAD(tk)
-            Return
-        End If
+            Case TokenID.TK_DATA
+                RecolectarDATA(tk)
+
+            Case TokenID.TK_READ
+                RecolectarREAD(tk)
+        End Select
 
         ' El resto de sentencias no relevantes para la pasada 1 se ignoran
 
     End Sub
 
     Private Sub RecolectarLET(tk As Token)
-        ' Formato: LET <var> <expr>
-        Dim pL As String = ""
-        Dim pR As String = ""
-        SepararLetIR(tk.Value, pL, pR)
-        Dim varName As String = ExprTypeEvaluator.GetBaseVariableName(pL)
 
-        If Not ctx.Variables.ContainsKey(varName) Then
-            Dim info As New VariableInfo With {
-                .Name = varName,
-                .IsString = varName.EndsWith("$"c)
-                }
+        Dim lhs As String = ""
+        Dim rhs As String = ""
+
+        ' Separación estructural LET (:=)
+        SepararLet(tk, lhs, rhs)
+
+        ' ---------------------------------
+        ' LHS: variable base
+        ' ---------------------------------
+        If Not lhs.StartsWith("V(") Then
+            Exit Sub  ' LET inválido, ya se detectará en pasada 2
+        End If
+
+        Dim endVar As Integer = lhs.IndexOf(")"c)
+        Dim baseName As String = lhs.Substring(2, endVar - 2)
+
+        Dim info As VariableInfo = Nothing
+        If Not ctx.Variables.TryGetValue(baseName, info) Then
+            info = New VariableInfo With {
+            .Name = baseName,
+            .IsString = baseName.EndsWith("$"c)
+        }
+            ctx.Variables.Add(baseName, info)
+        End If
+
+        info.WasAssigned = True
+        ctx.Variables(baseName) = info
+
+        ' ---------------------------------
+        ' LHS: índices (si existen)
+        ' ---------------------------------
+        Dim idxPos As Integer = lhs.IndexOf("IDX(")
+        If idxPos >= 0 Then
+
+            ' lhs contiene "... IDX( ... )"
+            Dim start As Integer = idxPos + 4      ' justo después de "IDX("
+            Dim endPos As Integer = lhs.LastIndexOf(")"c)
+
+            If endPos < start Then
+                Throw New FormatException($"IDX mal formado en LET: {lhs}")
+            End If
+
+            Dim idxText As String = lhs.Substring(start, endPos - start)
+
+
+            Dim indexParts = SplitTopLevel(idxText, ","c)
+            For Each part In indexParts
+                Dim rpnIdx = ParseRPN(part.Trim())
+                MarcarUsoVariablesRPN(rpnIdx)
+            Next
+        End If
+
+        ' ---------------------------------
+        ' RHS: expresión
+        ' ---------------------------------
+        Dim rpnRhs = ParseRPN(rhs)
+        MarcarUsoVariablesRPN(rpnRhs)
+
+    End Sub
+
+    Private Sub RecolectarIF(tk As Token)
+
+        ' En pasada 1 solo nos interesa marcar
+        ' las variables usadas en la condición
+
+        If tk.RPN Is Nothing OrElse tk.RPN.Count = 0 Then
+            Exit Sub
+        End If
+
+        MarcarUsoVariablesRPN(tk.RPN)
+
+    End Sub
+
+
+    Private Sub RecolectarFOR(tk As Token)
+
+        Dim text As String = tk.Value
+
+        ' -----------------------------
+        ' Separar variable de control
+        ' -----------------------------
+        Dim posAssign = text.IndexOf(":=", StringComparison.Ordinal)
+        If posAssign < 0 Then Exit Sub
+
+        Dim lhs = text.Substring(0, posAssign).Trim()
+        Dim rest = text.Substring(posAssign + 2).Trim()
+
+        ' lhs debe ser V(x)
+        If Not lhs.StartsWith("V(") Then Exit Sub
+
+        Dim endVar = lhs.IndexOf(")"c)
+        If endVar < 0 Then Exit Sub
+
+        Dim varName = lhs.Substring(2, endVar - 2)
+
+        ' Registrar variable de control como asignada
+        Dim info As VariableInfo = Nothing
+        If Not ctx.Variables.TryGetValue(varName, info) Then
+            info = New VariableInfo With {
+            .Name = varName,
+            .IsString = varName.EndsWith("$"c)
+        }
             ctx.Variables.Add(varName, info)
+        End If
+
+        info.WasAssigned = True
+        ctx.Variables(varName) = info
+
+        ' -----------------------------
+        ' Separar TO
+        ' -----------------------------
+        Dim posTo = rest.IndexOf(" TO ", StringComparison.OrdinalIgnoreCase)
+        If posTo < 0 Then Exit Sub
+
+        Dim initExpr = rest.Substring(0, posTo).Trim()
+        Dim tail = rest.Substring(posTo + 4).Trim()
+
+        ' -----------------------------
+        ' Separar STEP (opcional)
+        ' -----------------------------
+        Dim limitExpr As String
+        Dim stepExpr As String = Nothing
+
+        Dim posStep = tail.IndexOf(" STEP ", StringComparison.OrdinalIgnoreCase)
+        If posStep >= 0 Then
+            limitExpr = tail.Substring(0, posStep).Trim()
+            stepExpr = tail.Substring(posStep + 6).Trim()
+        Else
+            limitExpr = tail
+        End If
+
+        ' -----------------------------
+        ' Marcar uso de variables
+        ' -----------------------------
+        MarcarUsoVariablesRPN(ParseRPN(initExpr))
+        MarcarUsoVariablesRPN(ParseRPN(limitExpr))
+
+        If stepExpr IsNot Nothing Then
+            MarcarUsoVariablesRPN(ParseRPN(stepExpr))
         End If
 
     End Sub
 
-    Private Sub RecolectarPrint(tk)
+    Private Sub RecolectarPRINT(tk As Token)
+
+        ' PRINT siempre lleva una expresión RPN pura
+        If tk.RPN Is Nothing OrElse tk.RPN.Count = 0 Then
+            Exit Sub
+        End If
+
+        MarcarUsoVariablesRPN(tk.RPN)
 
     End Sub
 
@@ -233,7 +376,7 @@ Public Module SemanticAnalyzer
         If posParen < 0 Then Exit Sub
 
         Dim varName As String =
-        resto.Substring(0, posParen).Trim().ToUpperInvariant()
+        resto.Substring(0, posParen).Trim()
 
         ' Registrar variable si no existe
         If Not ctx.Variables.ContainsKey(varName) Then
@@ -259,35 +402,38 @@ Public Module SemanticAnalyzer
 
             Dim node As New DataNode
             node.Line = UltimaLineaZX
-            node.Value = ParseLiteral(valorTexto)
+            node.Value = ParseDataValue(valorTexto)
 
             ctx.DataNodes.Add(node)
         Next
 
     End Sub
 
-    Private Function ParseLiteral(text As String) As Object
+    Private Function ParseDataValue(text As String) As Object
 
         text = text.Trim()
 
-        ' String literal
-        If text.StartsWith(Constantes.C_COMILLAS) AndAlso text.EndsWith(Constantes.C_COMILLAS) Then
-            Return text.Substring(1, text.Length - 2)
+        ' Literal IR: C(...)
+        If text.StartsWith("C(") AndAlso text.EndsWith(")") Then
+            Dim inner As String = text.Substring(2, text.Length - 3).Trim()
+
+            ' String
+            If inner.StartsWith("""") AndAlso inner.EndsWith("""") Then
+                Return inner.Substring(1, inner.Length - 2)
+            End If
+
+            ' Numérico
+            Dim n As Double
+            If Double.TryParse(inner,
+                               Globalization.NumberStyles.Any,
+                               Globalization.CultureInfo.InvariantCulture,
+                               n) Then
+                Return n
+            End If
         End If
 
-        ' Numérico
-        Dim n As Double
-        If Double.TryParse(text,
-                           Globalization.NumberStyles.Any,
-                           Globalization.CultureInfo.InvariantCulture,
-                           n) Then
-            Return n
-        End If
-
-        ' Si no se reconoce, dejarlo como string
-        WarningSemantico(Nothing, 0, $"Literal DATA no reconocido: {text}")
+        WarningSemantico($"Literal DATA no reconocido: {text}")
         Return text
-
     End Function
 
     Private Sub RecolectarREAD(tk As Token)
@@ -296,7 +442,7 @@ Public Module SemanticAnalyzer
         Dim vars = tk.Value.Split(","c)
 
         For Each v In vars
-            Dim name = v.Trim().ToUpperInvariant()
+            Dim name = v.Trim()
             If Not ctx.Variables.ContainsKey(name) Then
                 Dim info As New VariableInfo With {
                     .Name = name,
@@ -312,110 +458,117 @@ Public Module SemanticAnalyzer
     ' --- SEGUNDA PASADA
     ' -----------------------------------------------------------------------------------------------------
 
-    Private Sub P2_AnalizarYEmitirStmt(tk As Token, lineaSRC As String, writer As StreamWriter)
+    Private Sub P2_AnalizarYEmitirStmt(tk As Token, lineaSRC As String)
         If tk.ID = TokenID.TCO_LINE Then
-            GuardarIRP_Token(writer, tk)
+            GuardarIRP_Token(tk)
             Return
         End If
         If tk.ID = TokenID.TCO_EOL Then
-            GuardarIRP_Token(writer, tk)
+            GuardarIRP_Token(tk)
             Return
         End If
 
         If tk.ID = TokenID.TCO_UNKNOWN Then
-            ErrorSemantico(Nothing, 0, $"Sentencia desconocida en '{lineaSRC}': {tk}")
+            ErrorSemantico($"Sentencia desconocida en '{lineaSRC}': {tk}")
             Return
         End If
 
         ' Avisos antes de generar
         Select Case Token.GetFamily(tk.ID)
             Case TokenFamily.TF_NOSOPORTADO   ' No soportadas
-                WarningSemantico(writer, 0, $"Sentencia no soportada: {tk}")
+                WarningSemantico($"Sentencia no soportada: {tk}")
             Case TokenFamily.TF_ESPECIALES   ' La especiales no se tratan
-                ErrorSemantico(writer, 0, $"Token especial no soportado: {tk}")
+                ErrorSemantico($"Token especial no soportado: {tk}")
         End Select
 
         Try
             ' Las que necesitan semántica especial
             If tk.ID = TokenID.TK_LET Then
-                AnalizarLET(tk, lineaSRC, writer)
+                AnalizarLET(tk, lineaSRC)
                 Return
             End If
 
             If tk.ID = TokenID.TK_PRINT Then
-                AnalizarPRINT(tk, writer)
+                AnalizarPRINT(tk)
                 Return
             End If
 
             If tk.ID = TokenID.TK_IF Then
-                AnalizarIF(tk, writer)
+                AnalizarIF(tk)
                 Return
             End If
 
             If tk.ID = TokenID.TK_FOR Then
-                AnalizarFOR(tk, writer)
+                AnalizarFOR(tk)
                 Return
             End If
 
             If tk.ID = TokenID.TK_NEXT Then
-                AnalizarNEXT(tk, writer)
+                AnalizarNEXT(tk)
                 Return
             End If
 
             If tk.ID = TokenID.TK_GOSUB Then
-                AnalizarGOSUB(tk, writer)
+                AnalizarGOSUB(tk)
                 Return
             End If
 
             If tk.ID = TokenID.TK_RETURN Then
-                AnalizarRETURN(tk, lineaSRC, writer)
+                AnalizarRETURN(tk, lineaSRC)
                 Return
             End If
 
             If tk.ID = TokenID.TK_GOTO OrElse tk.ID = TokenID.TK_STOP Then
-                GuardarIRP_Token(writer, tk)
+                GuardarIRP_Token(tk)
                 Return
             End If
 
             If tk.ID = TokenID.TK_READ Then
-                AnalizarREAD(tk, writer)
+                AnalizarREAD(tk)
                 Return
             End If
 
             ' CLEAR
 
             If tk.ID = TokenID.TK_CLEAR_RAM Then
-                WarningSemantico(Nothing, 0, $"CLEAR con parámetro no soportado directamente en SuperBASIC")
-                GuardarIRP_Token(writer, tk)
+                WarningSemantico($"CLEAR con parámetro no soportado directamente en SuperBASIC")
+                GuardarIRP_Token(tk)
                 Return
             End If
 
             If tk.ID = TokenID.TK_CLEAR Then
-                GuardarIRP_Token(writer, tk)
+                GuardarIRP_Token(tk)
                 Return
             End If
 
             'RANDOMIZE
 
             If tk.ID = TokenID.TK_RANDOMIZE Then
-                GuardarIRP_Token(writer, tk)
+                GuardarIRP_Token(tk)
                 Return
             End If
 
             ' RANDOMIZE USR (ZX-only)
             If tk.ID = TokenID.TK_RANDOMIZE_USR Then
-                WarningSemantico(writer, 0, $"RANDOMIZE USR no soportado directamente en QL")
-                GuardarIRP_Token(writer, tk)
+                WarningSemantico($"RANDOMIZE USR no soportado directamente en QL")
+                GuardarIRP_Token(tk)
+                Return
+            End If
+
+
+            If tk.ID = TokenID.TK_DATA Then
+                ' DATA se procesa solo en la pasada 1
+                ' No se emite como código ejecutable, se añadirá al final
                 Return
             End If
 
 
             ' el resto pasan directos
-            GuardarIRP_Token(writer, tk)
+            GuardarIRP_Token(tk)
             Return
 
         Catch ex As Exception
-            ErrorSemantico(Nothing, 0, $"Error semántico en '{lineaSRC}': {ex.Message}")
+            ErrorSemantico($"Error semántico en '{lineaSRC}': {ex.Message}")
         End Try
 
     End Sub
@@ -432,249 +585,276 @@ Public Module SemanticAnalyzer
         ' --------------------------------------------------------
         ' Sección de variables
         ' --------------------------------------------------------
-        Using writer As New StreamWriter(opts.FVar, False, New UTF8Encoding(False))
-            If ctx.Variables.Count <> 0 Then
-                GuardarIRS_Texto(writer, Constantes.VAR_NOMBRE & " " & Constantes.VAR_VERSION)
-                GuardarIRS_Texto(writer, "")
 
-                For Each kv In ctx.Variables
-                    Dim v = kv.Value
+        If ctx.Variables.Count <> 0 Then
+            opts.Fase = SubFases.Variables
 
-                    Dim flags As String = ""
-                    flags &= " ["
-                    flags &= If(v.WasAssigned, "A", " ")
-                    flags &= If(v.WasUsed, "U", " ")
-                    flags &= "]"
+            Console.WriteLine($"::A:{opts.Modulo} - {opts.Fase} - {ObtenerFicheroSalida(opts)}")
 
-                    If v.IsString Then
-                        GuardarIRS_VAR(writer, "STR " & v.Name & flags)
-                    Else
-                        GuardarIRS_VAR(writer, "NUM " & v.Name & flags)
-                    End If
+            stWriter = New StreamWriter(ObtenerFicheroSalida(opts), False, New UTF8Encoding(False))
 
-                Next
-                GuardarIRS_VAR(writer, "")
-                GuardarIRS_VAR(writer, "ENDVARS")
-            End If
-        End Using
+
+
+            GuardarIRS_Texto(Constantes.VAR_NOMBRE & " " & Constantes.VAR_VERSION)
+            GuardarIRS_Texto("")
+
+            For Each kv In ctx.Variables
+                Dim v = kv.Value
+
+                Dim flags As String = ""
+                flags &= " ["
+                flags &= If(v.WasAssigned, "A", " ")
+                flags &= If(v.WasUsed, "U", " ")
+                flags &= "]"
+
+                If v.IsString Then
+                    GuardarIRS_VAR("STR " & v.Name & flags)
+                Else
+                    GuardarIRS_VAR("NUM " & v.Name & flags)
+                End If
+
+            Next
+            GuardarIRS_VAR("")
+            GuardarIRS_VAR("ENDVARS")
+
+            stWriter.Close()
+        End If
+
 
         ' --------------------------------------------------------
         ' Sección DATA
         ' --------------------------------------------------------
-        Using writer As New StreamWriter(opts.FData, False, New UTF8Encoding(False))
-            If ctx.DataNodes.Count <> 0 Then
-                GuardarIRS_Texto(writer, Constantes.DATA_NOMBRE & " " & Constantes.DATA_VERSION)
-                GuardarIRS_Texto(writer, "")
 
-                For Each d In ctx.DataNodes
-                    If TypeOf d.Value Is String Then
-                        GuardarIRS_DATA(writer, $"NODE {d.Line} {Constantes.C_COMILLAS}{d.Value}{Constantes.C_COMILLAS}")
-                    Else
-                        GuardarIRS_DATA(writer, $"NODE {d.Line} {d.Value}")
-                    End If
-                Next
-                GuardarIRS_DATA(writer, "")
-                GuardarIRS_DATA(writer, "ENDDATA")
-            End If
-        End Using
+        If ctx.DataNodes.Count <> 0 Then
+            opts.Fase = SubFases.Data
+
+            Console.WriteLine($"::B:{opts.Fase} - {opts.Modulo} - {ObtenerFicheroSalida(opts)}")
+
+            stWriter = New StreamWriter(ObtenerFicheroSalida(opts), False, New UTF8Encoding(False))
+
+            GuardarIRS_Texto(Constantes.DATA_NOMBRE & " " & Constantes.DATA_VERSION)
+            GuardarIRS_Texto("")
+
+            For Each d In ctx.DataNodes
+                If TypeOf d.Value Is String Then
+                    GuardarIRS_DATA($"NODE {d.Line} {Constantes.C_COMILLAS}{d.Value}{Constantes.C_COMILLAS}")
+                Else
+                    GuardarIRS_DATA($"NODE {d.Line} {d.Value}")
+                End If
+            Next
+            GuardarIRS_DATA("")
+            GuardarIRS_DATA("ENDDATA")
+
+            stWriter.Close()
+        End If
 
         Return (NroErrores = 0)
 
     End Function
 
-    Private Sub AnalizarLET(tk As Token, lineaSRC As String, writer As StreamWriter)
+    Private Sub AnalizarLET(tk As Token, lineaSRC As String)
 
-        Dim resto As String = ""
-        Dim lvalue As String = ""
-        Dim rvalue As String = ""
+        ' tk.RPN YA está reconstruida automáticamente
+        Dim rpn As List(Of RPN.RPN_Node) = tk.RPN
 
-        SepararLetIR(tk.Value, lvalue, rvalue)
+        ' --- Marcar uso de variables ---
+        MarcarUsoVariablesRPN(rpn)
 
-        ' --- EXTRAER NOMBRE BASE DEL LVALUE ---
-        ' Ejemplos:
-        '   A        -> A
-        '   A(3)     -> A
-        '   B$       -> B$
-        '   B$(I,J)  -> B$
-
-        Dim baseVarName As String = ExprTypeEvaluator.GetBaseVariableName(lvalue)
-        'If Not ctx.Variables.ContainsKey(baseVarName) Then
-        '    WarningSintactico(Nothing, 0, $"Variable no declarada implícitamente: {baseVarName}")
-        '    Exit Sub
-        'End If
-
-        ' Marcar uso en expresión (lado derecho)
-        MarcarUsoVariables(rvalue)
-
-        ' Marcar asignación en la variable BASE
+        ' --- Marcar asignación de la variable base ---
+        Dim baseVarName As String = ExtraerVariableBaseDesdeLET(tk.Value) ' solo LValue
         If ctx.Variables.ContainsKey(baseVarName) Then
             Dim v = ctx.Variables(baseVarName)
             v.WasAssigned = True
             ctx.Variables(baseVarName) = v
         End If
 
-        ' --- COMPROBACIÓN DE TIPOS ---
+        ' --- Comprobación de tipos (usando RPN) ---
         Dim varType As VarType = If(baseVarName.EndsWith("$"c), VarType.StringType, VarType.Numeric)
-        Dim exprType As VarType = ExprTypeEvaluator.GetExprType(rvalue, ctx)
+        Dim exprType As VarType = GetExprType(rpn, ctx)
 
-        If varType = VarType.Numeric AndAlso exprType = VarType.StringType Then
-            WarningSemantico(Nothing, 0, $"Posible asignación inválida num <- str: {lineaSRC}")
+        If varType <> exprType Then
+            WarningSemantico($"Posible asignación incompatible: {lineaSRC}")
+        End If
+
+        ' --- Emitir IR tal cual ---
+        GuardarIRP_Token(tk)
+    End Sub
+
+    Private Function ExtraerVariableBaseDesdeLET(value As String) As String
+        If String.IsNullOrWhiteSpace(value) Then
+            Return ""
+        End If
+
+        Dim i As Integer = 0
+
+        ' Avanzar mientras sean caracteres válidos de nombre
+        While i < value.Length AndAlso
+          (Char.IsLetterOrDigit(value(i)) OrElse value(i) = "$"c)
+            i += 1
+        End While
+
+        Return value.Substring(0, i)
+    End Function
+
+
+
+    Private Sub AnalizarPRINT(tk As Token)
+        ' Cada TK_PRINT / TK_AT / TK_INK / etc.
+        ' se trata como una acción independiente
+
+        ' 1. Marcar uso de variables (si hay expresión)
+        MarcarUsoVariablesRPN(tk.RPN)
+
+        ' 2. Emitir directamente el token
+        GuardarIRP_Token(tk)
+
+    End Sub
+
+
+    Private Sub AnalizarIF(tk As Token)
+
+        ' La condición YA viene como RPN reconstruida desde el IR
+        Dim rpn As List(Of RPN.RPN_Node) = tk.RPN
+
+        ' Marcar uso de variables en la condición
+        MarcarUsoVariablesRPN(rpn)
+
+        ' Emitir IF estructural tal cual
+        GuardarIRP_Token(tk)
+
+    End Sub
+
+    Private Sub AnalizarFOR(tk As Token)
+
+        Dim text As String = tk.Value
+
+        ' V(j) := C(1) TO C(10) [STEP ...]
+        Dim posAssign = text.IndexOf(":=", StringComparison.Ordinal)
+        If posAssign < 0 Then
+            ErrorSemantico("FOR inválido: falta :=")
             Exit Sub
         End If
 
-        If varType = VarType.StringType AndAlso exprType = VarType.Numeric Then
-            WarningSemantico(Nothing, 0, $"Posible asignación inválida str <- num: {lineaSRC}")
+        Dim lhs = text.Substring(0, posAssign).Trim()     ' V(j)
+        Dim rest = text.Substring(posAssign + 2).Trim()  ' C(1) TO C(10)
+
+        ' ---- variable de control ----
+        If Not lhs.StartsWith("V(") Then
+            ErrorSemantico("FOR inválido: variable de control")
+            Exit Sub
+        End If
+        Dim varName = lhs.Substring(2, lhs.IndexOf(")") - 2)
+
+        ' ---- separar TO ----
+        Dim posTo = rest.IndexOf(" TO ", StringComparison.OrdinalIgnoreCase)
+        If posTo < 0 Then
+            ErrorSemantico("FOR inválido: falta TO")
             Exit Sub
         End If
 
-        lvalue = NormalizarEspacios(lvalue)
-        rvalue = NormalizarEspacios(rvalue)
-        GuardarIRP_Token(writer, New Token(TokenID.TK_LET, lvalue & "=" & rvalue))
+        Dim initExpr = rest.Substring(0, posTo).Trim()
+        Dim tail = rest.Substring(posTo + 4).Trim() ' después de TO
 
-    End Sub
+        ' ---- separar STEP (opcional) ----
+        Dim limitExpr As String
+        Dim stepExpr As String = Nothing
 
-    Private Sub SepararLetIR(stmt As String, ByRef lvalue As String, ByRef rvalue As String)
-
-        Dim nivel As Integer = 0
-
-        For i As Integer = 0 To stmt.Length - 1
-            Dim ch As Char = stmt(i)
-
-            Select Case ch
-                Case "("c
-                    nivel += 1
-                Case ")"c
-                    nivel -= 1
-                Case "="c
-                    If nivel = 0 Then
-                        lvalue = stmt.Substring(0, i).Trim()
-                        rvalue = stmt.Substring(i + 1).Trim()
-                        Return
-                    End If
-            End Select
-        Next
-
-        ' Si no se encontró separador válido
-        lvalue = ""
-        rvalue = ""
-    End Sub
-
-    Private Sub AnalizarPRINT(tk As Token, writer As StreamWriter)
-
-        ' stmt llega como:
-        ' PRINT AT 3,3;INK 7;"Hola mundo",A
-
-        'Marcar uso de variables SOLO fuera de strings
-        MarcarUsoVariables(tk.Value)
-
-        '  Guardar el PRINT COMPLETO, SIN TOCARLO
-        GuardarIRP_Token(writer, New Token(TokenID.TK_PRINT, tk.Value))
-
-    End Sub
-
-    Private Sub AnalizarIF(tk As Token, writer As StreamWriter)
-        Dim condicion As String = tk.Value.Trim()
-
-        condicion = NormalizarEspacios(condicion)
-        ' Emitir IF como nodo estructural
-        GuardarIRP_Token(writer, New Token(TokenID.TK_IF, condicion))
-
-    End Sub
-
-
-
-    Private Sub AnalizarFOR(tk As Token, writer As StreamWriter)
-        Dim varName As String = ""
-        Dim vm As VariableMatch = Nothing
-        Dim stmt As String = tk.Value
-
-        If Not TryMatchVariable(stmt, VarCheckContext.ForControl, vm) Then
-            ErrorSemantico(writer, 0, "Variable de control FOR inválida")
-            Exit Sub
+        Dim posStep = tail.IndexOf(" STEP ", StringComparison.OrdinalIgnoreCase)
+        If posStep >= 0 Then
+            limitExpr = tail.Substring(0, posStep).Trim()
+            stepExpr = tail.Substring(posStep + 6).Trim()
+        Else
+            limitExpr = tail
         End If
 
+        ' ---- RPN individual de cada parte ----
+        Dim rpnInit = ParseRPN(initExpr)
+        Dim rpnLimit = ParseRPN(limitExpr)
+        Dim rpnStep = If(stepExpr IsNot Nothing, ParseRPN(stepExpr), Nothing)
 
+        ' ---- semántica ----
+        MarcarUsoVariablesRPN(rpnInit)
+        MarcarUsoVariablesRPN(rpnLimit)
+        If rpnStep IsNot Nothing Then MarcarUsoVariablesRPN(rpnStep)
+
+        ' ---- pila FOR/NEXT ----
         ForStack.Push(varName)
 
-        ' Uso en expresión
-        MarcarUsoVariables(stmt.Substring(stmt.IndexOf("="c) + 1))
-
-        ' Marcar asignación
-        If ctx.Variables.ContainsKey(varName) Then
-            Dim v = ctx.Variables(varName)
-            v.WasAssigned = True
-            ctx.Variables(varName) = v
-        End If
-
-        stmt = NormalizarEspacios(stmt)
-        GuardarIRP_Token(writer, New Token(TokenID.TK_FOR, stmt))
-
+        GuardarIRP_Token(tk)
     End Sub
 
-    Private Sub AnalizarNEXT(tk As Token, writer As StreamWriter)
-        Dim stmt As String = tk.Value
-        Dim varName = stmt.Trim()
-        Dim vm As VariableMatch = Nothing
-
-        ' NEXT sin variable
-        If varName = "" Then
-            ErrorSemantico(writer, 0, "NEXT debe indicar la variable de control del FOR")
-            Exit Sub
+    Private Function ExtraerVariableControlFOR(value As String) As String
+        If String.IsNullOrWhiteSpace(value) Then
+            Return ""
         End If
 
-        ' Variable debe tener nombre correcto
-        If Not TryMatchVariable(varName, VarCheckContext.ForControl, vm) Then
-            ErrorSemantico(writer, 0, "Variable de control NEXT inválida")
-            Exit Sub
-        End If
+        Dim i As Integer = 0
 
-        'Next debe estar tras un for
+        ' Avanzar mientras sean caracteres válidos de identificador
+        While i < value.Length AndAlso
+          (Char.IsLetterOrDigit(value(i)) OrElse value(i) = "$"c)
+            i += 1
+        End While
+
+        Return value.Substring(0, i)
+    End Function
+
+    Private Sub AnalizarNEXT(tk As Token)
+
+        ' tk.Value contiene:
+        '   ""   → NEXT
+        '   "i"  → NEXT i
+        Dim varName As String = tk.Value.Trim()
+
+        ' NEXT sin FOR previo
         If ForStack.Count = 0 Then
-            ErrorSemantico(Nothing, 0, $"NEXT {stmt} sin FOR previo")
+            ErrorSemantico($"NEXT{If(varName <> "", " " & varName, "")} sin FOR previo")
             Exit Sub
         End If
 
-        Dim esperado = ForStack.Pop()
+        ' Variable esperada según el FOR
+        Dim esperado As String = ForStack.Pop()
 
-        If varName <> "" AndAlso varName <> esperado Then
-            WarningSemantico(Nothing, 0, $"NEXT {varName} no coincide con FOR {esperado}")
+        ' NEXT con variable explícita
+        If varName <> "" Then
+            If varName <> esperado Then
+                WarningSemantico($"NEXT {varName} no coincide con FOR {esperado}")
+            End If
         End If
 
-        GuardarIRP_Token(writer, New Token(TokenID.TK_NEXT, stmt))
+        ' Emitir tal cual
+        GuardarIRP_Token(tk)
 
     End Sub
 
-    Private Sub AnalizarGOSUB(tk As Token, writer As StreamWriter)
+    Private Sub AnalizarGOSUB(tk As Token)
 
         ' Solo marcamos que hay una llamada GOSUB pendiente de RETURN
         GosubStack.Push(1)
 
-        GuardarIRP_Token(writer, New Token(TokenID.TK_GOSUB, tk.Value))
+        GuardarIRP_Token(New Token(TokenID.TK_GOSUB, tk.Value))
 
     End Sub
 
-    Private Sub AnalizarRETURN(tk As Token, lineaSRC As String, writer As StreamWriter)
+    Private Sub AnalizarRETURN(tk As Token, lineaSRC As String)
 
         If GosubStack.Count = 0 Then
-            WarningSemantico(Nothing, 0, $"RETURN sin GOSUB previo: {lineaSRC}")
+            WarningSemantico($"RETURN sin GOSUB previo: {lineaSRC}")
         Else
             GosubStack.Pop()
         End If
 
-        GuardarIRP_Token(writer, New Token(TokenID.TK_RETURN, tk.Value))
+        GuardarIRP_Token(New Token(TokenID.TK_RETURN, tk.Value))
 
     End Sub
 
-    Private Sub AnalizarREAD(tk As Token, writer As StreamWriter)
+    Private Sub AnalizarREAD(tk As Token)
         ' Formato: READ A , B$ , C
         Dim stmt As String = tk.Value
         Dim vars = stmt.Split(","c)
 
         For Each n In vars
             Dim name As String = n.Trim()
-
-            ' ✅ Normalizar completamente el identificador
-            name = name.ToUpperInvariant()
 
             If name = "" Then Continue For
 
@@ -695,153 +875,44 @@ Public Module SemanticAnalyzer
             End If
         Next
 
-        GuardarIRP_Token(writer, New Token(TokenID.TK_READ, stmt))
+        GuardarIRP_Token(New Token(TokenID.TK_READ, stmt))
     End Sub
 
-    Private Sub MarcarUsoVariables(expr As String)
+    Private Sub MarcarUsoVariablesRPN(rpn As List(Of RPN.RPN_Node))
+        If rpn Is Nothing Then Exit Sub
 
-        If String.IsNullOrEmpty(expr) Then Exit Sub
+        For Each n In rpn
+            Select Case n.Kind
 
-        Dim i As Integer = 0
-        Dim len As Integer = expr.Length
+                Case RPNKind.VAR
+                    Dim name As String = n.Value
 
-        While i < len
-
-            Dim ch As Char = expr(i)
-
-            ' 1. Omitir literales string
-            If ch = Constantes.C_COMILLAS Then
-                i += 1
-                While i < len AndAlso expr(i) <> Constantes.C_COMILLAS
-                    i += 1
-                End While
-                If i < len Then i += 1
-                Continue While
-            End If
-
-            ' 2. Posible inicio de identificador
-            If Char.IsLetter(ch) Then
-                Dim start As Integer = i
-                i += 1
-                Dim hasDollar As Boolean = False
-
-                ' Letras y dígitos
-                While i < len AndAlso Char.IsLetterOrDigit(expr(i))
-                    i += 1
-                End While
-
-                ' $ opcional (solo uno y al final)
-                If i < len AndAlso expr(i) = "$"c Then
-                    hasDollar = True
-                    i += 1
-                End If
-
-                Dim name As String = expr.Substring(start, i - start).ToUpperInvariant()
-
-                ' ✅ Validación ZX BASIC final
-                ' (letra inicial garantizada)
-                If name.Length > 0 Then
-
-                    ' ❌ Palabras reservadas (cuando toque)
-                    ' If IsKeyword(name) Then GoTo NextChar
-
-                    ' ✅ Crear / marcar variable
                     If Not ctx.Variables.ContainsKey(name) Then
-                        ctx.Variables.Add(name,
+                        ctx.Variables.Add(
+                        name,
                         New VariableInfo With {
-                                                .Name = name,
-                                                .IsString = hasDollar,
-                                                .WasUsed = True
-                                                })
+                            .Name = name,
+                            .IsString = name.EndsWith("$"c),
+                            .WasUsed = True
+                        }
+                    )
                     Else
                         Dim v = ctx.Variables(name)
                         v.WasUsed = True
                         ctx.Variables(name) = v
                     End If
-                End If
 
-                Continue While
-            End If
+                Case RPNKind.FUN_CALL
+                    ' Marcar uso de función auxiliar
+                    ctx.FuncionesAuxiliares.Add(n.Value)
 
-            i += 1
-        End While
+                    ' Los argumentos YA están como nodos VAR en la RPN,
+                    ' así que no hay que hacer nada más aquí.
 
+            End Select
+        Next
     End Sub
 
-    ' ------------------------------------------------------------
-    ' Normaliza espacios SOLO fuera de cadenas y comentarios REM
-    ' ------------------------------------------------------------
-    Private Function NormalizarEspacios(expr As String) As String
-
-        If expr Is Nothing Then
-            Return expr
-
-        End If
-        Dim sb As New StringBuilder()
-        Dim inString As Boolean = False
-        Dim i As Integer = 0
-
-        While i < expr.Length
-
-            Dim ch As Char = expr(i)
-
-            ' ---- Strings ----
-            If ch = Constantes.C_COMILLAS Then
-                inString = Not inString
-                sb.Append(ch)
-                i += 1
-                Continue While
-            End If
-
-            If inString Then
-                sb.Append(ch)
-                i += 1
-                Continue While
-            End If
-
-            ' ---- Fuera de strings ----
-
-            ' Ignorar espacios (por defecto)
-            If ch = Constantes.C_ESPACIO Then
-                i += 1
-                Continue While
-            End If
-
-            Dim lista As New List(Of String)
-            lista.Add("AND")
-            lista.Add("OR")
-            lista.Add("NOT")
-            lista.Add("TO")
-
-            For Each palabra In lista
-                If AjustarPalabras(expr, palabra, i, sb) Then
-                    Continue While
-                End If
-            Next
-
-            'Ahora son TOKENS, no hay que tratar estas
-            'lista.Clear()
-            'lista.Add("AT")
-            'lista.Add("INK")
-            'lista.Add("PAPER")
-            'lista.Add("BRIGHT")
-            'lista.Add("FLASH")
-            'lista.Add("OVER")
-            'lista.Add("INVERSE")
-
-            'For Each palabra In lista
-            '    If AjustarPalabras(expr, palabra, i, sb) Then
-            '        Continue While
-            '    End If
-            'Next
-
-            ' ---- Carácter normal ----
-            sb.Append(ch)
-            i += 1
-        End While
-
-        Return sb.ToString().Trim()
-    End Function
 
     Private Function AjustarPalabras(expr As String,
                                      palabra As String,
@@ -895,7 +966,141 @@ Public Module SemanticAnalyzer
         Return Not Char.IsLetterOrDigit(expr(i + 1)) AndAlso expr(i + 1) <> "_"c
     End Function
 
+    ' ============================================================
+    ' Helpers de expresiones
+    ' ============================================================
+    Private Function SepararLet(tk As Token, ByRef lvalue As String, ByRef rvalue As String) As Boolean
 
+        If tk.ID <> TokenID.TK_LET Then
+            ErrorSemantico($"'La sentencia no es un LET {tk.ID.ToString}")
+            Return False
+        End If
+
+        Dim pos As Integer = tk.Value.IndexOf(":=", StringComparison.Ordinal)
+        If pos < 0 Then
+            ErrorSemantico($"'La sentencia LET no contiene la igualdad (:=)")
+            Return False
+        End If
+
+        lvalue = tk.Value.Substring(0, pos).Trim()
+        rvalue = tk.Value.Substring(pos + 2).Trim()
+
+
+        If lvalue = "" Then
+            ErrorSemantico($"'La sentencia LET no contiene parte izquierda")
+            Return False
+        End If
+
+        If rvalue = "" Then
+            ErrorSemantico($"'La sentencia LET no contiene parte derecha")
+            Return False
+        End If
+
+        Return True
+    End Function
+
+    'retona el nombde de la variable de la parte L
+    Private Function ExtraerBaseNameDeLHS(lhs As String) As String
+        If Not lhs.StartsWith("V(") Then
+            Throw New FormatException($"LHS LET inválido: {lhs}")
+        End If
+
+        Dim endPos = lhs.IndexOf(")"c)
+        If endPos < 0 Then
+            Throw New FormatException($"LHS LET inválido: {lhs}")
+        End If
+
+        Return lhs.Substring(2, endPos - 2)
+    End Function
+
+    'retona los índices de la variable de la parte L si existen
+    Private Function SplitTopLevel(text As String, separator As Char) As List(Of String)
+        Dim result As New List(Of String)
+        Dim level As Integer = 0
+        Dim start As Integer = 0
+
+        For i As Integer = 0 To text.Length - 1
+            Dim ch As Char = text(i)
+
+            Select Case ch
+                Case "("c
+                    level += 1
+
+                Case ")"c
+                    level -= 1
+
+                Case separator
+                    If level = 0 Then
+                        result.Add(text.Substring(start, i - start).Trim())
+                        start = i + 1
+                    End If
+            End Select
+        Next
+
+        ' último segmento
+        If start < text.Length Then
+            result.Add(text.Substring(start).Trim())
+        End If
+
+        Return result
+    End Function
+
+    Public Function GetExprType(rpn As List(Of RPN.RPN_Node), ctx As SemanticContext) As VarType
+
+        If rpn Is Nothing OrElse rpn.Count = 0 Then
+            Return VarType.Unknown
+        End If
+
+        Dim stack As New Stack(Of VarType)
+
+        For Each n In rpn
+            Select Case n.Kind
+
+                Case RPNKind.VAR
+                    ' El tipo depende del nombre ($)
+                    If n.Value.EndsWith("$"c) Then
+                        stack.Push(VarType.StringType)
+                    Else
+                        stack.Push(VarType.Numeric)
+                    End If
+
+                Case RPNKind.CTE
+                    ' Constante string o numérica
+                    If n.Value.StartsWith("""") Then
+                        stack.Push(VarType.StringType)
+                    Else
+                        stack.Push(VarType.Numeric)
+                    End If
+
+                Case RPNKind.FUN_CALL
+                    ' Por ahora asumimos funciones numéricas
+                    ' (puedes refinar esto luego)
+                    stack.Push(VarType.Numeric)
+
+                Case RPNKind.UNARY_OP
+                    Dim t As VarType = stack.Pop()
+                    stack.Push(t)
+
+                Case RPNKind.BINARY_OP
+                    Dim t2 As VarType = stack.Pop()
+                    Dim t1 As VarType = stack.Pop()
+
+                    ' Si alguno es string → string
+                    If t1 = VarType.StringType OrElse t2 = VarType.StringType Then
+                        stack.Push(VarType.StringType)
+                    Else
+                        stack.Push(VarType.Numeric)
+                    End If
+
+            End Select
+        Next
+
+        If stack.Count > 0 Then
+            Return stack.Peek()
+        End If
+
+        Return VarType.Unknown
+    End Function
 
     ' ============================================================
     ' GESTIÓN DE ERRORES / AVISOS
@@ -941,25 +1146,18 @@ Public Module SemanticAnalyzer
         Return varName
     End Function
 
-    Private Sub ErrorSemantico(writer As StreamWriter, columna As Integer, descripcion As String)
+    Private Sub ErrorSemantico(descripcion As String)
         NroErrores += 1
-        If (columna <> 0) Then
-            columna = columna - 1
-        End If
-        MensajeError(opts, writer, False, NroLineaFichero, columna, LineaParaMostrar,
-                     New String(" "c, columna) & "^ " & descripcion)
+        MensajeError(opts, stReader, stWriter, False, NroLineaFichero, 0, LineaParaMostrar, descripcion, False)
     End Sub
-    Private Sub WarningSemantico(writer As StreamWriter, columna As Integer, descripcion As String)
+
+    Private Sub WarningSemantico(descripcion As String)
         NroWarnings += 1
         If opts.NoPararPorError Or opts.SinWarnings Then
             Exit Sub
         End If
 
-        If (columna <> 0) Then
-            columna = columna - 1
-        End If
-        MensajeError(opts, writer, True, NroLineaFichero, columna, LineaParaMostrar,
-                     New String(" "c, columna) & "^ " & descripcion)
+        MensajeError(opts, stReader, stWriter, True, NroLineaFichero, 0, LineaParaMostrar, descripcion, False)
 
     End Sub
 
@@ -969,7 +1167,7 @@ Public Module SemanticAnalyzer
             Exit Sub
         End If
 
-        MensajeError(opts, Nothing, True, 0, 0, "", "[Variables] " & descripcion)
+        MensajeError(opts, Nothing, Nothing, True, 0, 0, "", "[Variables] " & descripcion, False)
     End Sub
 
 
@@ -977,27 +1175,22 @@ Public Module SemanticAnalyzer
     ' GRABAR EN DESTINO
     ' ============================================================
 
-    Private Sub GuardarIRP_Token(writer As StreamWriter, tk As Token)
+    Private Sub GuardarIRP_Token(tk As Token)
         Dim pi As New PrintItem
         If tk.ID = TokenID.TK_PRINT Then
-            pi = PrintItem.FromText(tk.Value)
+            pi = PrintItem.FromToken(tk)
         Else
             pi.ID = TokenID.TCO_UNKNOWN
         End If
 
-        GuardarIRS(writer, tk, pi)
+        GuardarIRS(tk, pi)
     End Sub
 
-
-
-    Private Sub GuardarIRS(writer As StreamWriter, tk As Token, pi As PrintItem)
+    Private Sub GuardarIRS(tk As Token, pi As PrintItem)
         Dim idNum As Integer = CInt(tk.ID)
         Dim value As String = If(tk.Value IsNot Nothing, tk.Value, "")
         Dim Linea As String = ""
         Dim Comentario As String = ""
-
-        If tk.ID <> TokenID.TK_REM Then tk.Value = NormalizarEspacios(tk.Value)
-        If pi.ID <> TokenID.TK_REM Then pi.Value = NormalizarEspacios(pi.Value)
 
         If pi.ID = TokenID.TCO_UNKNOWN Then
             Linea = $"{idNum} {value}"
@@ -1009,24 +1202,29 @@ Public Module SemanticAnalyzer
 
         If Len(Linea) < 49 Then
             Linea &= Space(50 - Len(Linea)) & $"{Constantes.MarcaComentario} {Comentario}"
-            GuardarIRS_Texto(writer, Linea)
+            GuardarIRS_Texto(Linea)
         Else
-            GuardarIRS_Texto(writer, Linea)
+            GuardarIRS_Texto(Linea)
             Linea = Space(50) & $"{Constantes.MarcaComentario} {Comentario}"
-            GuardarIRS_Texto(writer, Linea)
+            GuardarIRS_Texto(Linea)
         End If
     End Sub
 
-    Private Sub GuardarIRS_VAR(writer As StreamWriter, linea As String)
-        GuardarIRS_Texto(writer, "VAR  " & linea)
+    Private Sub GuardarIRS_VAR(linea As String)
+        GuardarIRS_Texto("VAR  " & linea)
     End Sub
 
-    Private Sub GuardarIRS_DATA(writer As StreamWriter, linea As String)
-        GuardarIRS_Texto(writer, "DATA " & linea)
+    Private Sub GuardarIRS_DATA(linea As String)
+        GuardarIRS_Texto("DATA " & linea)
     End Sub
 
-    Private Sub GuardarIRS_Texto(writer As StreamWriter, linea As String)
-        writer.WriteLine(linea)
+    Private Sub GuardarIRS_Texto(linea As String)
+
+        If stWriter Is Nothing Then
+            Throw New InvalidOperationException("OutWriter no inicializado")
+        End If
+
+        stWriter.WriteLine(linea)
 
         If opts.Verbose Then
             MostrarVerbose(opts, linea)

@@ -15,10 +15,14 @@ Public Module ProcesosGenerales
         Dim aux As String
 
         opts.Modulo = Modulo
+        opts.Fase = SubFases.Base
         opts.FEntrada = ""
         opts.FSalidaLex = ""
+        opts.FSalidaNor = ""
         opts.FSalidaPar = ""
         opts.FSalidaSem = ""
+        opts.FSalidaVar = ""
+        opts.FSalidaDat = ""
         opts.FSalidaGSB = ""
         opts.FSalidaRen = ""
         opts.FSalida = ""
@@ -26,7 +30,7 @@ Public Module ProcesosGenerales
         opts.Batch = False
         opts.Silencioso = False
         opts.Verbose = False
-        opts.Batch = False
+        opts.ZX = False
         opts.SinWarnings = False
         opts.NoPararPorError = False
         opts.SinComentarios = False
@@ -117,6 +121,10 @@ Public Module ProcesosGenerales
                         opts.Batch = True
                         opts.Opciones &= args(i) & " "
 
+                    Case Constantes.opZX
+                        opts.ZX = True
+                        opts.Opciones &= args(i) & " "
+
                     Case Constantes.opNoWarnings
                         opts.SinWarnings = True
                         opts.Opciones &= args(i) & " "
@@ -157,6 +165,7 @@ Public Module ProcesosGenerales
             opts.NoPararPorError = True
             opts.Verbose = False
             opts.SinWarnings = False
+            opts.ZX = True
         End If
 
         If opts.ModoDebug = True Then
@@ -173,7 +182,7 @@ Public Module ProcesosGenerales
         If Not opts.Batch Then
             MostrarMensaje(opts, " ")
             MostrarMensaje(opts, "- Entrada.: " & ObtenerFicheroEntrada(opts))
-            MostrarMensaje(opts, "- Salida..: " & ObtenerFicheroSalida(opts, opts.Modulo))
+            MostrarMensaje(opts, "- Salida..: " & ObtenerFicheroSalida(opts))
             If (opts.Opciones <> "") Then
                 MostrarMensaje(opts, "- Opciones: " & opts.Opciones)
             End If
@@ -195,6 +204,9 @@ Public Module ProcesosGenerales
             Case Constantes.MLex
                 Descripcion = "Analizador Léxico"
                 Extension = Constantes.LEX_EXTENSION
+            Case Constantes.MNor
+                Descripcion = "Normalizador ZX"
+                Extension = Constantes.NOR_EXTENSION
             Case Constantes.MPar
                 Descripcion = "Analizador Sintáctico"
                 Extension = Constantes.PAR_EXTENSION
@@ -218,6 +230,10 @@ Public Module ProcesosGenerales
         End If
         If opts.Modulo = Constantes.MLex Or opts.Modulo = Constantes.MDir Then
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.LEX_EXTENSION & " con los tokens")
+            MostrarMensaje(opts, "Genera: opcionalmente un fichero " & Constantes.NOR_EXTENSION & " con los tokens normalizados")
+        End If
+        If opts.Modulo = Constantes.MNor Or opts.Modulo = Constantes.MDir Then
+            MostrarMensaje(opts, "Genera: un fichero " & Constantes.NOR_EXTENSION & " con los tokens normalizados")
         End If
         If opts.Modulo = Constantes.MPar Or opts.Modulo = Constantes.MDir Then
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.PAR_EXTENSION & " con el arbol EDPen modo de texto IR")
@@ -225,7 +241,7 @@ Public Module ProcesosGenerales
         If opts.Modulo = Constantes.MSem Or opts.Modulo = Constantes.MDir Then
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.SEM_EXTENSION & " con el arbol EDP ajustado en modo de texto IR")
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.VAR_EXTENSION & " con las variables detectadas")
-            MostrarMensaje(opts, "Genera: un fichero " & Constantes.DATA_EXTENSION & " con los DATA detectados")
+            MostrarMensaje(opts, "Genera: un fichero " & Constantes.DTA_EXTENSION & " con los DATA detectados")
         End If
         If opts.Modulo = Constantes.MGSB Or opts.Modulo = Constantes.MDir Then
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.GQL_EXTENSION & " con los DATA detectados")
@@ -248,7 +264,7 @@ Public Module ProcesosGenerales
 
         ' Convención de módulos:
         ' Z = ZX2SB (Director)
-        ' L = JLexer
+        ' L = JLexer, FZX
         ' P = JParser
         ' S = JSemantic
         ' G = JGenerator
@@ -256,40 +272,42 @@ Public Module ProcesosGenerales
         '
         ' Las cadenas "X__S__", etc., indican qué módulos soportan cada opción
 
-        If InStr("XLPSGR", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opSilencioso) &
-                                                               "Modo Silencioso. No muestra las líneas mientras se procesan.")
-        If InStr("XLPSGR", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opVerbose) &
-                                                               "Modo Verbose. Muestra más información. Anula " & "-s")
-        If InStr("X_PSGR", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opNoWarnings) &
-                                                               "Modo No Warnings. No se muestran los warnings ni paran el proceso.")
-        If InStr("XLPSGR", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opContinuarSError) &
-                                                               "Modo Continuar si Errores. No se para al encontrar un error, el resultado se ve en el LOG.")
-        If InStr("XLPSGR", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opBath) &
-                                                               "Modo Batch. No muestra nada en pantalla ni interactúa. " &
-                                                               "Activa " & Constantes.opSilencioso & " " &
-                                                                           Constantes.opContinuarSError & " y " &
-                                                               "Anula " & Constantes.opVerbose & " " &
-                                                                        If(Letra <> "L", Constantes.opNoWarnings, ""))
-        If InStr("X__SG_", Letra) > 0 Then MostrarMensaje(opts, " ")
-        If InStr("X___G_", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opSinComentarios) &
-                                                               "Modo Sin Comentarios. No añade los comentarios del fichero de origen.")
-        If InStr("X___G_", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opDebug) &
-                                                               "Modo Debug. Añade la línea del fichero original como un comentario sin " &
-                                                               "número de línea.")
-        If InStr("X___G_", Letra) > 0 Then MostrarMensaje(opts, " ")
-        If InStr("X___G_", Letra) > 0 Then
+        If InStr("XLNPSGR", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opSilencioso) &
+                                                                "Modo Silencioso. No muestra las líneas mientras se procesan.")
+        If InStr("XLNPSGR", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opVerbose) &
+                                                                "Modo Verbose. Muestra más información. Anula " & "-s")
+        If InStr("XLNPSGR", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opNoWarnings) &
+                                                                "Modo No Warnings. No se muestran los warnings ni paran el proceso.")
+        If InStr("XLNPSGR", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opContinuarSError) &
+                                                                "Modo Continuar si Errores. No se para al encontrar un error, el resultado se ve en el LOG.")
+        If InStr("XLNPSGR", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opBath) &
+                                                                "Modo Batch. No muestra nada en pantalla ni interactúa. " &
+                                                                "Activa " & Constantes.opSilencioso & " " &
+                                                                            Constantes.opZX &
+                                                                            Constantes.opContinuarSError & " y " &
+                                                                "Anula " & Constantes.opVerbose & " " &
+                                                                         If(Letra <> "L", Constantes.opNoWarnings, ""))
+        If InStr("XL___G_", Letra) > 0 Then MostrarMensaje(opts, " ")
+        If InStr("XL_____", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opZX) &
+                                                                 "Modo ZX. Si existen variables con espacio las normaliza sin preguntar.")
+        If InStr("X____G_", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opSinComentarios) &
+                                                                 "Modo Sin Comentarios. No añade los comentarios del fichero de origen.")
+        If InStr("X____G_", Letra) > 0 Then MostrarMensaje(opts, MostrarOpcion(Constantes.opDebug) &
+                                                                 "Modo Debug. Añade la línea del fichero original como un comentario sin " &
+                                                                 "número de línea.")
+        If InStr("X____G_", Letra) > 0 Then MostrarMensaje(opts, " ")
+        If InStr("X____G_", Letra) > 0 Then
             MostrarMensaje(opts, MostrarOpcion(Constantes.opFuncion & "n") & "Las sentencias no soportadas generan:")
             MostrarMensaje(opts, $"            {Constantes.opFuncion & Constantes.opFuncion_Err}: un error en la ejecución (si no se indica nada se usa esta opción).")
             MostrarMensaje(opts, $"            {Constantes.opFuncion & Constantes.opFuncion_Msg}: un mensaje en la ejecución.")
             MostrarMensaje(opts, $"            {Constantes.opFuncion & Constantes.opFuncion_Ign}: son ignoradas.")
         End If
-        If InStr("X____R", Letra) > 0 Then
+        If InStr("X_____R", Letra) > 0 Then MostrarMensaje(opts, " ")
+        If InStr("X_____R", Letra) > 0 Then
             MostrarMensaje(opts, MostrarOpcion(Constantes.opBase & "n") & "La renumeración comienza en n (si se omite será " & Constantes.opBase & "1000)")
             MostrarMensaje(opts, MostrarOpcion(Constantes.opPaso & "n") & "La renumeración irá de n en n (si se omite será " & Constantes.opPaso & "10)")
             MostrarMensaje(opts, MostrarOpcion(Constantes.opIND & "n") & "Se indenta de n en n columnas (si se omite será " & Constantes.opIND & "2)")
-
         End If
-
 
         Environment.Exit(1)
     End Sub
@@ -302,7 +320,14 @@ Public Module ProcesosGenerales
         Select Case opts.Modulo
             Case Constantes.MDir : Return opts.FEntrada
             Case Constantes.MLex : Return opts.FEntrada
-            Case Constantes.MPar : Return opts.FSalidaLex
+            Case Constantes.MNor : Return opts.FSalidaLex
+            Case Constantes.MPar
+                'Seleccionar cual de los dos ficheros de tokens usar
+                If File.Exists(opts.FSalidaNor) Then
+                    Return opts.FSalidaNor
+                Else
+                    Return opts.FSalidaLex
+                End If
             Case Constantes.MSem : Return opts.FSalidaPar
             Case Constantes.MGSB : Return opts.FSalidaSem
             Case Constantes.MRen : Return opts.FSalidaGSB
@@ -310,12 +335,18 @@ Public Module ProcesosGenerales
         Return ""
     End Function
 
-    Private Function ObtenerFicheroSalida(opts As CmdOptions, Modulo As String) As String
-        Select Case Modulo
+    Public Function ObtenerFicheroSalida(opts As CmdOptions) As String
+        Select Case opts.Modulo
             Case Constantes.MDir : Return opts.FSalida
             Case Constantes.MLex : Return opts.FSalidaLex
+            Case Constantes.MNor : Return opts.FSalidaNor
             Case Constantes.MPar : Return opts.FSalidaPar
-            Case Constantes.MSem : Return opts.FSalidaSem
+            Case Constantes.MSem
+                Select Case opts.Fase
+                    Case SubFases.Base : Return opts.FSalidaSem
+                    Case SubFases.Variables : Return opts.FSalidaVar
+                    Case SubFases.Data : Return opts.FSalidaDat
+                End Select
             Case Constantes.MGSB : Return opts.FSalidaGSB
             Case Constantes.MRen : Return opts.FSalidaRen
         End Select
@@ -330,8 +361,11 @@ Public Module ProcesosGenerales
         End If
 
         opts.FSalidaLex = Path.ChangeExtension(opts.FEntrada, Constantes.LEX_EXTENSION)
+        opts.FSalidaNor = Path.ChangeExtension(opts.FEntrada, Constantes.NOR_EXTENSION)
         opts.FSalidaPar = Path.ChangeExtension(opts.FEntrada, Constantes.PAR_EXTENSION)
         opts.FSalidaSem = Path.ChangeExtension(opts.FEntrada, Constantes.SEM_EXTENSION)
+        opts.FSalidaVar = Path.ChangeExtension(opts.FEntrada, Constantes.VAR_EXTENSION)
+        opts.FSalidaDat = Path.ChangeExtension(opts.FEntrada, Constantes.DTA_EXTENSION)
         opts.FSalidaGSB = Path.ChangeExtension(opts.FEntrada, Constantes.GQL_EXTENSION)
         If (opts.FSalida = "") Then
             opts.FSalidaRen = Path.ChangeExtension(opts.FEntrada, "")
@@ -339,8 +373,8 @@ Public Module ProcesosGenerales
         Else
             opts.FSalidaRen = opts.FSalida
         End If
-        opts.FVar = Path.ChangeExtension(opts.FEntrada, Constantes.VAR_EXTENSION)
-        opts.FData = Path.ChangeExtension(opts.FEntrada, Constantes.DATA_EXTENSION)
+        opts.FSalidaVar = Path.ChangeExtension(opts.FEntrada, Constantes.VAR_EXTENSION)
+        opts.FSalidaDat = Path.ChangeExtension(opts.FEntrada, Constantes.DTA_EXTENSION)
         opts.FLines = Path.ChangeExtension(opts.FEntrada, Constantes.LIN_EXTENSION)
         opts.FLog = Path.ChangeExtension(opts.FEntrada, Constantes.LOG_EXTENSION)    ' Fichero de log es común a todos
 
@@ -351,6 +385,7 @@ Public Module ProcesosGenerales
 
         If opts.Modulo = Constantes.MLex Or opts.Modulo = Constantes.MDir Then
             ListaFicheros.Add(opts.FSalidaLex)
+            ListaFicheros.Add(opts.FSalidaNor)
         End If
 
         If opts.Modulo = Constantes.MPar Or opts.Modulo = Constantes.MDir Then
@@ -359,8 +394,8 @@ Public Module ProcesosGenerales
 
         If opts.Modulo = Constantes.MSem Or opts.Modulo = Constantes.MDir Then
             ListaFicheros.Add(opts.FSalidaSem)
-            ListaFicheros.Add(opts.FVar)
-            ListaFicheros.Add(opts.FData)
+            ListaFicheros.Add(opts.FSalidaVar)
+            ListaFicheros.Add(opts.FSalidaDat)
         End If
 
         If opts.Modulo = Constantes.MGSB Or opts.Modulo = Constantes.MDir Then
@@ -408,18 +443,33 @@ Public Module ProcesosGenerales
             If File.Exists(Fichero) Then
                 Try
                     File.Delete(Fichero)
+                    MostrarMensaje(opts, $"Fichero {Fichero} borrado")
                 Catch ex As Exception
                     MostrarMensaje(opts, $"[{opts.Modulo}][WARNING] No se pudo eliminar el fichero {Fichero}: {ex.Message}")
                 End Try
-                MostrarMensaje(opts, $"Fichero {Fichero} borrado")
             End If
         End If
     End Sub
 
-    ' --- Eliminar el fichero generado si hay errores
-    Public Sub EliminarFicheroErroneo(fichero As String, opts As CmdOptions)
-        MostrarMensaje(opts, $"[{opts.Modulo}] Error detectado: eliminando fichero generado")
-        BorrarFichero(fichero, opts)
+    ' --- Eliminar los ficheros generados si hay errores
+    Public Sub EliminarFicheroErroneo(opts As CmdOptions)
+        MostrarMensaje(opts, $"[{opts.Modulo}] Eliminando ficheros generados, revise el log")
+
+        Select Case opts.Modulo
+            Case Constantes.MDir
+                BorrarFichero(opts.FSalidaLex, opts)
+                BorrarFichero(opts.FSalidaNor, opts)
+                BorrarFichero(opts.FSalidaPar, opts)
+                BorrarFichero(opts.FSalidaSem, opts)
+                BorrarFichero(opts.FSalidaGSB, opts)
+                BorrarFichero(opts.FSalidaRen, opts)
+            Case Constantes.MLex
+                BorrarFichero(opts.FSalidaLex, opts)
+                BorrarFichero(opts.FSalidaNor, opts)
+            Case Else
+                BorrarFichero(opts.FSalida, opts)
+        End Select
+
     End Sub
 
     ' ============================================================
@@ -463,16 +513,55 @@ Public Module ProcesosGenerales
         Return sb.ToString().Trim()
     End Function
 
-    Public Sub MostrarError(opts As CmdOptions, writer As StreamWriter, nLin As Integer, nCol As Integer, Linea1 As String, Line2 As String)
-        MensajeError(opts, writer, False, nLin, nCol, Linea1, Line2)
+    ' ============================================================
+    ' Procesos de salida en pantalla
+    ' ============================================================
+
+    Public Function Preguntar(msg As String) As Boolean
+        Dim resp As String = ""
+        Console.WriteLine("")
+        While True
+            Console.WriteLine(msg & " (S/N)? ")
+
+            resp = Console.ReadLine()
+            resp = resp.Trim().ToUpper()
+            If resp = "" Then resp = "S"
+            resp = resp.Substring(0, 1)
+
+            If (resp = "S") Or (resp = "N") Then
+                Exit While
+            End If
+
+            Console.WriteLine("")
+            Console.WriteLine("Responda S o N (o bien CR para S)")
+        End While
+
+        If (resp = "S") Then
+            Return True
+        End If
+        Return False
+    End Function
+
+    Public Sub MensajeFinal(opts As CmdOptions, NroErrores As Integer)
+        MostrarMensaje(opts, " ")
+        If NroErrores = 0 Then
+            MostrarMensaje(opts, "Finalizado correctamente")
+        Else
+            Dim texto As String = $"Finalizado con {NroErrores} " & If(NroErrores = 1, "error", "errores")
+            MensajeError(opts, Nothing, Nothing, False, 0, 0, texto, "", True)
+        End If
     End Sub
 
-    Public Sub MostrarWarning(opts As CmdOptions, writer As StreamWriter, nLin As Integer, nCol As Integer, Linea1 As String, Line2 As String)
-        MensajeError(opts, writer, True, nLin, nCol, Linea1, "")
+    Public Sub MostrarError(opts As CmdOptions, reader As StreamReader, writer As StreamWriter, nLin As Integer, nCol As Integer, Linea1 As String, Line2 As String)
+        MensajeError(opts, reader, writer, False, nLin, nCol, Linea1, Line2, False)
+    End Sub
+
+    Public Sub MostrarWarning(opts As CmdOptions, reader As StreamReader, writer As StreamWriter, nLin As Integer, nCol As Integer, Linea1 As String, Line2 As String)
+        MensajeError(opts, reader, writer, True, nLin, nCol, Linea1, "", False)
     End Sub
 
 
-    Public Sub MensajeError(opts As CmdOptions, writer As StreamWriter, Warning As Boolean, nLin As Integer, nCol As Integer, Linea1 As String, Linea2 As String)
+    Public Sub MensajeError(opts As CmdOptions, reader As StreamReader, writer As StreamWriter, Warning As Boolean, nLin As Integer, nCol As Integer, Linea1 As String, Linea2 As String, final As Boolean)
         Dim Msg As String = ""
 
         If nLin <> 0 And nCol <> 0 Then
@@ -488,11 +577,16 @@ Public Module ProcesosGenerales
         MostrarMensaje(opts, "-")
 
         If Not opts.Batch AndAlso Not opts.NoPararPorError Then
-            Console.Write("                 ¿Desea continuar (S/N)? ")
-            Dim resp = Console.ReadLine().Trim().ToUpper()
-            If (resp = "N") Then
+            Dim mens As String = ""
+            If final Then
+                mens = "                 ¿Desea mantener el fichero generado"
+            Else
+                mens = "                 ¿Desea continuar"
+            End If
+            If (Not Preguntar(mens)) Then
+                If reader IsNot Nothing Then reader.Close()
                 If writer IsNot Nothing Then writer.Close()
-                EliminarFicheroErroneo(opts.FSalida, opts)
+                EliminarFicheroErroneo(opts)
                 Environment.Exit(1)
             End If
         End If

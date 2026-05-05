@@ -2,7 +2,9 @@
 Option Explicit On
 
 Imports System.Data.SqlTypes
+Imports System.Formats.Asn1
 Imports System.IO
+Imports System.Text
 Imports System.Text.RegularExpressions
 Imports System.Xml
 
@@ -16,13 +18,16 @@ Public Module Renumerador
     Dim LineaSTOPFinal As Integer = 0
     Dim AddStop As Boolean = False
     Dim indentLevel As Integer = 0
-
+    Dim stReader As StreamReader
+    Dim stWriter As StreamWriter
 
     ' ==========================================================
     ' Punto de entrada
     ' ==========================================================
     Public Function Ejecutar(_opts As CmdOptions) As Integer
         opts = _opts
+        stWriter = New StreamWriter(ObtenerFicheroSalida(opts), False, New UTF8Encoding(False))
+        stReader = New StreamReader(ObtenerFicheroEntrada(opts))
         NroLineaFichero = 0
         NroErrores = 0
 
@@ -44,21 +49,16 @@ Public Module Renumerador
                 opts.Ren_IND = 2
             End If
 
-            Using ficEntrada As New StreamReader(opts.FSalidaGSB),
-                  ficLineas As New StreamWriter(opts.FLines)
+            Using ficEntrada As New StreamReader(opts.FSalidaGSB)
 
                 Dim LineaParaMostrar As String = ""
                 While Not ficEntrada.EndOfStream
                     Dim linea As String = ficEntrada.ReadLine()
                     LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, linea)
-                    AñadirEquivalencia(ficLineas, NroLineaFichero, NroLineaPrograma)
+                    AñadirEquivalencia(stWriter, NroLineaFichero, NroLineaPrograma)
                 End While
 
                 LineaSTOPFinal = CalcularNuevo(Equivalencias.Count + 1)
-
-                MostrarSalida(ficLineas, " ", False)
-                MostrarSalida(ficLineas, "-- FINALIZADO --", False)
-                MostrarSalida(ficLineas, " ", False)
             End Using
 
 
@@ -66,10 +66,9 @@ Public Module Renumerador
             ' PASADA 2: reescritura del programa
             ' --------------------------------------------------
             opts.Pasada = 2
-            Using ficEntrada As New StreamReader(opts.FSalidaGSB),
-                  ficSalida As New StreamWriter(opts.FSalidaRen)
+            Using ficEntrada As New StreamReader(opts.FSalidaGSB)
 
-                ficSalida.NewLine = vbLf
+                stWriter.NewLine = vbLf
 
                 While Not ficEntrada.EndOfStream
                     Dim linea As String = ficEntrada.ReadLine()
@@ -80,24 +79,26 @@ Public Module Renumerador
                         Dim resto As String = linea.Substring(nroAntiguo.ToString().Length).TrimStart()
 
                         resto = RenumerarSaltos(resto)
-                        GuardarLinea(ficSalida, nroNuevo, resto)
+                        GuardarLinea(nroNuevo, resto)
                     Else
-                        GuardarLinea(ficSalida, 0, linea)
+                        GuardarLinea(0, linea)
                     End If
                 End While
 
-                ' Linea de stop final debe existir
+                ' Linea de stop final, si debe existir
                 If (AddStop) And (LineaSTOPFinal <> 0) Then
-                    GuardarLinea(ficSalida, LineaSTOPFinal - opts.Ren_Paso, "REM *** ZX2SB FINAL DEL PROGRAMA ***")
-                    GuardarLinea(ficSalida, LineaSTOPFinal, "STOP")
+                    GuardarLinea(LineaSTOPFinal - opts.Ren_Paso, "REM *** ZX2SB FINAL DEL PROGRAMA ***")
+                    GuardarLinea(LineaSTOPFinal, "STOP")
                 End If
             End Using
-
 
         Catch ex As Exception
             Console.WriteLine(ex.ToString)
             NroErrores += 1
         End Try
+
+        stReader.Close()
+        stWriter.Close()
 
         Return NroErrores
 
@@ -273,8 +274,8 @@ Public Module Renumerador
             salida &= destino.ToString()
         End If
 
-            ' ✅ Avanzar índice completamente aquí
-            i = inicio + LongitudSalto(texto, inicio, palabra)
+        ' ✅ Avanzar índice completamente aquí
+        i = inicio + LongitudSalto(texto, inicio, palabra)
 
         Return salida
     End Function
@@ -316,10 +317,10 @@ Public Module Renumerador
 
     Private Sub GuardarEquivalencia(writer As StreamWriter, origen As Integer, destino As Integer)
         Dim linea As String = $"{origen}:{destino}"
-        MostrarSalida(writer, linea, True)
+        GuardarFichero(linea, True)
     End Sub
 
-    Private Sub GuardarLinea(writer As StreamWriter, nroNuevo As Integer, linea As String)
+    Private Sub GuardarLinea(nroNuevo As Integer, linea As String)
         Dim stmt As String = linea.Trim()
 
         ' 1) Si es cierre, desindentar ANTES
@@ -340,7 +341,7 @@ Public Module Renumerador
         End If
 
         ' 4) Emitir
-        MostrarSalida(writer, lineaFinal, False)
+        GuardarFichero(lineaFinal, False)
 
         ' 5) Si es apertura, indentar DESPUÉS
         If EsApertura(stmt) Then
@@ -349,9 +350,9 @@ Public Module Renumerador
     End Sub
 
 
-    Private Sub MostrarSalida(writer As StreamWriter, linea As String, eq As Boolean)
+    Private Sub GuardarFichero(linea As String, eq As Boolean)
         If (eq) Then linea = "[EQ] " & linea
-        writer.WriteLine(linea)
+        stWriter.WriteLine(linea)
         If opts.Verbose Then
             MostrarVerbose(opts, linea)
         End If

@@ -2,6 +2,7 @@
   <Folder Name="/src_cli/">
     <Project Path="src_cli/JGenerator/JGenerator.vbproj" />
     <Project Path="src_cli/JLexer/JLexer.vbproj" />
+    <Project Path="src_cli/JNormZX/JNormalizadorZX.vbproj" />
     <Project Path="src_cli/JParser/JParser.vbproj" />
     <Project Path="src_cli/JRenumerador/JRenumerador.vbproj" />
     <Project Path="src_cli/JSemantic/JSemantic.vbproj" />
@@ -12,6 +13,7 @@
   <Folder Name="/src_lib/">
     <Project Path="src_lib/ZX2SB_0_Common/ZX2SB_0_Common.vbproj" />
     <Project Path="src_lib/ZX2SB_1_Lexer/ZX2SB_1_Lexer.vbproj" />
+    <Project Path="src_lib/ZX2SB_1_Normalizador/ZX2SB_1_NormalizadorZX.vbproj" />
     <Project Path="src_lib/ZX2SB_2_Parser/ZX2SB_2_Parser.vbproj" />
     <Project Path="src_lib/ZX2SB_3_Semantic/ZX2SB_3_Semantic.vbproj" />
     <Project Path="src_lib/ZX2SB_4_Generator/ZX2SB_4_Generator.vbproj" />

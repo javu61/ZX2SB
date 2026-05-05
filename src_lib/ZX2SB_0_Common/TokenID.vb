@@ -100,7 +100,6 @@ Public Enum TokenID As Integer
     TK_ELSE = TokenFamily.TF_GENERAL + TokenTipo.TT_SENTENCIA + 33
     TK_FN = TokenFamily.TF_GENERAL + TokenTipo.TT_SENTENCIA + 35
     TK_FOR = TokenFamily.TF_BLOQUES + TokenTipo.TT_SENTENCIA + 36
-    TK_GO = TokenFamily.TF_GENERAL + TokenTipo.TT_SENTENCIA + 37
     TK_GOSUB = TokenFamily.TF_GENERAL + TokenTipo.TT_SENTENCIA + 38
     TK_GOTO = TokenFamily.TF_GENERAL + TokenTipo.TT_SENTENCIA + 39
     TK_IF = TokenFamily.TF_BLOQUES + TokenTipo.TT_SENTENCIA + 40
@@ -120,7 +119,6 @@ Public Enum TokenID As Integer
     TK_TO = TokenFamily.TF_GENERAL + TokenTipo.TT_SENTENCIA + 62
     TK_VERIFY = TokenFamily.TF_GENERAL + TokenTipo.TT_SENTENCIA + 63
     TK_END = TokenFamily.TF_GENERAL + TokenTipo.TT_SENTENCIA + 64
-    TK_SUB = TokenFamily.TF_GENERAL + TokenTipo.TT_SENTENCIA + 65
     TK_RANDOMIZE = TokenFamily.TF_GENERAL + TokenTipo.TT_SENTENCIA + 66
 
     TK_COPY = TokenFamily.TF_NOSOPORTADO + TokenTipo.TT_SENTENCIA + 29

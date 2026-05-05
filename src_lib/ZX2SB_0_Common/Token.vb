@@ -12,6 +12,7 @@ Public Structure Token
     Public Value As String
     Public Line As Integer
     Public Col As Integer
+    Dim _RPN As List(Of RPN_Node)
 
     Public Sub New(id As TokenID, valor As String, linea As Integer, columna As Integer)
         Me.ID = id
@@ -71,6 +72,17 @@ Public Structure Token
             End Select
         End Get
     End Property
+
+
+    Public ReadOnly Property RPN As List(Of RPN_Node)
+        Get
+            If _RPN Is Nothing AndAlso DebeTenerRPN(Me.ID) Then
+                _RPN = ParseRPN(Me.Value)
+            End If
+            Return _rpn
+        End Get
+    End Property
+
 
     ' ---------------------------------------------------
     '  Serialización EXACTA al fichero .tok
@@ -165,10 +177,10 @@ Public Structure Token
     ' ===========================================
     '  Nombres simbólicos de tokens (solo debug)
     ' ===========================================
-    Public Function TokenName(id As TokenID) As String
-        Dim name As String = [Enum].GetName(GetType(TokenID), id)
+    Public Function TokenName() As String
+        Dim name As String = [Enum].GetName(GetType(TokenID), Me.ID)
         If name Is Nothing Then
-            Return "UNKNOWN(" & CInt(id).ToString("00") & ")"
+            Return "UNKNOWN(" & CInt(ID).ToString("00") & ")"
         End If
         Return name
     End Function
@@ -359,6 +371,15 @@ Public Structure Token
                 Return True
         End Select
         Return False
+    End Function
+
+    Private Function DebeTenerRPN(id As TokenID) As Boolean
+        'Tokens TK_LET y TK_FOR no debe hacerse automáticamente, se hará en la función adecuada
+        If id = TokenID.TK_IF OrElse id = TokenID.TK_PRINT Then
+            Return True
+        Else
+            Return False
+        End If
     End Function
 
 End Structure

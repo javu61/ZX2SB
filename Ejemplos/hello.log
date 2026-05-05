@@ -1,52 +1,53 @@
-[JParser] Fichero C:\Proyectos\ZX2SB\ejemplos\hello.log borrado
-[JParser]  
-[JParser] - Entrada.: C:\Proyectos\ZX2SB\ejemplos\hello.tok
-[JParser] - Salida..: C:\Proyectos\ZX2SB\ejemplos\hello.irp
-[JParser] - Opciones: -d -nw 
-[JParser]  
-[JParser]  
-[JParser] 002: 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
-[JParser] 003: 11 PRINT BIN 11100110
-[JParser] 004: 12 LET A B=5 : PRINT A B, AB
-[JParser] 005: 13 LET P I=3 : PRINT P I, PI
-[JParser] 006: 15 FOR J=1 to 10 : PRINT J : NEXT J
-[JParser] 007: 20 LET A=1: LET B=2: LET C=3
-[JParser] 008: 25 GO SUB 750
-[JParser] 009: 30 IF A=1 THEN GO TO 100
-[JParser] 010: 40 PRINT "ESTO NO DEBE EJECUTARSE"
-[JParser] 011: 50 GOTO 9999 : REM salto inexistente, no error
-[JParser] 012: 60 PRINT "TAMPOCO DEBE VERSE"
-[JParser] 013: 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
-[JParser] 014: 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
-[JParser] 015: 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
-[JParser] 016: 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
-[JParser] 017: 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
-[JParser] 018: 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
-[JParser] 019: 200 FOR I=1 TO 3
-[JParser] 020: 210 PRINT "BUCLE I=";I
-[JParser] 021: 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
-[JParser] 022: 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
-[JParser] 023: 240 PRINT "DESPUES DEL IF EN FOR"
-[JParser] 024: 250 NEXT I
-[JParser] 025: 300 REM --- PRUEBA READ / DATA / RESTORE ---
-[JParser] 026: 310 DATA 10,20,30
-[JParser] 027: 320 READ X
-[JParser] 028: 330 PRINT "X=";X
-[JParser] 029: 340 READ X
-[JParser] 030: 350 PRINT "X=",X
-[JParser] 031: 360 RESTORE 310
-[JParser] 032: 370 READ X
-[JParser] 033: 380 PRINT "X=";X
-[JParser] 034: 400 REM --- IF CON READ ---
-[JParser] 035: 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
-[JParser] 036: 500 REM --- STOP INTERMEDIO ---
-[JParser] 037: 510 STOP
-[JParser] 038: 520 PRINT "NO DEBE EJECUTARSE"
-[JParser] 039: 600 REM --- IF MULTIPLE FINAL MALVADO ---
-[JParser] 040: 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
-[JParser] 041: 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
-[JParser] 042: 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
-[JParser] 043: 700 REM === FIN ===
-[JParser] 044: 800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
-[JParser] 045: 810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
-[JParser] Finalizado correctamente
+[JNormalizar] Fichero C:\Proyectos\ZX2SB\Ejemplos\hello.log borrado
+[JNormalizar]  
+[JNormalizar] - Entrada.: C:\Proyectos\ZX2SB\Ejemplos\hello.tok
+[JNormalizar] - Salida..: C:\Proyectos\ZX2SB\Ejemplos\hello.tkz
+[JNormalizar] - Opciones: -nw 
+[JNormalizar]  
+[JNormalizar]  
+[JNormalizar] 002: 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
+[JNormalizar] 003: 11 PRINT BIN 11100110
+[JNormalizar] 004: 12 LET A B=5 : PRINT A B, AB
+[JNormalizar] 005: 13 LET P I1=3 : PRINT P I1, PI
+[JNormalizar] 006: 15 FOR J=1 to 10 : PRINT J : NEXT J
+[JNormalizar] 007: 20 LET A$="1": LET B$=2: LET C=3
+[JNormalizar] 008: 25 GOSUB 750 : GOSUB751 : GO SUB 752 : GO SUB753 : GOTO 60 : GOTO61: GO TO 62 : GO TO63
+[JNormalizar] 009: 30 IF A=1 THEN GO TO 100 : LET GO1TO=3
+[JNormalizar] 010: 40 PRINT "ESTO NO DEBE EJECUTARSE"
+[JNormalizar] 011: 50 GOTO 9999 : REM salto inexistente, no error
+[JNormalizar] 012: 60 PRINT "TAMPOCO DEBE VERSE"
+[JNormalizar] 013: 100 PRINT "ENTRA EN BLOQUE IF SIMPLE"
+[JNormalizar] 014: 110 IF A=1 THEN PRINT "IF SIMPLE CON PRINT"
+[JNormalizar] 015: 120 IF A=1 THEN PRINT "UNO" : PRINT "DOS" : PRINT "TRES"
+[JNormalizar] 016: 130 IF A=1 THEN IF B=2 THEN PRINT "IF DOBLE"
+[JNormalizar] 017: 140 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "IF TRIPLE"
+[JNormalizar] 018: 150 IF A=1 THEN IF B=2 THEN IF C=3 THEN PRINT "A" : PRINT "B" : PRINT "C"
+[JNormalizar] 019: 200 FOR I=1 TO 3
+[JNormalizar] 020: 210 PRINT "BUCLE I=";I
+[JNormalizar] 021: 220 IF I=2 THEN PRINT "IF DENTRO DEL FOR"
+[JNormalizar] 022: 230 IF I=2 THEN LET B=4 : GOTO 8888 : LET A=9 : REM código inalcanzable
+[JNormalizar] 023: 240 PRINT "DESPUES DEL IF EN FOR"
+[JNormalizar] 024: 250 NEXT I
+[JNormalizar] 025: 300 REM --- PRUEBA READ / DATA / RESTORE ---
+[JNormalizar] 026: 310 DATA 10,20,"CADENA",30
+[JNormalizar] 027: 320 READ X,Y,C$,Z
+[JNormalizar] 028: 330 PRINT "X=";X
+[JNormalizar] 029: 340 READ X
+[JNormalizar] 030: 350 PRINT "X=",X
+[JNormalizar] 031: 360 RESTORE 310
+[JNormalizar] 032: 370 READ X
+[JNormalizar] 033: 380 PRINT "X=";X
+[JNormalizar] 034: 400 REM --- IF CON READ ---
+[JNormalizar] 035: 410 IF A=1 THEN READ X : PRINT "READ EN IF=";X
+[JNormalizar] 036: 500 REM --- STOP INTERMEDIO ---
+[JNormalizar] 037: 510 STOP
+[JNormalizar] 038: 520 PRINT "NO DEBE EJECUTARSE"
+[JNormalizar] 039: 600 REM --- IF MULTIPLE FINAL MALVADO ---
+[JNormalizar] 040: 610 IF A=1 THEN IF B>2 THEN IF C<>3 THEN PRINT "X" : IF A=1 THEN PRINT "Y" : IF B=2 THEN PRINT "Z"
+[JNormalizar] 041: 650 IF A ( BX + C +  5   , Z * 4 + F) = C ( t * 4 )+u AND b <> 0 THEN PRINT "OK"
+[JNormalizar] 042: 660 LET   A  ( BX+C +5, Z * 4+F)=C (t *4) : LET B=C^ 3
+[JNormalizar] 043: 700 REM === FIN ===
+[JNormalizar] 044: 800 PRINT AT 10,2;"K";AT G(10),2,"L";INK 4;PAPER 3;45;A(bc+4, C*4),B
+[JNormalizar] 045: 810 PRINT TAB 10;"A";TAB(20);"B";AT 1,4
+[JNormalizar]  
+[JNormalizar] Finalizado correctamente

@@ -1,19 +1,28 @@
 ﻿Public Module Opciones
+
+    Enum SubFases
+        Base
+        Data
+        Variables
+    End Enum
+
     Public Structure CmdOptions
 
         ' --- Proceso en el que estamos ---
         Public Modulo As String
+        Public Fase As SubFases
 
         ' --- Ficheros de entrada y salida ---
         Public FEntrada As String
         Public FSalidaLex As String
+        Public FSalidaNor As String
         Public FSalidaPar As String
         Public FSalidaSem As String
+        Public FSalidaDat As String
+        Public FSalidaVar As String
         Public FSalidaGSB As String
         Public FSalidaRen As String
         Public FSalida As String
-        Public FVar As String
-        Public FData As String
         Public FLines As String
         Public FLog As String
 
@@ -24,17 +33,18 @@
         Public Pasada As Integer
 
         ' --- Salida / modo de ejecución ---
-        Public Silencioso As Boolean      ' -s
-        Public Verbose As Boolean         ' -v
-        Public Batch As Boolean           ' -b
+        Public Silencioso As Boolean       ' -s
+        Public Verbose As Boolean          ' -v
+        Public Batch As Boolean            ' -b
+        Public ZX As Boolean               ' -zx
 
         ' --- Control de errores y avisos ---
-        Public NoPararPorError As Boolean   ' -ne
+        Public NoPararPorError As Boolean  ' -ne
         Public SinWarnings As Boolean      ' -nw
 
         ' --- Comentarios / debug ---
         Public SinComentarios As Boolean   ' -nc
-        Public ModoDebug As Boolean            ' -d
+        Public ModoDebug As Boolean        ' -d
 
         ' --- Funciones no soportadas ---
         Public Funciones As Integer        ' 0=Dar error, 1=Mostrar en pantalla y seguir, 2=Ignorar

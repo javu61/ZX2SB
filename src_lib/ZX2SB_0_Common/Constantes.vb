@@ -6,6 +6,7 @@
 Public Module Constantes
     Public Const MDir As String = "ZX2SB"
     Public Const MLex As String = "JLexer"
+    Public Const MNor As String = "JNormalizar"
     Public Const MPar As String = "JParser"
     Public Const MSem As String = "JSemantic"
     Public Const MGSB As String = "JGeneratorSB"
@@ -41,8 +42,12 @@ Public Module Constantes
     Public Const LOG_EXTENSION As String = ".log"
 
     Public Const LEX_EXTENSION As String = ".tok"
+    Public Const NOR_EXTENSION As String = ".tkz"
     Public Const LEX_NOMBRE As String = "TOK"
     Public Const LEX_VERSION As String = "1.0"
+
+    Public Const TKZ_NOMBRE As String = "TKZ"
+    Public Const TKZ_VERSION As String = "1.0"
 
     Public Const PAR_EXTENSION As String = ".irp"
     Public Const PAR_NOMBRE As String = "IRP"
@@ -56,7 +61,7 @@ Public Module Constantes
     Public Const VAR_NOMBRE As String = "VAR"
     Public Const VAR_VERSION As String = "1.0"
 
-    Public Const DATA_EXTENSION As String = ".dat"
+    Public Const DTA_EXTENSION As String = ".dat"
     Public Const DATA_NOMBRE As String = "DATA"
     Public Const DATA_VERSION As String = "1.0"
 
@@ -73,6 +78,7 @@ Public Module Constantes
     Public Const opSilencioso = "-s"
     Public Const opVerbose = "-v"
     Public Const opBath = "-b"
+    Public Const opZX = "-zx"
     Public Const opNoWarnings = "-nw"
     Public Const opContinuarSError = "-ce"
     Public Const opSinComentarios = "-nc"
