@@ -120,7 +120,7 @@ Public Module Parser
 
 
         GuardarIRP_Token(TokenID.TCO_EOF)
-
+        stWriter.Flush()
         stReader.Close()
         stWriter.Close()
 
@@ -1183,9 +1183,10 @@ Public Module Parser
 
                         ' Argumento obligatorio: expresión
                         Dim exprArg As List(Of RPN.RPN_Node) = Nothing
-                        If Not ParseExprTexto(False, exprArg) Then
+                        If Not ParseExprTexto(False, exprArg, ";,") Then
                             Return False
                         End If
+
 
                         resultado.AddRange(exprArg)
 
@@ -1489,7 +1490,12 @@ Public Module Parser
 
     Private Sub GuardarIRP_PRINT(item As PrintItem)
 
+        If item.ID = TokenID.TK_PRINT Then
+            item.ID = DetectarTipoPrint(item.Expr1)
+        End If
+
         Dim sb As New StringBuilder()
+
         If item.Expr1 IsNot Nothing Then
             sb.Append(RPN_ToText(item.Expr1))
         End If
@@ -1499,8 +1505,39 @@ Public Module Parser
             sb.Append(RPN_ToText(item.Expr2))
         End If
 
-        GuardarIRP_Token_Valor(item.ID, sb.ToString())
+        item.Value = sb.ToString()
+
+        GuardarIRP(New Token(TokenID.TK_PRINT, ""), item)
+
     End Sub
+
+    Private Function DetectarTipoPrint(expr As List(Of RPN.RPN_Node)) As TokenID
+
+        If expr Is Nothing OrElse expr.Count = 0 Then
+            Return TokenID.TCO_UNKNOWN
+        End If
+
+        Dim first = expr(expr.Count - 1) ' en RPN el resultado final
+
+        Select Case first.Kind
+            Case RPNKind.VAR
+                Return TokenID.TES_IDENT
+
+            Case RPNKind.CTE
+                If first.TokenID = TokenID.TES_STRING Then
+                    Return TokenID.TES_STRING
+                Else
+                    Return TokenID.TES_NUMBER
+                End If
+
+            Case RPNKind.FUN_CALL
+                Return first.TokenID
+
+            Case Else
+                Return TokenID.TK_PRINT   ' fallback
+        End Select
+
+    End Function
 
 
     Private Sub GuardarIRP_IF(condicion As List(Of RPN.RPN_Node))
@@ -1509,12 +1546,10 @@ Public Module Parser
     End Sub
 
 
-    Private Sub GuardarIRP_FOR(
-                               varName As String,
+    Private Sub GuardarIRP_FOR(varName As String,
                                exprInit As List(Of RPN.RPN_Node),
                                exprLimit As List(Of RPN.RPN_Node),
-                               exprStep As List(Of RPN.RPN_Node)
-                            )
+                               exprStep As List(Of RPN.RPN_Node))
         Dim sb As New StringBuilder()
 
         sb.Append($"V({varName}) := ")

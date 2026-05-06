@@ -20,7 +20,7 @@ Module Program_Lexer
         Dim NroErrores As Integer
 
         ' --- Procesar argumentos ---
-        ProcesarArgs(Constantes.MLex, args, opts)
+        Dim L As List(Of Procesos) = ProcesarArgs(Constantes.MLex, args, opts)
 
         ' --- Llamada al LEXER REAL ---
         Try

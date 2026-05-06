@@ -39,9 +39,9 @@ Public Module QLGenerator
     ' Punto de entrada
     ' ============================================================
     Public Function Ejecutar(_Opts As CmdOptions) As Integer
+        opts = _Opts
         stWriter = New StreamWriter(ObtenerFicheroSalida(opts), False, New UTF8Encoding(False))
         stReader = New StreamReader(ObtenerFicheroEntrada(opts))
-        opts = _Opts
         NroErrores = 0
 
         FuncionesFNUsadas.Clear()
@@ -129,6 +129,7 @@ Public Module QLGenerator
             Return 1
         End If
 
+        stWriter.Flush()
         stReader.Close()
         stWriter.Close()
         Return 0
@@ -414,26 +415,28 @@ Public Module QLGenerator
         Dim cmd As String = tk.Mnemonic
         Dim stmt As String = tk.Value
 
-        ' Separar por el primer igual que esté fuera de los paréntesis
+        ' Separar por el primer :=  que esté fuera de los paréntesis
         Dim p1 As Integer = BuscarIgualDelLet(stmt)
         If p1 < 0 Then
-            ' Caso degenerado: LET A
-            EmitirLinea(writer, stmt, False)
+            EmitirError(writer, 0, "LET sin operador :=")
+            Exit Sub
         End If
 
         Dim lhs As String = stmt.Substring(0, p1).Trim()
-        Dim rhs As String = stmt.Substring(p1 + 1).Trim()
+        Dim rhs As String = stmt.Substring(p1 + 2).Trim()
+
+        Dim lhsExpr As String = RPN_To_Infix(lhs)
+        Dim rhsExpr As String = RPN_To_Infix(rhs)
         'rhs = ReescribirExpresion(rhs, True)
         ' 🔑 El '=' SE INSERTA AQUÍ SIEMPRE
-        EmitirLinea(writer, $"{lhs}={rhs}", False) 'En el QL no hace falta el LET
+        EmitirLinea(writer, $"{lhsExpr}={rhsExpr}", False) 'En el QL no hace falta el LET
     End Sub
 
     Private Function BuscarIgualDelLet(texto As String) As Integer
         Dim nivel As Integer = 0
+        Dim i As Integer = 0
 
-        'Inicialmente no pasábamos el igual, se separaba por un espacio, pero como pueden haber espacios
-        'dentro de los paréntesis se vigila, pero se mantiene por si acaso se vuelve a quitar el igual
-        For i As Integer = 0 To texto.Length - 1
+        While i < texto.Length - 1
             Dim ch As Char = texto(i)
 
             Select Case ch
@@ -443,15 +446,19 @@ Public Module QLGenerator
                 Case ")"c
                     If nivel > 0 Then nivel -= 1
 
-                Case "="c
-                    If nivel = 0 Then
-                        Return i   ' ✅ igual separador LHS / RHS
+                Case ":"c
+                    ' ¿Es := a nivel superior?
+                    If nivel = 0 AndAlso texto(i + 1) = "="c Then
+                        Return i   ' índice del :
                     End If
             End Select
-        Next
 
-        Return -1   ' ❌ no encontrado
+            i += 1
+        End While
+
+        Return -1   ' no encontrado
     End Function
+
 
 
     ' =========================================================
@@ -462,42 +469,45 @@ Public Module QLGenerator
         Dim tkaux As New Token(item.ID, item.Value)
         Dim Comando As String = "PRINT "
 
-        'Las directivas ya no van dentro del print, salto TAB
-        If tk.IsPrintDirective And tk.ID <> TokenID.TK_TAB Then
+        ' Directivas fuera del PRINT
+        If tk.IsPrintDirective AndAlso tk.ID <> TokenID.TK_TAB Then
             EmitirLinea(writer, $"{tkaux.Mnemonic} {tkaux.Value}", False)
 
-            'Solo necesitas añadir un separador si es coma, e irá en linea aparte
             If item.Separator = PrintSeparator.C Then
                 EmitirLinea(writer, Comando & ",", False)
             End If
 
-        Else
-            Dim sb As New StringBuilder
-            sb.Append(Comando)
-
-            'TAB debe cambiarse en el QL
-            If item.ID = TokenID.TK_TAB Then
-                sb.Append(EmitirTAB(writer, item.Value))
-            Else
-                'El resto van directas
-                sb.Append(SentenciaSimpleQL(writer, tkaux))
-            End If
-
-            ' Aplicar separador
-            Select Case item.Separator
-                Case PrintSeparator.P
-                    sb.Append(";")
-                Case PrintSeparator.C
-                    sb.Append(",")
-                Case PrintSeparator.N
-                    ' nada
-            End Select
-
-            EmitirLinea(writer, sb.ToString(), False)
-
+            Return
         End If
 
+        Dim sb As New StringBuilder
+        sb.Append(Comando)
+
+        ' TAB se trata aparte
+        If item.ID = TokenID.TK_TAB Then
+            sb.Append(EmitirTAB(writer, item.Value))
+        Else
+            ' ✅ AQUÍ ESTÁ EL CAMBIO IMPORTANTE
+
+            Console.WriteLine($"::2:{tkaux.Value}")
+
+            Dim expr As String = RPN_To_Infix(tkaux.Value)
+            sb.Append(expr)
+        End If
+
+        ' Aplicar separador
+        Select Case item.Separator
+            Case PrintSeparator.P
+                sb.Append(";")
+            Case PrintSeparator.C
+                sb.Append(",")
+            Case PrintSeparator.N
+                ' nada
+        End Select
+
+        EmitirLinea(writer, sb.ToString(), False)
     End Sub
+
 
 
     Private Function EmitirTAB(writer As StreamWriter, value As String) As String
@@ -549,6 +559,148 @@ Public Module QLGenerator
             GrabarSalida(writer, GenerarLineaNumerada(sentenciaQL), True)
         End If
     End Sub
+
+    ' ============================================================
+    ' Procesar el RPN
+    ' ============================================================
+
+    Private Function RPN_To_Infix(expr As String) As String
+
+        Dim stack As New Stack(Of String)
+
+        ' Tokenizar por espacios de nivel superior
+        Dim tokens As List(Of String) = TokenizarRPN(expr)
+
+        For Each tk In tokens
+
+            ' --------------------------
+            ' Variable: V(x)
+            ' --------------------------
+            If tk.StartsWith("V(") Then
+                stack.Push(ExtraerContenido(tk))
+
+                ' --------------------------
+                ' Constante: C(n)
+                ' --------------------------
+            ElseIf tk.StartsWith("C(") Then
+                stack.Push(ExtraerContenido(tk))
+
+                ' --------------------------
+                ' Operador binario: B(+), B(*), B(^)...
+                ' --------------------------
+            ElseIf tk.StartsWith("B(") Then
+                Dim op As String = ExtraerContenido(tk)
+                Dim rhs As String = stack.Pop()
+                Dim lhs As String = stack.Pop()
+                stack.Push($"{lhs}{op}{rhs}")
+
+                ' --------------------------
+                ' Función: F(nombre,argc)
+                ' --------------------------
+            ElseIf tk.StartsWith("F(") Then
+                Dim inner As String = ExtraerContenido(tk)
+                Dim parts = inner.Split(","c)
+                Dim fname As String = parts(0)
+                Dim argc As Integer = Integer.Parse(parts(1))
+
+                Dim args As New List(Of String)
+                For i As Integer = 1 To argc
+                    args.Insert(0, stack.Pop())
+                Next
+
+                stack.Push($"{fname}({String.Join(",", args)})")
+
+                ' --------------------------
+                ' IDX(...) → índices de array
+                ' --------------------------
+            ElseIf tk.StartsWith("IDX(") Then
+                Dim inner As String = ExtraerContenido(tk)
+
+                ' Separar índices de nivel superior
+                Dim indices = SplitTopLevel(inner, ","c)
+                Dim idxExpr As New List(Of String)
+
+                For Each idx In indices
+                    idxExpr.Add(RPN_To_Infix(idx.Trim()))
+                Next
+
+                Dim baseVar As String = stack.Pop()
+                stack.Push($"{baseVar}({String.Join(",", idxExpr)})")
+
+            Else
+                Throw New Exception($"Token RPN desconocido: {tk}")
+            End If
+
+        Next
+
+        If stack.Count <> 1 Then
+            Throw New Exception("RPN inválida: pila no reducida a 1 elemento")
+        End If
+
+        Return stack.Pop()
+    End Function
+
+    Private Function ExtraerContenido(tk As String) As String
+        Dim p1 = tk.IndexOf("("c)
+        Dim p2 = tk.LastIndexOf(")"c)
+        Return tk.Substring(p1 + 1, p2 - p1 - 1)
+    End Function
+
+    Private Function SplitTopLevel(text As String, separator As Char) As List(Of String)
+        Dim result As New List(Of String)
+        Dim level As Integer = 0
+        Dim start As Integer = 0
+
+        For i As Integer = 0 To text.Length - 1
+            Dim ch As Char = text(i)
+
+            Select Case ch
+                Case "("c
+                    level += 1
+                Case ")"c
+                    level -= 1
+                Case separator
+                    If level = 0 Then
+                        result.Add(text.Substring(start, i - start).Trim())
+                        start = i + 1
+                    End If
+            End Select
+        Next
+
+        ' Último segmento
+        If start < text.Length Then
+            result.Add(text.Substring(start).Trim())
+        End If
+
+        Return result
+    End Function
+
+
+    Private Function TokenizarRPN(text As String) As List(Of String)
+        Dim res As New List(Of String)
+        Dim level As Integer = 0
+        Dim start As Integer = 0
+
+        For i As Integer = 0 To text.Length - 1
+            Select Case text(i)
+                Case "("c
+                    level += 1
+                Case ")"c
+                    level -= 1
+                Case " "c
+                    If level = 0 Then
+                        res.Add(text.Substring(start, i - start).Trim())
+                        start = i + 1
+                    End If
+            End Select
+        Next
+
+        If start < text.Length Then
+            res.Add(text.Substring(start).Trim())
+        End If
+
+        Return res.Where(Function(s) s <> "").ToList()
+    End Function
 
     ' ============================================================
     ' ERRORES

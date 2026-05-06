@@ -91,4 +91,11 @@ Public Module Constantes
     Public Const opPaso = "-rp"
     Public Const opIND = "-i"
 
+    Public Const opPrLex = "-l", opToLex = "-" + opPrLex
+    Public Const opPrNor = "-n", opToNor = "-" + opPrNor
+    Public Const opPrPar = "-p", opToPar = "-" + opPrPar
+    Public Const opPrSem = "-m", opToSem = "-" + opPrSem
+    Public Const opPrGen = "-g", opToGen = "-" + opPrGen
+    Public Const opPrRen = "-r", opToRen = "-" + opPrRen
+
 End Module

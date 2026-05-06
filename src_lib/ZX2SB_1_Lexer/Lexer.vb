@@ -7,7 +7,7 @@ Imports System.IO
 Imports System.Text
 Imports System.Xml
 
-Public Module NormalizadorZX
+Public Module Lexer
 
     Dim opts As CmdOptions
     Dim pos As Integer
@@ -39,19 +39,22 @@ Public Module NormalizadorZX
 
 
             ' ----------------------------------------------------------
-            ' Primera línea
+            ' Primera línea (en el lexer no hace nada, lo mantengo por unificar)
             ' ----------------------------------------------------------
             If PrimeraLinea Then
-                GuardaSalida($"{Constantes.LEX_NOMBRE} {Constantes.LEX_VERSION}")
                 PrimeraLinea = False
             End If
 
+            ' ----------------------------------------------------------
+            ' Primera línea
+            ' ----------------------------------------------------------
             LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, LineaLeida)
             GuardaSalida($"{Constantes.MarcaSRC} {LineaParaMostrar}")
             AnalizarLinea(LineaLeida, NroLineaFichero)
         End While
 
         AddTokenEOFL()
+        stWriter.Flush()
         stReader.Close()
         stWriter.Close()
 

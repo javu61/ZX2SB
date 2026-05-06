@@ -20,7 +20,7 @@ Module Program_Parser
         Dim NroErrores As Integer
 
         ' --- Procesar argumentos ---
-        ProcesarArgs(Constantes.MPar, args, opts)
+        Dim L As List(Of Procesos) = ProcesarArgs(Constantes.MPar, args, opts)
 
         ' --- Llamada al PARSER ---
         Try

@@ -12,6 +12,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\src_lib\ZX2SB_0_Common\ZX2SB_0_Common.vbproj" />
 		<ProjectReference Include="..\..\src_lib\ZX2SB_1_Lexer\ZX2SB_1_Lexer.vbproj" />
+		<ProjectReference Include="..\..\src_lib\ZX2SB_1_Normalizador\ZX2SB_1_NormalizadorZX.vbproj" />
 		<ProjectReference Include="..\..\src_lib\ZX2SB_2_Parser\ZX2SB_2_Parser.vbproj" />
 		<ProjectReference Include="..\..\src_lib\ZX2SB_3_Semantic\ZX2SB_3_Semantic.vbproj" />
 		<ProjectReference Include="..\..\src_lib\ZX2SB_4_Generator\ZX2SB_4_Generator.vbproj" />

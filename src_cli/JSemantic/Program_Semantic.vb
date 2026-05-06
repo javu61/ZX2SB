@@ -20,7 +20,7 @@ Module Program_Semantic
         Dim NroErrores As Integer
 
         ' --- Procesar argumentos ---
-        ProcesarArgs(Constantes.MSem, args, opts)
+        Dim L As List(Of Procesos) = ProcesarArgs(Constantes.MSem, args, opts)
 
         ' --- Llamada al SEMANTIC ---
         Try

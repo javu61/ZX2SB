@@ -49,16 +49,15 @@ Public Module SemanticAnalyzer
         ' ============================================================
         ' SEGUNDA PASADA (Análisis semántico + generación IRS)
         ' ============================================================
-        opts.Pasada = 2
-
-
         GuardarIRS_Texto(Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION)
+        opts.Pasada = 2
         ProcesarIR()
         If NroErrores <> 0 Then
             Return 1
         End If
 
         GuardarIRP_Token(New Token(TokenID.TCO_EOF))
+        stWriter.Flush()
         GuardarVarAndData()
 
         ' Los avisos de variables son warnings
@@ -585,15 +584,9 @@ Public Module SemanticAnalyzer
         ' --------------------------------------------------------
         ' Sección de variables
         ' --------------------------------------------------------
-
         If ctx.Variables.Count <> 0 Then
             opts.Fase = SubFases.Variables
-
-            Console.WriteLine($"::A:{opts.Modulo} - {opts.Fase} - {ObtenerFicheroSalida(opts)}")
-
             stWriter = New StreamWriter(ObtenerFicheroSalida(opts), False, New UTF8Encoding(False))
-
-
 
             GuardarIRS_Texto(Constantes.VAR_NOMBRE & " " & Constantes.VAR_VERSION)
             GuardarIRS_Texto("")
@@ -614,9 +607,9 @@ Public Module SemanticAnalyzer
                 End If
 
             Next
-            GuardarIRS_VAR("")
+            GuardarIRS_VAR("-")
             GuardarIRS_VAR("ENDVARS")
-
+            stWriter.Flush()
             stWriter.Close()
         End If
 
@@ -627,9 +620,6 @@ Public Module SemanticAnalyzer
 
         If ctx.DataNodes.Count <> 0 Then
             opts.Fase = SubFases.Data
-
-            Console.WriteLine($"::B:{opts.Fase} - {opts.Modulo} - {ObtenerFicheroSalida(opts)}")
-
             stWriter = New StreamWriter(ObtenerFicheroSalida(opts), False, New UTF8Encoding(False))
 
             GuardarIRS_Texto(Constantes.DATA_NOMBRE & " " & Constantes.DATA_VERSION)
@@ -642,9 +632,9 @@ Public Module SemanticAnalyzer
                     GuardarIRS_DATA($"NODE {d.Line} {d.Value}")
                 End If
             Next
-            GuardarIRS_DATA("")
+            GuardarIRS_DATA("-")
             GuardarIRS_DATA("ENDDATA")
-
+            stWriter.Flush()
             stWriter.Close()
         End If
 
@@ -1211,11 +1201,19 @@ Public Module SemanticAnalyzer
     End Sub
 
     Private Sub GuardarIRS_VAR(linea As String)
-        GuardarIRS_Texto("VAR  " & linea)
+        GuardarIRS_Aux("VAR", linea)
     End Sub
 
     Private Sub GuardarIRS_DATA(linea As String)
-        GuardarIRS_Texto("DATA " & linea)
+        GuardarIRS_Aux("DATA", linea)
+    End Sub
+
+    Private Sub GuardarIRS_Aux(tipo As String, linea As String)
+        If (linea <> "-") Then
+            GuardarIRS_Texto(tipo & "  " & linea)
+        Else
+            GuardarIRS_Texto("")
+        End If
     End Sub
 
     Private Sub GuardarIRS_Texto(linea As String)

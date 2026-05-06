@@ -97,6 +97,7 @@ Public Module Renumerador
             NroErrores += 1
         End Try
 
+        stWriter.Flush()
         stReader.Close()
         stWriter.Close()
 

@@ -42,6 +42,9 @@ Public Module NormalizadorZX
                 Continue While
             End If
 
+            ' --------------------------------------------
+            ' Primera línea, versión
+            ' --------------------------------------------  
             If PrimeraLinea Then
                 If Not lineaLeida.StartsWith(Constantes.LEX_NOMBRE) Then
                     ErrorNormalizador(0, "[ERROR] No es un fichero " & Constantes.LEX_NOMBRE & ": " & lineaLeida)
@@ -78,6 +81,7 @@ Public Module NormalizadorZX
         GuardarVariable(nombreAcumulado)
 
         AddTokenEOFL()
+        stWriter.Flush()
         stReader.Close()
         stWriter.Close()
 

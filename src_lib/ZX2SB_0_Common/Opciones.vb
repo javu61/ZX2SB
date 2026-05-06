@@ -1,5 +1,19 @@
 ﻿Public Module Opciones
 
+    Enum Procesos
+        Ninguno = -1
+
+        Lexer = 1
+        Normalizador = 2
+        Parser = 3
+        Semantico = 4
+        Generador = 5
+        Renumerador = 6
+
+        Primero = Lexer
+        Ultimo = Renumerador
+    End Enum
+
     Enum SubFases
         Base
         Data
@@ -46,6 +60,10 @@
         Public SinComentarios As Boolean   ' -nc
         Public ModoDebug As Boolean        ' -d
 
+        ' --- Proceso a ejecutar --
+        Public Ej_Proceso As Procesos      ' -L/N/P/S/G/R Nombre Ejecuta SOLO ese proceso
+        Public Ej_Hasta As Boolean         ' +L/N/P/S/G/R Nombre Ejecuta HASTA ese proceso
+
         ' --- Funciones no soportadas ---
         Public Funciones As Integer        ' 0=Dar error, 1=Mostrar en pantalla y seguir, 2=Ignorar
 
@@ -58,5 +76,9 @@
         Public DesdeDirector As Boolean     ' Si el proceso se lanzó desde el director
 
     End Structure
+
+    Public Function NombreProceso(p As Procesos) As String
+        Return [Enum].GetName(GetType(Procesos), p)
+    End Function
 
 End Module

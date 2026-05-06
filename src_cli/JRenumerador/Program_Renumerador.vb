@@ -20,7 +20,7 @@ Module Program_Renumerador
         Dim NroErrores As Integer
 
         ' --- Procesar argumentos ---
-        ProcesarArgs(Constantes.MRen, args, opts)
+        Dim L As List(Of Procesos) = ProcesarArgs(Constantes.MRen, args, opts)
 
         ' --- Llamada al LEXER REAL ---
         Try

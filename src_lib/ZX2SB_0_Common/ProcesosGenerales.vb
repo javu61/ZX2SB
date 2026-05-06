@@ -9,8 +9,8 @@ Imports System.Text
 
 Public Module ProcesosGenerales
 
-    Public Sub ProcesarArgs(Modulo As String, args() As String, ByRef opts As CmdOptions)
-
+    Public Function ProcesarArgs(Modulo As String, args() As String, ByRef opts As CmdOptions) As List(Of Procesos)
+        Dim ListaProcesos As New List(Of Procesos)
         Dim i As Integer
         Dim aux As String
 
@@ -27,6 +27,10 @@ Public Module ProcesosGenerales
         opts.FSalidaRen = ""
         opts.FSalida = ""
         opts.Opciones = ""
+
+        opts.Ej_Proceso = Procesos.Ninguno
+        opts.Ej_Hasta = False
+
         opts.Batch = False
         opts.Silencioso = False
         opts.Verbose = False
@@ -108,41 +112,31 @@ Public Module ProcesosGenerales
                     HayError = True
                 End Try
             Else
-                Select Case args(i).ToLower()
-                    Case Constantes.opSilencioso
-                        opts.Silencioso = True
-                        opts.Opciones &= args(i) & " "
+                Dim op As String = args(i).ToLower()
+                Dim hasta As Boolean = False
 
-                    Case Constantes.opVerbose
-                        opts.Verbose = True
-                        opts.Opciones &= args(i) & " "
+                If (op.StartsWith("--")) Then
+                    op = op.Substring(1)
+                    hasta = True
+                End If
 
-                    Case Constantes.opBath
-                        opts.Batch = True
-                        opts.Opciones &= args(i) & " "
+                Select Case op
+                    Case Constantes.opPrLex : SetProceso(opts, Procesos.Lexer, hasta)
+                    Case Constantes.opPrNor : SetProceso(opts, Procesos.Normalizador, hasta)
+                    Case Constantes.opPrPar : SetProceso(opts, Procesos.Parser, hasta)
+                    Case Constantes.opPrSem : SetProceso(opts, Procesos.Semantico, hasta)
+                    Case Constantes.opPrGen : SetProceso(opts, Procesos.Generador, hasta)
+                    Case Constantes.opPrRen : SetProceso(opts, Procesos.Renumerador, hasta)
 
-                    Case Constantes.opZX
-                        opts.ZX = True
-                        opts.Opciones &= args(i) & " "
-
-                    Case Constantes.opNoWarnings
-                        opts.SinWarnings = True
-                        opts.Opciones &= args(i) & " "
-
-                    Case Constantes.opContinuarSError
-                        opts.NoPararPorError = True
-                        opts.Opciones &= args(i) & " "
-
-                    Case Constantes.opSinComentarios
-                        opts.SinComentarios = True
-                        opts.Opciones &= args(i) & " "
-
-                    Case Constantes.opDebug
-                        opts.ModoDebug = True
-                        opts.Opciones &= args(i) & " "
-
-                    Case Else
-                        HayError = True
+                    Case Constantes.opSilencioso : opts.Silencioso = True
+                    Case Constantes.opVerbose : opts.Verbose = True
+                    Case Constantes.opBath : opts.Batch = True
+                    Case Constantes.opZX : opts.ZX = True
+                    Case Constantes.opNoWarnings : opts.SinWarnings = True
+                    Case Constantes.opContinuarSError : opts.NoPararPorError = True
+                    Case Constantes.opSinComentarios : opts.SinComentarios = True
+                    Case Constantes.opDebug : opts.ModoDebug = True
+                    Case Else : HayError = True
                 End Select
             End If
 
@@ -150,6 +144,8 @@ Public Module ProcesosGenerales
                 MostrarMensaje(opts, "Errores en parámetros: Opción desconocida: " & args(i))
                 MostrarUso(opts)
                 Environment.Exit(1)
+            Else
+                opts.Opciones &= args(i) & " "
             End If
 
             i += 1
@@ -172,11 +168,63 @@ Public Module ProcesosGenerales
             opts.SinComentarios = False
         End If
 
+        ' Construir pipeline
+        If opts.Ej_Proceso = Procesos.Ninguno Then 'Si no se indica nada, se lanzan todos
+            opts.Ej_Proceso = Procesos.Ultimo
+            opts.Ej_Hasta = True
+        End If
+
+        Dim procesoInicial As Procesos = opts.Ej_Proceso
+        Dim procesoFinal As Procesos = opts.Ej_Proceso
+
+        If (procesoInicial < Procesos.Primero) Then
+            procesoInicial = Procesos.Primero
+        ElseIf (procesoInicial > Procesos.Ultimo) Then
+            procesoInicial = Procesos.Ultimo
+        End If
+
+        If procesoFinal < procesoInicial Then
+            procesoFinal = procesoInicial
+        ElseIf (procesoFinal > Procesos.Ultimo) Then
+            procesoFinal = Procesos.Ultimo
+        End If
+
+        ' Modo "hasta"
+        If opts.Ej_Hasta Then
+            procesoInicial = Procesos.Primero
+        End If
+
+        For p As Procesos = procesoInicial To procesoFinal
+            ListaProcesos.Add(p)
+        Next
+
         ' Preparar el fichero de salida
-        PrepararFicheros(opts)
+        PrepararFicheros(opts, ListaProcesos)
 
         MostrarInicio(opts)
+
+        Return (ListaProcesos)
+    End Function
+
+    Private Sub SetProceso(ByRef opts As CmdOptions, p As Procesos, hasta As Boolean)
+
+        ' Si este argumento es "hasta" explícito
+        If hasta Then
+            opts.Ej_Hasta = True
+        End If
+
+        ' Si ya había un proceso distinto, activamos modo "hasta"
+        If opts.Ej_Proceso <> Procesos.Ninguno AndAlso p <> opts.Ej_Proceso Then
+            opts.Ej_Hasta = True
+        End If
+
+        ' Elegir el proceso más avanzado
+        If p > opts.Ej_Proceso Then
+            opts.Ej_Proceso = p
+        End If
+
     End Sub
+
 
     Private Sub MostrarInicio(opts As CmdOptions)
         If Not opts.Batch Then
@@ -308,6 +356,22 @@ Public Module ProcesosGenerales
             MostrarMensaje(opts, MostrarOpcion(Constantes.opPaso & "n") & "La renumeración irá de n en n (si se omite será " & Constantes.opPaso & "10)")
             MostrarMensaje(opts, MostrarOpcion(Constantes.opIND & "n") & "Se indenta de n en n columnas (si se omite será " & Constantes.opIND & "2)")
         End If
+        If InStr("XLNPSGR", Letra) > 0 Then MostrarMensaje(opts, " ")
+        If InStr("XLNPSGR", Letra) > 0 Then
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opPrLex) & "Lanza el proceso " & Opciones.NombreProceso(Opciones.Procesos.Lexer))
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opPrNor) & "Lanza el proceso " & Opciones.NombreProceso(Opciones.Procesos.Normalizador))
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opPrPar) & "Lanza el proceso " & Opciones.NombreProceso(Opciones.Procesos.Parser))
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opPrSem) & "Lanza el proceso " & Opciones.NombreProceso(Opciones.Procesos.Semantico))
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opPrGen) & "Lanza el proceso " & Opciones.NombreProceso(Opciones.Procesos.Generador))
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opPrRen) & "Lanza el proceso " & Opciones.NombreProceso(Opciones.Procesos.Renumerador))
+            MostrarMensaje(opts, " ")
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opToLex) & "Lanza todos los procesos hasta el " & Opciones.NombreProceso(Opciones.Procesos.Lexer))
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opToNor) & "Lanza todos los procesos hasta el " & Opciones.NombreProceso(Opciones.Procesos.Normalizador))
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opToPar) & "Lanza todos los procesos hasta el " & Opciones.NombreProceso(Opciones.Procesos.Parser))
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opToSem) & "Lanza todos los procesos hasta el " & Opciones.NombreProceso(Opciones.Procesos.Semantico))
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opToGen) & "Lanza todos los procesos hasta el " & Opciones.NombreProceso(Opciones.Procesos.Generador))
+            MostrarMensaje(opts, MostrarOpcion(Constantes.opToRen) & "Lanza todos los procesos hasta el " & Opciones.NombreProceso(Opciones.Procesos.Renumerador))
+        End If
 
         Environment.Exit(1)
     End Sub
@@ -353,7 +417,7 @@ Public Module ProcesosGenerales
         Return ""
     End Function
 
-    Private Sub PrepararFicheros(ByRef opts As CmdOptions)
+    Private Sub PrepararFicheros(ByRef opts As CmdOptions, ListaProcesos As List(Of Procesos))
 
         If Not File.Exists(opts.FEntrada) Then
             Console.WriteLine("ERROR: No existe el fichero de entrada. Proceso finalizado")
@@ -383,31 +447,34 @@ Public Module ProcesosGenerales
         Dim ListaFicheros As New List(Of String)
         Dim resp As String = "S"
 
-        If opts.Modulo = Constantes.MLex Or opts.Modulo = Constantes.MDir Then
-            ListaFicheros.Add(opts.FSalidaLex)
-            ListaFicheros.Add(opts.FSalidaNor)
-        End If
+        For Each p In ListaProcesos
+            Select Case p
 
-        If opts.Modulo = Constantes.MPar Or opts.Modulo = Constantes.MDir Then
-            ListaFicheros.Add(opts.FSalidaPar)
-        End If
+                Case Procesos.Lexer
+                    ListaFicheros.Add(opts.FSalidaLex)
 
-        If opts.Modulo = Constantes.MSem Or opts.Modulo = Constantes.MDir Then
-            ListaFicheros.Add(opts.FSalidaSem)
-            ListaFicheros.Add(opts.FSalidaVar)
-            ListaFicheros.Add(opts.FSalidaDat)
-        End If
 
-        If opts.Modulo = Constantes.MGSB Or opts.Modulo = Constantes.MDir Then
-            ListaFicheros.Add(opts.FSalidaGSB)
-        End If
+                Case Procesos.Normalizador
+                    ListaFicheros.Add(opts.FSalidaNor)
 
-        If opts.Modulo = Constantes.MRen Or opts.Modulo = Constantes.MDir Then
+                Case Procesos.Parser
+                    ListaFicheros.Add(opts.FSalidaPar)
 
-            ListaFicheros.Add(opts.FSalidaRen)
-            ListaFicheros.Add(opts.FLines)
-        End If
+                Case Procesos.Semantico
+                    ListaFicheros.Add(opts.FSalidaSem)
+                    ListaFicheros.Add(opts.FSalidaVar)
+                    ListaFicheros.Add(opts.FSalidaDat)
 
+                Case Procesos.Generador
+                    ListaFicheros.Add(opts.FSalidaGSB)
+
+                Case Procesos.Renumerador
+                    ListaFicheros.Add(opts.FSalidaRen)
+                    ListaFicheros.Add(opts.FLines)
+            End Select
+
+        Next
+        ' El LOG SIEMPRE
         ListaFicheros.Add(opts.FLog)
 
         If ListaFicheros.Count <> 0 Then

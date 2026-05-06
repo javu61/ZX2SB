@@ -27,78 +27,48 @@ Module Program_Director
         Dim opts As CmdOptions = Nothing
         Dim NroErrores As Integer = 0
 
+        ' --- Procesar argumentos ---
+
+        ' PARA DEBUG Simple
+
+
+#If DEBUG Then
+        If args.Length = 0 Then
+            args = New String() {
+            "c:\Proyectos\zx2sb\ejemplos\hello.bas",
+            "-p"
+            }
+        End If
+#End If
+
+
+
+        Dim ListaProcesos As List(Of Procesos) = ProcesarArgs(Constantes.MDir, args, opts)
+
         Try
-            ' --- Procesar argumentos ---
-            ProcesarArgs(Constantes.MDir, args, opts)
+
             opts.DesdeDirector = True
             NroErrores = 0
-            ' ====================================================
-            ' 1a. LEXER
-            ' ====================================================
-            'ProcesarArgs(Constantes.MLex, args, opts)
-            opts.Modulo = Constantes.MLex
-            NroErrores += Lexer.Ejecutar(opts)
-            If NroErrores <> 0 Then
-                Throw New ApplicationException("Errores en el Lexer")
-            End If
 
-            ' ====================================================
-            ' 1b. Normalizador
-            ' ====================================================
-            'ProcesarArgs(Constantes.MLex, args, opts)
-            opts.Modulo = Constantes.MNor
-            NroErrores += NormalizadorZX.Ejecutar(opts)
-            If NroErrores <> 0 Then
-                Throw New ApplicationException("Errores en el Normalizador")
-            End If
+            For Each p In ListaProcesos
+                MostrarMensaje(opts, $"[DIRECTOR] Ejecutando {NombreProceso(p)}")
 
-            ' ====================================================
-            ' 2. PARSER / SINTÁCTICO
-            ' ====================================================
-            'ProcesarArgs(Constantes.MPar, args, opts)
-            opts.Modulo = Constantes.MPar
-            NroErrores += Parser.Ejecutar(opts)
-            If NroErrores <> 0 Then
-                Throw New ApplicationException("Errores en el Parser")
-            End If
+                Dim errores As Integer = EjecutarProceso(p, opts)
+                NroErrores += errores
 
-            ' ====================================================
-            ' 3. SEMÁNTICO
-            ' ====================================================
-            'ProcesarArgs(Constantes.MSem, args, opts)
+                If errores <> 0 Then
+                    Throw New ApplicationException($"Errores en {NombreProceso(p)}")
+                End If
 
-            opts.Modulo = Constantes.MSem
-            NroErrores += Semantic.Ejecutar(opts)
-            If NroErrores <> 0 Then
-                Throw New ApplicationException("Errores semánticos")
-            End If
-
-            ' ====================================================
-            ' 4. GENERACIÓN DE CÓDIGO (lógico, sin numerar)
-            ' ====================================================
-            'ProcesarArgs(Constantes.MGSB, args, opts)
-            opts.Modulo = Constantes.MGSB
-            NroErrores += Generator.Ejecutar(opts)
-            If NroErrores <> 0 Then
-                Throw New ApplicationException("Errores generando")
-            End If
-
-            ' ====================================================
-            ' 5. RENUMERACIÓN (si aplica al backend)
-            ' ====================================================
-            'ProcesarArgs(Constantes.MRen, args, opts)
-            opts.Modulo = Constantes.MRen
-            NroErrores += Renumerador.Ejecutar(opts)
-            If NroErrores <> 0 Then
-                Throw New ApplicationException("Errores generando")
-            End If
+            Next
 
         Catch ex As Exception
+
             If opts.ModoDebug Then
                 'Mostrar la traza completa
-                Console.WriteLine("EXCEPCIÓN NO CONTROLADA:")
+                Console.WriteLine("[DIRECTOR] EXCEPCIÓN NO CONTROLADA:")
                 Console.WriteLine(ex.Message)
-                Console.WriteLine("---- STACK TRACE ----")
+                Console.WriteLine("[DIRECTOR] ---- STACK TRACE ----")
                 Console.WriteLine(ex.StackTrace)
                 Throw
             Else
@@ -113,5 +83,40 @@ Module Program_Director
         Environment.Exit(NroErrores)
 
     End Sub
+
+    Private Function EjecutarProceso(p As Procesos, ByRef opts As CmdOptions) As Integer
+
+        Select Case p
+
+            Case Procesos.Lexer
+                opts.Modulo = Constantes.MLex
+                Return Lexer.Ejecutar(opts)
+
+            Case Procesos.Normalizador
+                opts.Modulo = Constantes.MNor
+                Return NormalizadorZX.Ejecutar(opts)
+
+            Case Procesos.Parser
+                opts.Modulo = Constantes.MPar
+                Return Parser.Ejecutar(opts)
+
+            Case Procesos.Semantico
+                opts.Modulo = Constantes.MSem
+                Return Semantic.Ejecutar(opts)
+
+            Case Procesos.Generador
+                opts.Modulo = Constantes.MGSB
+                Return Generator.Ejecutar(opts)
+
+            Case Procesos.Renumerador
+                opts.Modulo = Constantes.MRen
+                Return Renumerador.Ejecutar(opts)
+
+        End Select
+
+        Return 0
+
+    End Function
+
 
 End Module

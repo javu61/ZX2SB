@@ -21,7 +21,7 @@ Module Program_NormalizadorZX
         Dim NroErrores As Integer
 
         ' --- Procesar argumentos ---
-        ProcesarArgs(Constantes.MNor, args, opts)
+        Dim L As List(Of Procesos) = ProcesarArgs(Constantes.MNor, args, opts)
 
         ' --- Llamada al NORMALIZADOR REAL ---
         Try

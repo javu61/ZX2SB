@@ -32,7 +32,8 @@ Module Program_Generator
         Dim NroErrores As Integer
 
         ' --- Procesar argumentos ---
-        ProcesarArgs(Constantes.MGSB, args, opts)
+        Dim L As List(Of Procesos) = ProcesarArgs(Constantes.MGSB, args, opts)
+
         ' --- Llamada al Generador ---
         Try
             NroErrores = QLGenerator.Ejecutar(opts)
