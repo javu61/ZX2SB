@@ -1,15 +1,12 @@
-[ZX2SB] Fichero c:\Proyectos\zx2sb\ejemplos\hello.log borrado
-[ZX2SB]  
-[ZX2SB] - Entrada.: c:\Proyectos\zx2sb\ejemplos\hello.bas
-[ZX2SB] - Salida..: 
-[ZX2SB] - Opciones: -m 
-[ZX2SB]  
-[ZX2SB]  
-[ZX2SB] [DIRECTOR] Ejecutando Semantico
-[JSemantic.1] IRP 1.0
-[JSemantic.1] 002: 10 REM === PRUEBA COMPLETA GENERADOR ZX2SB ===
-[JSemantic.1] 003: 11 PRINT BIN 11100110
+[JSemantic] Fichero C:\Proyectos\ZX2SB\Ejemplos\hello.log borrado
 [JSemantic]  
-[JSemantic] [ERROR] IR: ParseRPN inválido: esperaba '(' tras '3'
+[JSemantic] - Entrada.: C:\Proyectos\ZX2SB\Ejemplos\hello.irp
+[JSemantic] - Salida..: C:\Proyectos\ZX2SB\Ejemplos\hello.irs
+[JSemantic] - Opciones: --p 
+[JSemantic]  
+[JSemantic]  
+[JSemantic]  
+[JSemantic] [ERROR] Could not find file 'C:\Proyectos\ZX2SB\Ejemplos\hello.irp'.
 [JSemantic]  
 [JSemantic] [ERROR] Finalizado con 1 error
+[JSemantic] [JSemantic] Eliminando ficheros generados, revise el log

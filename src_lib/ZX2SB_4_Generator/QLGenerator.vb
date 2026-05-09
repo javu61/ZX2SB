@@ -62,6 +62,17 @@ Public Module QLGenerator
             ' Primera línea, Debe contener tipo y versión del fichero
             ' ----------------------------------------------------------
             If PrimeraLinea Then
+                Dim resultado As String = ""
+                If Not GetVersion(opts, LineaLeida, resultado) Then
+                    EmitirError(stWriter, 0, resultado)
+                Else
+                    GrabarSalida(stWriter, "REM --> " & resultado, False)
+                End If
+                PrimeraLinea = False
+                Continue While
+            End If
+
+            If PrimeraLinea Then
                 If Not LineaLeida.StartsWith(Constantes.SEM_NOMBRE) Then
                     EmitirError(stWriter, 0, "[ERROR] No es un fichero " & Constantes.SEM_NOMBRE & ": " & LineaLeida)
                     Return (1)
@@ -78,7 +89,7 @@ Public Module QLGenerator
             ' --------------------------------------------
             ' Línea fuente original (contexto de error)
             ' --------------------------------------------
-            If LineaLeida.StartsWith(MarcaSRC) Then
+            If LineaLeida.StartsWith(Marca_SRC) Then
                 CerrarIF(stWriter)
 
                 ContadorLineaInterna = 0
@@ -238,21 +249,7 @@ Public Module QLGenerator
         End Select
     End Sub
 
-    Private Function LeerNumeroLiteral(texto As String) As Integer
-        Dim n As Integer = 0
-        Dim i As Integer = 0
 
-        While i < texto.Length AndAlso Char.IsWhiteSpace(texto(i))
-            i += 1
-        End While
-
-        While i < texto.Length AndAlso Char.IsDigit(texto(i))
-            n = n * 10 + (Asc(texto(i)) - Asc("0"c))
-            i += 1
-        End While
-
-        Return n
-    End Function
 
     ' =========================================================
     ' Generar IF (ZX BASIC → SuperBASIC QL)
@@ -284,21 +281,21 @@ Public Module QLGenerator
     ' =========================================================
 
     Private Sub GenerarIF(writer As StreamWriter, tkIF As Token)
-        'Dim cmd As String = tkIF.Mnemonic
-        'Dim stmt As String = tkIF.Value
-        Dim tkThen As New Token(TokenID.TK_THEN)
+        Dim expr As String
 
-        ' stmt llega como: "A = 1"
+        If tkIF.RPN IsNot Nothing AndAlso tkIF.RPN.Count > 0 Then
+            expr = RPNToInfix(tkIF.RPN)
+        Else
+            expr = tkIF.Value ' fallback
+        End If
 
-        Dim lineaIF As String = $"{tkIF.Mnemonic} {tkIF.Value} {tkThen.Mnemonic}"
+        Dim lineaIF As String = $"IF {expr} THEN"
+
 
         EmitirLinea(writer, lineaIF, True)
 
         IFContador += 1
     End Sub
-
-
-
 
     Private Sub CerrarIF(writer As StreamWriter)
 
@@ -331,37 +328,84 @@ Public Module QLGenerator
 
     End Function
 
-
-
     ' =========================================================
     ' Emisión de FOR/NEXT
     ' =========================================================
     Private Sub GenerarFor(writer As StreamWriter, tkFOR As Token)
-        ' Seguimiento del bucle
-        Dim varName As String = tkFOR.Value.Split("="c)(0).Trim().ToUpperInvariant()
+
+        Dim RPNAux = tkFOR.RPN
+        Dim texto = tkFOR.Value
+
+        If RPNAux Is Nothing OrElse RPNAux.Count = 0 Then
+            EmitirError(writer, 0, "FOR sin RPN")
+            Exit Sub
+        End If
+
+        ' ------------------------------------------------------
+        ' Separar por TO (texto)
+        ' ------------------------------------------------------
+        Dim partes = texto.Split(New String() {"TO"}, StringSplitOptions.None)
+
+        If partes.Length <> 2 Then
+            EmitirError(writer, 0, "FOR inválido: falta TO")
+            Exit Sub
+        End If
+
+        ' ------------------------------------------------------
+        ' Parte izquierda: V(j) := C(1)
+        ' ------------------------------------------------------
+        Dim lhsRPN = RPNAux.TakeWhile(Function(n) n.Kind <> RPNKind.ASSIGN).ToList()
+        Dim idxAssign = RPNAux.FindIndex(Function(n) n.Kind = RPNKind.ASSIGN)
+
+        Dim initRPN = RPNAux.GetRange(idxAssign + 1, 1) ' C(1)
+
+        Dim varName As String
+
+        If lhsRPN.Count > 0 AndAlso lhsRPN(0).Kind = RPNKind.VAR Then
+            varName = lhsRPN(0).Value.ToUpperInvariant()
+        Else
+            EmitirError(writer, 0, "FOR inválido: variable incorrecta")
+            Exit Sub
+        End If
+
+        Dim initExpr = RPN.RPNToInfix(initRPN)
+
+        ' ------------------------------------------------------
+        ' Parte derecha: límite
+        ' ------------------------------------------------------
+        Dim limitText = partes(1).Trim()
+
+        Dim limitRPN = ParseRPN(limitText)
+        Dim limitExpr = RPN.RPNToInfix(limitRPN)
+
+        ' ------------------------------------------------------
+        ' Construcción final
+        ' ------------------------------------------------------
+        Dim linea As String = $"FOR {varName}={initExpr} TO {limitExpr}"
+
+        EmitirLinea(writer, linea, False)
+
+        ' registrar FOR
         ForStack.Push(varName)
 
-        ' Emitir FOR QL provisional
-        EmitirLinea(writer, $"{tkFOR.Mnemonic} {tkFOR.Value}", False)
     End Sub
 
     Private Sub GenerarNext(writer As StreamWriter, tk As Token)
-        Dim varName As String = tk.Value
 
-        ' Comprobación estructural (NO bloqueante)
+        Dim varName As String = tk.Value.ToUpperInvariant()
+
         If ForStack.Count = 0 Then
-            EmitirWarning(writer, $"Next {varName} sin For previo")
+            EmitirWarning(writer, $"NEXT {varName} sin FOR previo")
+
         ElseIf ForStack.Peek() <> varName Then
-            EmitirWarning(writer, $"For/Next no estructurado: se cierra {varName}, " & $"pero el último For abierto era {ForStack.Peek()}")
-            ' Buscar y eliminar el FOR correspondiente si quieres
+            EmitirWarning(writer, $"FOR/NEXT no estructurado: se cierra {varName}, pero esperaba {ForStack.Peek()}")
             EliminarForDePila(varName)
+
         Else
             ForStack.Pop()
         End If
 
-        ' 👉 Aquí está la clave:
-        ' siempre respetar la variable del ZX
-        EmitirLinea(writer, $"End For {varName}", False) 'No es un token, es comando propio del QL
+        EmitirLinea(writer, $"END FOR {varName}", False)
 
     End Sub
 
@@ -396,7 +440,7 @@ Public Module QLGenerator
     End Sub
 
     ' =========================================================
-    ' Emisión de LET (ZX → SuperBASIC QL)
+    ' Emisión de REM
     ' =========================================================
     Private Sub GenerarRem(writer As StreamWriter, tk As Token)
         If opts.SinComentarios Then
@@ -411,114 +455,216 @@ Public Module QLGenerator
 
     End Sub
 
-    Private Sub GenerarLet(writer As StreamWriter, tk As Token)
-        Dim cmd As String = tk.Mnemonic
-        Dim stmt As String = tk.Value
 
-        ' Separar por el primer :=  que esté fuera de los paréntesis
-        Dim p1 As Integer = BuscarIgualDelLet(stmt)
-        If p1 < 0 Then
-            EmitirError(writer, 0, "LET sin operador :=")
+    ' =========================================================
+    ' Emisión de LET (ZX → SuperBASIC QL)
+    ' =========================================================
+    Private Sub GenerarLet(writer As StreamWriter, tk As Token)
+
+        Dim rpn = tk.RPN
+
+        If rpn Is Nothing OrElse rpn.Count = 0 Then
+            EmitirError(writer, 0, "LET sin RPN")
             Exit Sub
         End If
 
-        Dim lhs As String = stmt.Substring(0, p1).Trim()
-        Dim rhs As String = stmt.Substring(p1 + 2).Trim()
+        ' ------------------------------------------------------
+        ' Buscar asignación A(=)
+        ' ------------------------------------------------------
+        Dim idxAssign = rpn.FindIndex(Function(n) n.Kind = RPNKind.ASSIGN)
 
-        Dim lhsExpr As String = RPN_To_Infix(lhs)
-        Dim rhsExpr As String = RPN_To_Infix(rhs)
-        'rhs = ReescribirExpresion(rhs, True)
-        ' 🔑 El '=' SE INSERTA AQUÍ SIEMPRE
-        EmitirLinea(writer, $"{lhsExpr}={rhsExpr}", False) 'En el QL no hace falta el LET
+        If idxAssign < 0 Then
+            EmitirError(writer, 0, "LET inválido: falta asignación")
+            Exit Sub
+        End If
+
+        ' ------------------------------------------------------
+        ' Separar LHS / RHS
+        ' ------------------------------------------------------
+        Dim lhs = rpn.GetRange(0, idxAssign)
+        Dim rhs = rpn.GetRange(idxAssign + 1, rpn.Count - idxAssign - 1)
+
+        If lhs.Count = 0 Then
+            EmitirError(writer, 0, "LET inválido: LHS vacío")
+            Exit Sub
+        End If
+
+        ' ------------------------------------------------------
+        ' Construir LHS (variable + índices)
+        ' ------------------------------------------------------
+        Dim lhsExpr As String
+
+        ' variable base
+        If lhs(0).Kind <> RPNKind.VAR Then
+            EmitirError(writer, 0, "LET inválido: variable incorrecta")
+            Exit Sub
+        End If
+
+        Dim varName = lhs(0).Value
+
+        ' comprobar si hay índices (I -> IDX)
+        Dim idxNode = lhs.FirstOrDefault(Function(n) n.Kind = RPNKind.FUN_CALL AndAlso n.Value = "IDX")
+
+        Dim tieneIDX = lhs.Any(Function(n) n.Kind = RPNKind.FUN_CALL AndAlso n.Value = "IDX")
+
+        If tieneIDX Then
+            ' Extraer argumentos desde RPN usando stack
+            Dim args = ExtraerArgsDesdeRPN(lhs, idxNode.Arity)
+
+            lhsExpr = $"{varName}({String.Join(",", args)})"
+
+        Else
+            lhsExpr = varName
+        End If
+
+        ' ------------------------------------------------------
+        ' Construir RHS
+        ' ------------------------------------------------------
+        Dim rhsExpr As String = RPNToInfix(rhs)
+
+        ' ------------------------------------------------------
+        ' Emitir LET (sin palabra LET en QL)
+        ' ------------------------------------------------------
+        EmitirLinea(writer, $"{lhsExpr}={rhsExpr}", False)
+
     End Sub
 
-    Private Function BuscarIgualDelLet(texto As String) As Integer
-        Dim nivel As Integer = 0
-        Dim i As Integer = 0
+    Private Function ExtraerArgsDesdeRPN(rpn As List(Of RPN_Node), arity As Integer) As List(Of String)
 
-        While i < texto.Length - 1
-            Dim ch As Char = texto(i)
+        Dim stack As New Stack(Of String)
 
-            Select Case ch
-                Case "("c
-                    nivel += 1
+        For Each n In rpn
 
-                Case ")"c
-                    If nivel > 0 Then nivel -= 1
+            Select Case n.Kind
 
-                Case ":"c
-                    ' ¿Es := a nivel superior?
-                    If nivel = 0 AndAlso texto(i + 1) = "="c Then
-                        Return i   ' índice del :
+                Case RPNKind.VAR
+                    stack.Push(n.Value)
+
+                Case RPNKind.CTE
+                    stack.Push(n.Value)
+
+                Case RPNKind.BINARY_OP
+                    Dim b = stack.Pop()
+                    Dim a = stack.Pop()
+                    stack.Push($"{a}{n.Value}{b}")
+
+                Case RPNKind.UNARY_OP
+                    Dim a = stack.Pop()
+                    stack.Push($"{n.Value}{a}")
+
+                Case RPNKind.FUN_CALL
+
+                    If n.Value = "IDX" Then
+                        ' Extraer argumentos reales
+                        Dim args As New List(Of String)
+
+                        For i = 1 To n.Arity
+                            args.Insert(0, stack.Pop())
+                        Next
+
+                        Return args
+                    Else
+                        ' Función normal
+                        Dim args As New List(Of String)
+
+                        For i = 1 To n.Arity
+                            args.Insert(0, stack.Pop())
+                        Next
+
+                        stack.Push($"{n.Value}({String.Join(",", args)})")
                     End If
+
             End Select
 
-            i += 1
-        End While
+        Next
 
-        Return -1   ' no encontrado
+        Return New List(Of String)
+
     End Function
-
 
 
     ' =========================================================
     ' Emisión de PRINT (ZX → SuperBASIC QL)
     ' =========================================================
     Private Sub GenerarPRINT(writer As StreamWriter, numeroLineaActual As Integer, tk As Token)
+
         Dim item As New PrintItem(tk)
-        Dim tkaux As New Token(item.ID, item.Value)
-        Dim Comando As String = "PRINT "
+        Dim comando As String = "PRINT "
 
+        ' -----------------------------------------
         ' Directivas fuera del PRINT
-        If tk.IsPrintDirective AndAlso tk.ID <> TokenID.TK_TAB Then
-            EmitirLinea(writer, $"{tkaux.Mnemonic} {tkaux.Value}", False)
+        ' -----------------------------------------
+        If tk.IsPrintDirective AndAlso item.ID <> TokenID.TK_TAB Then
 
+            Select Case item.ID
+
+                Case TokenID.TK_AT
+                    Dim x = RPN.RPNToInfix(item.Expr1)
+                    Dim y = RPN.RPNToInfix(item.Expr2)
+
+                    EmitirLinea(writer, $"AT {x},{y}", False)
+
+                Case TokenID.TK_INK, TokenID.TK_PAPER
+                    Dim expr = RPN.RPNToInfix(item.Expr1)
+
+                    EmitirLinea(writer, $"{item.ID.ToString.Replace("TK_", "")} {expr}", False)
+
+            End Select
+
+            ' Si hay coma, forzar PRINT
             If item.Separator = PrintSeparator.C Then
-                EmitirLinea(writer, Comando & ",", False)
+                EmitirLinea(writer, comando & Constantes.C_COMA, False)
             End If
 
             Return
         End If
 
+        ' -----------------------------------------
+        ' PRINT normal
+        ' -----------------------------------------
         Dim sb As New StringBuilder
-        sb.Append(Comando)
+        sb.Append(comando)
 
-        ' TAB se trata aparte
         If item.ID = TokenID.TK_TAB Then
-            sb.Append(EmitirTAB(writer, item.Value))
+
+            Dim expr = RPN.RPNToInfix(item.Expr1)
+            sb.Append("TO " & expr)
+
         Else
-            ' ✅ AQUÍ ESTÁ EL CAMBIO IMPORTANTE
 
-            Console.WriteLine($"::2:{tkaux.Value}")
+            If item.Expr1 IsNot Nothing Then
+                Dim expr = RPN.RPNToInfix(item.Expr1)
+                sb.Append(expr)
+            End If
 
-            Dim expr As String = RPN_To_Infix(tkaux.Value)
-            sb.Append(expr)
         End If
 
-        ' Aplicar separador
+        ' -----------------------------------------
+        ' Separador
+        ' -----------------------------------------
         Select Case item.Separator
             Case PrintSeparator.P
                 sb.Append(";")
             Case PrintSeparator.C
-                sb.Append(",")
+                sb.Append(Constantes.C_COMA)
             Case PrintSeparator.N
                 ' nada
         End Select
 
         EmitirLinea(writer, sb.ToString(), False)
+
     End Sub
 
+    Private Function EmitirTAB(item As PrintItem) As String
 
-
-    Private Function EmitirTAB(writer As StreamWriter, value As String) As String
-        Dim v = value.Trim()
-
-        ' Quitar paréntesis si existen
-        If v.StartsWith("("c) AndAlso v.EndsWith(")"c) Then
-            v = v.Substring(1, v.Length - 2)
+        If item.Expr1 Is Nothing Then
+            Return "TO 0"
         End If
 
-        Return ("TO " & v)
+        Dim expr = RPN.RPNToInfix(item.Expr1)
+
+        Return "TO " & expr
+
     End Function
 
 
@@ -560,147 +706,7 @@ Public Module QLGenerator
         End If
     End Sub
 
-    ' ============================================================
-    ' Procesar el RPN
-    ' ============================================================
 
-    Private Function RPN_To_Infix(expr As String) As String
-
-        Dim stack As New Stack(Of String)
-
-        ' Tokenizar por espacios de nivel superior
-        Dim tokens As List(Of String) = TokenizarRPN(expr)
-
-        For Each tk In tokens
-
-            ' --------------------------
-            ' Variable: V(x)
-            ' --------------------------
-            If tk.StartsWith("V(") Then
-                stack.Push(ExtraerContenido(tk))
-
-                ' --------------------------
-                ' Constante: C(n)
-                ' --------------------------
-            ElseIf tk.StartsWith("C(") Then
-                stack.Push(ExtraerContenido(tk))
-
-                ' --------------------------
-                ' Operador binario: B(+), B(*), B(^)...
-                ' --------------------------
-            ElseIf tk.StartsWith("B(") Then
-                Dim op As String = ExtraerContenido(tk)
-                Dim rhs As String = stack.Pop()
-                Dim lhs As String = stack.Pop()
-                stack.Push($"{lhs}{op}{rhs}")
-
-                ' --------------------------
-                ' Función: F(nombre,argc)
-                ' --------------------------
-            ElseIf tk.StartsWith("F(") Then
-                Dim inner As String = ExtraerContenido(tk)
-                Dim parts = inner.Split(","c)
-                Dim fname As String = parts(0)
-                Dim argc As Integer = Integer.Parse(parts(1))
-
-                Dim args As New List(Of String)
-                For i As Integer = 1 To argc
-                    args.Insert(0, stack.Pop())
-                Next
-
-                stack.Push($"{fname}({String.Join(",", args)})")
-
-                ' --------------------------
-                ' IDX(...) → índices de array
-                ' --------------------------
-            ElseIf tk.StartsWith("IDX(") Then
-                Dim inner As String = ExtraerContenido(tk)
-
-                ' Separar índices de nivel superior
-                Dim indices = SplitTopLevel(inner, ","c)
-                Dim idxExpr As New List(Of String)
-
-                For Each idx In indices
-                    idxExpr.Add(RPN_To_Infix(idx.Trim()))
-                Next
-
-                Dim baseVar As String = stack.Pop()
-                stack.Push($"{baseVar}({String.Join(",", idxExpr)})")
-
-            Else
-                Throw New Exception($"Token RPN desconocido: {tk}")
-            End If
-
-        Next
-
-        If stack.Count <> 1 Then
-            Throw New Exception("RPN inválida: pila no reducida a 1 elemento")
-        End If
-
-        Return stack.Pop()
-    End Function
-
-    Private Function ExtraerContenido(tk As String) As String
-        Dim p1 = tk.IndexOf("("c)
-        Dim p2 = tk.LastIndexOf(")"c)
-        Return tk.Substring(p1 + 1, p2 - p1 - 1)
-    End Function
-
-    Private Function SplitTopLevel(text As String, separator As Char) As List(Of String)
-        Dim result As New List(Of String)
-        Dim level As Integer = 0
-        Dim start As Integer = 0
-
-        For i As Integer = 0 To text.Length - 1
-            Dim ch As Char = text(i)
-
-            Select Case ch
-                Case "("c
-                    level += 1
-                Case ")"c
-                    level -= 1
-                Case separator
-                    If level = 0 Then
-                        result.Add(text.Substring(start, i - start).Trim())
-                        start = i + 1
-                    End If
-            End Select
-        Next
-
-        ' Último segmento
-        If start < text.Length Then
-            result.Add(text.Substring(start).Trim())
-        End If
-
-        Return result
-    End Function
-
-
-    Private Function TokenizarRPN(text As String) As List(Of String)
-        Dim res As New List(Of String)
-        Dim level As Integer = 0
-        Dim start As Integer = 0
-
-        For i As Integer = 0 To text.Length - 1
-            Select Case text(i)
-                Case "("c
-                    level += 1
-                Case ")"c
-                    level -= 1
-                Case " "c
-                    If level = 0 Then
-                        res.Add(text.Substring(start, i - start).Trim())
-                        start = i + 1
-                    End If
-            End Select
-        Next
-
-        If start < text.Length Then
-            res.Add(text.Substring(start).Trim())
-        End If
-
-        Return res.Where(Function(s) s <> "").ToList()
-    End Function
 
     ' ============================================================
     ' ERRORES
@@ -712,7 +718,7 @@ Public Module QLGenerator
         End If
 
         MostrarError(opts, stReader, stWriter, NroLineaFichero, columna, LineaParaMostrar,
-                     New String(" "c, columna) & "^ " & descripcion)
+                     New String(Constantes.C_ESPACIO, columna) & Constantes.Marca_Error & descripcion)
     End Sub
 
     Private Sub EmitirWarning(writer As StreamWriter, mensaje As String)
@@ -740,7 +746,7 @@ Public Module QLGenerator
             linea = "   " & linea
         End If
         If Not opts.Silencioso Then
-            MostrarMensaje(opts, Constantes.MarcaGen & " " & linea)
+            MostrarMensaje(opts, Constantes.Marca_Gen & " " & linea)
         End If
 
     End Sub

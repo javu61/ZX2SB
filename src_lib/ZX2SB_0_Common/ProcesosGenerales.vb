@@ -6,6 +6,7 @@ Imports System.Runtime.InteropServices.JavaScript.JSType
 Imports System.Runtime.Intrinsics
 Imports System.Runtime.Intrinsics.Arm
 Imports System.Text
+Imports System.Xml
 
 Public Module ProcesosGenerales
 
@@ -50,12 +51,17 @@ Public Module ProcesosGenerales
         End If
 
         ' Primer argumento Obligatorio: fichero de entrada 
-        opts.FEntrada = args(0)
-        If opts.FEntrada.StartsWith("-") Then
+        If args(0).StartsWith("-") Then
             MostrarMensaje(opts, "ERROR: El primer argumento debe ser el fichero de entrada.")
             MostrarUso(opts)
         End If
+        opts.FEntrada = args(0)
         i = 1
+
+        If args(0) = "*" Then
+            opts.FEntrada = "C:\Proyectos\ZX2SB\Ejemplos\hello.bas"
+        End If
+
 
         ' Segundo argumento opcional: fichero de salida
         If (args.Length > 1) Then
@@ -289,7 +295,7 @@ Public Module ProcesosGenerales
         If opts.Modulo = Constantes.MSem Or opts.Modulo = Constantes.MDir Then
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.SEM_EXTENSION & " con el arbol EDP ajustado en modo de texto IR")
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.VAR_EXTENSION & " con las variables detectadas")
-            MostrarMensaje(opts, "Genera: un fichero " & Constantes.DTA_EXTENSION & " con los DATA detectados")
+            MostrarMensaje(opts, "Genera: un fichero " & Constantes.DATA_EXTENSION & " con los DATA detectados")
         End If
         If opts.Modulo = Constantes.MGSB Or opts.Modulo = Constantes.MDir Then
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.GQL_EXTENSION & " con los DATA detectados")
@@ -377,7 +383,7 @@ Public Module ProcesosGenerales
     End Sub
 
     Private Function MostrarOpcion(opcion As String) As String
-        Return ("     " & opcion & New String(" "c, 5 - opcion.Length))
+        Return ("     " & opcion & New String(Constantes.C_ESPACIO, 5 - opcion.Length))
     End Function
 
     Public Function ObtenerFicheroEntrada(opts As CmdOptions) As String
@@ -429,7 +435,7 @@ Public Module ProcesosGenerales
         opts.FSalidaPar = Path.ChangeExtension(opts.FEntrada, Constantes.PAR_EXTENSION)
         opts.FSalidaSem = Path.ChangeExtension(opts.FEntrada, Constantes.SEM_EXTENSION)
         opts.FSalidaVar = Path.ChangeExtension(opts.FEntrada, Constantes.VAR_EXTENSION)
-        opts.FSalidaDat = Path.ChangeExtension(opts.FEntrada, Constantes.DTA_EXTENSION)
+        opts.FSalidaDat = Path.ChangeExtension(opts.FEntrada, Constantes.DATA_EXTENSION)
         opts.FSalidaGSB = Path.ChangeExtension(opts.FEntrada, Constantes.GQL_EXTENSION)
         If (opts.FSalida = "") Then
             opts.FSalidaRen = Path.ChangeExtension(opts.FEntrada, "")
@@ -438,7 +444,7 @@ Public Module ProcesosGenerales
             opts.FSalidaRen = opts.FSalida
         End If
         opts.FSalidaVar = Path.ChangeExtension(opts.FEntrada, Constantes.VAR_EXTENSION)
-        opts.FSalidaDat = Path.ChangeExtension(opts.FEntrada, Constantes.DTA_EXTENSION)
+        opts.FSalidaDat = Path.ChangeExtension(opts.FEntrada, Constantes.DATA_EXTENSION)
         opts.FLines = Path.ChangeExtension(opts.FEntrada, Constantes.LIN_EXTENSION)
         opts.FLog = Path.ChangeExtension(opts.FEntrada, Constantes.LOG_EXTENSION)    ' Fichero de log es común a todos
 
@@ -547,8 +553,8 @@ Public Module ProcesosGenerales
 
         Dim sb As New StringBuilder(linea.Length)
 
-        If linea.StartsWith(MarcaSRC) Then
-            linea = linea.Substring(Len(MarcaSRC)).Trim()
+        If linea.StartsWith(Marca_SRC) Then
+            linea = linea.Substring(Len(Marca_SRC)).Trim()
         End If
 
         NroLineaFichero += 1
@@ -711,5 +717,74 @@ Public Module ProcesosGenerales
         Dim aux As String = If(msg = "-", " ", "[" & opts.Modulo & Pasada & "] " & msg)
         Return (aux)
     End Function
+
+    Public Function GetVersion(opts As CmdOptions) As String
+        Dim salida As String = ""
+        GetVersion(opts, "", salida)
+        Return salida
+    End Function
+
+    Public Function GetVersion(opts As CmdOptions, linea As String, ByRef salida As String) As Boolean
+        Dim prg_Origen As String = ""
+        Dim ver_Origen As String = ""
+        Dim prg_Destino As String = ""
+
+        Select Case opts.Modulo
+            Case Constantes.MDir
+                ver_Origen = ""
+                prg_Destino = ""
+            Case Constantes.MLex
+                ver_Origen = ""
+                prg_Destino = Constantes.LEX_NOMBRE & " " & Constantes.LEX_VERSION
+            Case Constantes.MNor
+                ver_Origen = Constantes.LEX_NOMBRE & " " & Constantes.LEX_VERSION
+                prg_Destino = Constantes.TKZ_NOMBRE & " " & Constantes.TKZ_VERSION
+            Case Constantes.MPar
+                ver_Origen = Constantes.TKZ_NOMBRE & " " & Constantes.TKZ_VERSION
+                prg_Destino = Constantes.PAR_NOMBRE & " " & Constantes.PAR_VERSION
+            Case Constantes.MSem
+
+                Select Case opts.Fase
+                    Case SubFases.Base
+                        ver_Origen = Constantes.PAR_NOMBRE & " " & Constantes.PAR_VERSION
+                        prg_Destino = Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION
+                    Case SubFases.Variables
+                        ver_Origen = ""
+                        prg_Destino = Constantes.VAR_NOMBRE & " " & Constantes.VAR_VERSION
+                    Case SubFases.Data
+                        ver_Origen = ""
+                        prg_Destino = Constantes.DATA_NOMBRE & " " & Constantes.DATA_VERSION
+                End Select
+            Case Constantes.MGSB
+                ver_Origen = Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION
+                prg_Destino = Constantes.GQL_NOMBRE & " " & Constantes.GQL_VERSION
+            Case Constantes.MRen
+                ver_Origen = Constantes.GQL_NOMBRE & " " & Constantes.GQL_VERSION
+                prg_Destino = ""
+        End Select
+
+        salida = prg_Destino & " (Generado " & Now.ToString & ")"
+
+        Dim i As Integer = InStr(ver_Origen, " ")
+        If (i > 0) Then
+            prg_Origen = ver_Origen.Substring(0, i).Trim
+
+
+            If InStr(linea, prg_Origen) = -1 Then
+                salida = $"No es un fichero {prg_Origen} de ZX2SB: {linea}"
+                Return False
+            End If
+
+            If InStr(linea, ver_Origen) = -1 Then
+                salida = $"Versión incorrecta del fichero {prg_Origen} de ZX2SB: {linea}"
+                Return False
+            End If
+
+        End If
+
+        Return True
+
+    End Function
+
 End Module
 

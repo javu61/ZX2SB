@@ -39,17 +39,24 @@ Public Module Lexer
 
 
             ' ----------------------------------------------------------
-            ' Primera línea (en el lexer no hace nada, lo mantengo por unificar)
+            ' Primera línea 
             ' ----------------------------------------------------------
             If PrimeraLinea Then
+                Dim resultado As String = ""
+                If Not GetVersion(opts, LineaLeida, resultado) Then
+                    ' No puede dar error pues la entrada es el fichero de origen
+                Else
+                    GuardaSalida(resultado)
+                End If
                 PrimeraLinea = False
+                ' No hay que saltar pues la entrada es el fichero de origen
             End If
 
             ' ----------------------------------------------------------
             ' Primera línea
             ' ----------------------------------------------------------
             LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, LineaLeida)
-            GuardaSalida($"{Constantes.MarcaSRC} {LineaParaMostrar}")
+            GuardaSalida($"{Constantes.Marca_SRC} {LineaParaMostrar}")
             AnalizarLinea(LineaLeida, NroLineaFichero)
         End While
 
@@ -89,7 +96,7 @@ Public Module Lexer
 
 
             If Char.IsDigit(c) OrElse
-               (c = "."c AndAlso pos + 1 < LineaAnalizar.Length AndAlso Char.IsDigit(LineaAnalizar(pos + 1))) Then
+               (c = Constantes.C_PUNTO AndAlso pos + 1 < LineaAnalizar.Length AndAlso Char.IsDigit(LineaAnalizar(pos + 1))) Then
 
                 Dim col = pos + 1
                 Dim tok = ConsumirNumero(col, LineaAnalizar)
@@ -207,7 +214,7 @@ Public Module Lexer
         Dim puntos As Integer = 0
 
         ' Caso especial: número que empieza por punto (.2)
-        If LineaAnalizar(pos) = "."c Then
+        If LineaAnalizar(pos) = Constantes.C_PUNTO Then
             sb.Append("0")
         End If
 
@@ -218,7 +225,7 @@ Public Module Lexer
                 sb.Append(ch)
                 Avanzar()
 
-            ElseIf ch = "."c Then
+            ElseIf ch = Constantes.C_PUNTO Then
                 puntos += 1
                 If puntos > 1 Then
                     ErrorLexico(col, "Número mal formado")
@@ -246,12 +253,12 @@ Public Module Lexer
         Dim posInicial As Integer = pos
 
         ' ---------------------------------------------
-        ' 1. Consumir letras / dígitos / $
+        ' Consumir letras / dígitos / $
         ' ---------------------------------------------
         While pos < LineaAnalizar.Length
             Dim ch As Char = LineaAnalizar(pos)
 
-            If Char.IsLetterOrDigit(ch) OrElse ch = "$"c Then
+            If Char.IsLetterOrDigit(ch) OrElse ch = Constantes.C_DOLAR Then
                 sb.Append(ch)
                 Avanzar()
             Else
@@ -259,38 +266,10 @@ Public Module Lexer
             End If
         End While
 
-        '' --------------------------------------------------------
-        '' 2. Caso especial: GO TO / GO SUB separados por espacio
-        '' --------------------------------------------------------
-        'If sb.ToString().ToUpperInvariant() = "GO" Then
-        '    If pos < LineaAnalizar.Length AndAlso LineaAnalizar(pos) = " "c Then
 
-        '        Dim savePos As Integer = pos
-        '        Avanzar() ' consumir espacio
-
-        '        ' Leer siguiente palabra (TO / SUB)
-        '        Dim sb2 As New StringBuilder()
-        '        While pos < LineaAnalizar.Length AndAlso Char.IsLetter(LineaAnalizar(pos))
-        '            sb2.Append(Char.ToUpperInvariant(LineaAnalizar(pos)))
-        '            Avanzar()
-        '        End While
-
-        '        Select Case sb2.ToString()
-        '            Case "TO"
-        '                Return New Token(TokenID.TK_GOTO, "", NroLineaFichero, col)
-
-        '            Case "SUB"
-        '                Return New Token(TokenID.TK_GOSUB, "", NroLineaFichero, col)
-
-        '            Case Else
-        '                ' No era GO TO / GO SUB → volver atrás
-        '                pos = savePos
-        '        End Select
-        '    End If
-        'End If
 
         ' ---------------------------------------------
-        ' 3. Clasificación normal
+        ' Clasificación normal
         ' ---------------------------------------------
         Dim lexeme As String = sb.ToString()
         If lexeme = "" Then
@@ -451,7 +430,7 @@ Public Module Lexer
             columna = columna - 1
         End If
         MostrarError(opts, stReader, stWriter, NroLineaPrograma, columna, LineaParaMostrar,
-                     New String(" "c, columna) & "^ " & descripcion)
+                     New String(Constantes.C_ESPACIO, columna) & Constantes.Marca_Error & descripcion)
     End Sub
 
     Private Sub AddTokenEOL()

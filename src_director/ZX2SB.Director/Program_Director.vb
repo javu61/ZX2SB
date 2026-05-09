@@ -30,16 +30,14 @@ Module Program_Director
         ' --- Procesar argumentos ---
 
         ' PARA DEBUG Simple
-
-
-#If DEBUG Then
+        '#If DEBUG Then
         If args.Length = 0 Then
             args = New String() {
-            "c:\Proyectos\zx2sb\ejemplos\hello.bas",
-            "-p"
+            "C:\Proyectos\zx2sb\ejemplos\hello.bas",
+            "-m"
             }
         End If
-#End If
+        '#End If
 
 
 

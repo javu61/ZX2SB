@@ -255,7 +255,7 @@ Public Module Renumerador
         i += palabra.Length
 
         ' Copiar espacios
-        While i < texto.Length AndAlso texto(i) = " "c
+        While i < texto.Length AndAlso texto(i) = Constantes.C_ESPACIO
             salida &= texto(i)
             i += 1
         End While
@@ -285,7 +285,7 @@ Public Module Renumerador
 
         Dim i As Integer = inicio + palabra.Length
 
-        While i < texto.Length AndAlso texto(i) = " "c
+        While i < texto.Length AndAlso texto(i) = Constantes.C_ESPACIO
             i += 1
         End While
 
@@ -330,7 +330,7 @@ Public Module Renumerador
         End If
 
         ' 2) Construir indentación
-        Dim indent As String = New String(" "c, indentLevel * opts.Ren_IND)
+        Dim indent As String = New String(Constantes.C_ESPACIO, indentLevel * opts.Ren_IND)
 
         ' 3) Construir línea final
         Dim lineaFinal As String

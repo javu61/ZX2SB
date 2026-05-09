@@ -23,7 +23,6 @@ Public Module Parser
     Private PrimeraLinea As Boolean = True
     Private bufferLinea As New List(Of Token)
     Private encontradoEOF As Boolean = False
-    Private UltimaFueIF As Boolean = False
     Private stReader As StreamReader
     Private stWriter As StreamWriter
 
@@ -54,37 +53,24 @@ Public Module Parser
             ' Primera línea, Debe contener tipo y versión del fichero
             ' ----------------------------------------------------------
             If PrimeraLinea Then
-                If Not LineaLeida.StartsWith(Constantes.LEX_NOMBRE) And
-                   Not LineaLeida.StartsWith(Constantes.TKZ_NOMBRE) Then
-                    ErrorSintactico(0, "[ERROR] No es un fichero de Tokens ZX2SB: " & LineaLeida)
-                    Return (1)
-                End If
-
-                If LineaLeida.StartsWith(Constantes.LEX_NOMBRE) Then
-                    If Not LineaLeida.StartsWith(Constantes.LEX_NOMBRE & " " & Constantes.LEX_VERSION) Then
-                        ErrorSintactico(0, "[ERROR] Versión incorrecta del fichero " & Constantes.LEX_NOMBRE & ": " & LineaLeida)
-                        Return (1)
-                    End If
+                Dim resultado As String = ""
+                If Not GetVersion(opts, LineaLeida, resultado) Then
+                    ErrorSintactico(0, resultado)
                 Else
-                    If Not LineaLeida.StartsWith(Constantes.TKZ_NOMBRE & " " & Constantes.TKZ_VERSION) Then
-                        ErrorSintactico(0, "[ERROR] Versión incorrecta del fichero " & Constantes.LEX_NOMBRE & ": " & LineaLeida)
-                        Return (1)
-                    End If
+                    GuardarIRP_Texto(resultado)
                 End If
-
-                GuardarIRP_Texto(Constantes.PAR_NOMBRE & " " & Constantes.PAR_VERSION)
-
                 PrimeraLinea = False
                 Continue While
             End If
 
+
             ' --------------------------------------------
             ' Línea original (contexto para el  error)
             ' --------------------------------------------            
-            If LineaLeida.StartsWith(MarcaSRC) Then
+            If LineaLeida.StartsWith(Marca_SRC) Then
                 LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, LineaLeida)
 
-                GuardarIRP_Texto($"{Constantes.MarcaSRC} {LineaParaMostrar}")
+                GuardarIRP_Texto($"{Constantes.Marca_SRC} {LineaParaMostrar}")
                 Continue While
             End If
 
@@ -159,15 +145,9 @@ Public Module Parser
 
             If Tid() = TokenID.TSP_DOSPUNTOS Then
                 NextToken()
-                UltimaFueIF = False
 
             ElseIf Tid() = TokenID.TCO_EOL Then
                 Exit While
-
-            ElseIf UltimaFueIF Then
-                ' ✅ El THEN ya actuó como separador
-                ' NO consumir token, continuar al siguiente ParseStatement
-                UltimaFueIF = False
 
             Else
                 ErrorSintactico(TokenColumna, "Falta ':' entre sentencias")
@@ -233,42 +213,42 @@ Public Module Parser
 
         If tok.IsStatementStart() Then
             Select Case tok.ID
-                Case TokenID.TK_LET : ParseLet() : Exit Sub
-                Case TokenID.TK_PRINT : ParsePRINT() : Exit Sub
-                Case TokenID.TK_IF : ParseIf() : Exit Sub
-                Case TokenID.TK_GOTO : ParseGoto() : Exit Sub
-                Case TokenID.TK_GOSUB : ParseGosub() : Exit Sub
-                Case TokenID.TK_RETURN : ParseReturn() : Exit Sub
-                Case TokenID.TK_RESTORE : ParseRestore() : Exit Sub
-                Case TokenID.TK_READ : ParseRead() : Exit Sub
-                Case TokenID.TK_DATA : ParseData() : Exit Sub
-                Case TokenID.TK_STOP : ParseStop() : Exit Sub
-                Case TokenID.TK_FOR : ParseFor() : Exit Sub
-                Case TokenID.TK_NEXT : ParseNext() : Exit Sub
-                Case TokenID.TK_REM : ParseREM() : Exit Sub
-                Case TokenID.TK_CLEAR : ParseClear() : Exit Sub
-                Case TokenID.TK_DIM : ParseDim() : Exit Sub
-                Case TokenID.TK_RANDOMIZE : ParseRandomize() : Exit Sub
+                Case TokenID.TK_LET : Parse_Let() : Exit Sub
+                Case TokenID.TK_PRINT : Parse_PRINT() : Exit Sub
+                Case TokenID.TK_IF : Parse_If() : Exit Sub
+                Case TokenID.TK_GOTO : Parse_Goto() : Exit Sub
+                Case TokenID.TK_GOSUB : Parse_Gosub() : Exit Sub
+                Case TokenID.TK_RETURN : Parse_Return() : Exit Sub
+                Case TokenID.TK_RESTORE : Parse_Restore() : Exit Sub
+                Case TokenID.TK_READ : Parse_Read() : Exit Sub
+                Case TokenID.TK_DATA : Parse_Data() : Exit Sub
+                Case TokenID.TK_STOP : Parse_Stop() : Exit Sub
+                Case TokenID.TK_FOR : Parse_For() : Exit Sub
+                Case TokenID.TK_NEXT : Parse_Next() : Exit Sub
+                Case TokenID.TK_REM : Parse_REM() : Exit Sub
+                Case TokenID.TK_CLEAR : Parse_Clear() : Exit Sub
+                Case TokenID.TK_DIM : Parse_Dim() : Exit Sub
+                Case TokenID.TK_RANDOMIZE : Parse_Randomize() : Exit Sub
+                Case TokenID.TK_BEEP : Parse_Beep() : Exit Sub
 
+                Case TokenID.TK_CLS : Parse_SimpleStmt(TokenID.TK_CLS) : Exit Sub
 
-                Case TokenID.TK_CLS : ParseSimpleStmt(TokenID.TK_CLS) : Exit Sub
-                Case TokenID.TK_BORDER : ParseUnaryStmt(TokenID.TK_BORDER) : Exit Sub
-                Case TokenID.TK_PAUSE : ParseUnaryStmt(TokenID.TK_PAUSE) : Exit Sub
-                Case TokenID.TK_BEEP : ParseBeep() : Exit Sub
-                Case TokenID.TK_INK : ParseUnaryStmt(TokenID.TK_INK) : Exit Sub
-                Case TokenID.TK_PAPER : ParseUnaryStmt(TokenID.TK_PAPER) : Exit Sub
-                Case TokenID.TK_BRIGHT : ParseUnaryStmt(TokenID.TK_BRIGHT) : Exit Sub
-                Case TokenID.TK_FLASH : ParseUnaryStmt(TokenID.TK_FLASH) : Exit Sub
-                Case TokenID.TK_INVERSE : ParseUnaryStmt(TokenID.TK_INVERSE) : Exit Sub
+                Case TokenID.TK_BORDER : Parse_UnaryStmt(TokenID.TK_BORDER) : Exit Sub
+                Case TokenID.TK_PAUSE : Parse_UnaryStmt(TokenID.TK_PAUSE) : Exit Sub
+                Case TokenID.TK_INK : Parse_UnaryStmt(TokenID.TK_INK) : Exit Sub
+                Case TokenID.TK_PAPER : Parse_UnaryStmt(TokenID.TK_PAPER) : Exit Sub
+                Case TokenID.TK_BRIGHT : Parse_UnaryStmt(TokenID.TK_BRIGHT) : Exit Sub
+                Case TokenID.TK_FLASH : Parse_UnaryStmt(TokenID.TK_FLASH) : Exit Sub
+                Case TokenID.TK_INVERSE : Parse_UnaryStmt(TokenID.TK_INVERSE) : Exit Sub
 
-                Case TokenID.TK_POKE : ParseBinaryStmt(TokenID.TK_POKE) : Exit Sub
-                Case TokenID.TK_OUT : ParseBinaryStmt(TokenID.TK_OUT) : Exit Sub
+                Case TokenID.TK_POKE : Parse_BinaryStmt(TokenID.TK_POKE) : Exit Sub
+                Case TokenID.TK_OUT : Parse_BinaryStmt(TokenID.TK_OUT) : Exit Sub
 
-                Case TokenID.TK_RUN : ParseRun() : Exit Sub
-                Case TokenID.TK_LIST : ParseList() : Exit Sub
-                Case TokenID.TK_LOAD : ParseLoad() : Exit Sub
-                Case TokenID.TK_SAVE : ParseSave() : Exit Sub
-                Case TokenID.TK_MERGE : ParseMerge() : Exit Sub
+                Case TokenID.TK_RUN : Parse_Run() : Exit Sub
+                Case TokenID.TK_LIST : Parse_List() : Exit Sub
+                Case TokenID.TK_LOAD : Parse_Load() : Exit Sub
+                Case TokenID.TK_SAVE : Parse_Save() : Exit Sub
+                Case TokenID.TK_MERGE : Parse_Merge() : Exit Sub
 
             End Select
 
@@ -289,7 +269,7 @@ Public Module Parser
     ' ============================================================
     ' SENTENCIAS
     ' ============================================================
-    Private Sub ParseREM()
+    Private Sub Parse_REM()
         NextToken() ' consumir REM
 
         Dim comentario As String = ""
@@ -307,17 +287,17 @@ Public Module Parser
         End While
     End Sub
 
-    Private Sub ParseReturn()
+    Private Sub Parse_Return()
         GuardarIRP_Token(TokenID.TK_RETURN)
         NextToken()
     End Sub
 
-    Private Sub ParseStop()
+    Private Sub Parse_Stop()
         GuardarIRP_Token(TokenID.TK_STOP)
         NextToken()
     End Sub
 
-    Private Sub ParseClear()
+    Private Sub Parse_Clear()
         'CLEAR        ; borra variables
         'CLEAR n      ; borra variables y fija RAMTOP = n
 
@@ -340,7 +320,7 @@ Public Module Parser
     End Sub
 
 
-    Private Sub ParseDim()
+    Private Sub Parse_Dim()
 
         ' Consumir DIM
         NextToken()
@@ -393,7 +373,7 @@ Public Module Parser
         GuardarIRP_DIM(arrayName, dims)
     End Sub
 
-    Private Sub ParseLet()
+    Private Sub Parse_Let()
 
         ' Consumir LET solo si es explícito
         If Tid() = TokenID.TK_LET Then
@@ -421,8 +401,7 @@ Public Module Parser
         GuardarIRP_LET(name, indices, rpn)
     End Sub
 
-    Private Function ParseLValue(
-                                 ByRef name As String,
+    Private Function ParseLValue(ByRef name As String,
                                  ByRef indices As List(Of List(Of RPN.RPN_Node))
                                 ) As Boolean
 
@@ -471,7 +450,7 @@ Public Module Parser
         Return True
     End Function
 
-    Private Sub ParseRandomize()
+    Private Sub Parse_Randomize()
 
         ' Consumir RANDOMIZE
         NextToken()
@@ -499,7 +478,7 @@ Public Module Parser
 
 
 
-    Private Function ParsePRINT() As Boolean
+    Private Function Parse_PRINT() As Boolean
 
         ' Consumir TK_PRINT
         NextToken()
@@ -691,7 +670,7 @@ Public Module Parser
     End Function
 
 
-    Private Sub ParseIf()
+    Private Sub Parse_If()
         ' Consumir IF
         NextToken()
 
@@ -708,16 +687,17 @@ Public Module Parser
         End If
 
         ' Consumir THEN
-        NextToken()
+        '+++NextToken()
+        'Cambiamos THEN por : y actua como separador de sentencias estándar
+        Dim tk As Token = tokensLinea(idx)
+        tk.ID = TokenID.TSP_DOSPUNTOS
+        tokensLinea(idx) = tk
 
         ' Emitir IF como sentencia independiente, con condición RPN
         GuardarIRP_IF(condicion)
-
-        ' Importante: el cuerpo del IF NO se consume aquí
-        UltimaFueIF = True
     End Sub
 
-    Private Sub ParseGoto()
+    Private Sub Parse_Goto()
         NextToken()
         Dim ln As String = TokenValor()
         NextToken()
@@ -725,7 +705,7 @@ Public Module Parser
     End Sub
 
 
-    Private Sub ParseGosub()
+    Private Sub Parse_Gosub()
         NextToken()
         Dim ln As String = TokenValor()
         NextToken()
@@ -735,43 +715,77 @@ Public Module Parser
     ' ------------------------------------------------------------
     ' FOR I = expr TO expr [STEP expr]
     ' ------------------------------------------------------------
-    Private Sub ParseFor()
+    Private Sub Parse_For()
 
         ' Consumir FOR
         NextToken()
 
-        ' Variable de control
-        If Tid() <> TokenID.TES_IDENT Then
-            ErrorSintactico(TokenColumna, "Se esperaba variable de control en FOR")
-            Exit Sub
-        End If
+        ' --- FOR var = 
+        Dim startPos As Integer = TokenColumna()
+        Dim tkVar As New Token(TokenID.TCO_UNKNOWN)
+        Dim varName As New StringBuilder
 
-        Dim varName As String = TokenValor()
-        NextToken()
+        While Tid() <> TokenID.TOP_EQ AndAlso Tid() <> TokenID.TCO_EOL
+            If (Tid() = TokenID.TES_IDENT) And (tkVar.ID = TokenID.TCO_UNKNOWN) Then
+                tkVar = Ttk()
+            End If
 
-        ' Debe venir '='
+            Select Case Tid()
+                Case TokenID.TES_IDENT : varName.Append(Ttk.Value)
+                Case TokenID.TSP_PAR_ABIERTO : varName.Append("(")
+                Case TokenID.TSP_PAR_CERRADO : varName.Append(")")
+                Case TokenID.TSP_COMA : varName.Append(",")
+                Case Else
+                    ErrorSintactico(startPos, $"Token no válido para variable de control del FOR : {Ttk.ID}")
+                    Exit Sub
+            End Select
+            NextToken()
+        End While
+
         If Tid() <> TokenID.TOP_EQ Then
-            ErrorSintactico(TokenColumna, "Se esperaba '=' en FOR")
+            ErrorSintactico(startPos, "FOR sin '=' tras variable de control")
             Exit Sub
         End If
+
         NextToken() ' consumir '='
 
-        ' Expresión inicial
+        'Validar la variable de control del bucle
+        If varName.Length = 0 Then
+            ErrorSintactico(startPos, "Se esperaba variable de control en FOR")
+            Exit Sub
+        End If
+
+        'Regla ZX: solo simples de una letra y deben ser numéricas
+        If varName.ToString().Contains(Constantes.C_DOLAR) Then
+            ErrorSintactico(0, $"Variable {varName} no válida en FOR, solo admite variables numéricas simples de una letra")
+            Exit Sub
+        End If
+
+        If varName.ToString().Contains("(") Then
+            ErrorSintactico(startPos, $"FOR no admite arrays: '{varName}'")
+            Exit Sub
+        End If
+
+        If varName.Length <> 1 Then
+            ErrorSintactico(startPos, $"Variable '{varName}' no válida en FOR, debe ser una letra")
+            Exit Sub
+        End If
+
+        ' --- FOR var = Expresión 
         Dim exprInit As List(Of RPN.RPN_Node) = Nothing
         If Not ParseExprTexto(True, exprInit) Then Exit Sub
 
-        ' Debe venir TO
+        ' --- FOR var = Expresión TO expresion
         If Tid() <> TokenID.TK_TO Then
             ErrorSintactico(TokenColumna, "Se esperaba TO en FOR")
             Exit Sub
         End If
         NextToken()
 
-        ' Expresión límite
         Dim exprLimit As List(Of RPN.RPN_Node) = Nothing
         If Not ParseExprTexto(True, exprLimit) Then Exit Sub
 
-        ' STEP opcional
+        ' --- FOR var = Expresión TO expresion STEP expresion (opcional)
         Dim exprStep As List(Of RPN.RPN_Node) = Nothing
         If Tid() = TokenID.TK_STEP Then
             NextToken()
@@ -779,13 +793,13 @@ Public Module Parser
         End If
 
         ' Emitir IR FOR (estructural, no textual)
-        GuardarIRP_FOR(varName, exprInit, exprLimit, exprStep)
+        GuardarIRP_FOR(tkVar, exprInit, exprLimit, exprStep)
     End Sub
 
     ' ------------------------------------------------------------
     ' NEXT [I]
     ' ------------------------------------------------------------
-    Private Sub ParseNext()
+    Private Sub Parse_Next()
 
         ' Consumir NEXT
         NextToken()
@@ -800,7 +814,7 @@ Public Module Parser
 
     End Sub
 
-    Private Sub ParseRestore()
+    Private Sub Parse_Restore()
 
         ' Consumir RESTORE
         NextToken()
@@ -816,7 +830,7 @@ Public Module Parser
 
     End Sub
 
-    Private Sub ParseRead()
+    Private Sub Parse_Read()
 
         ' Consumir READ
         NextToken()
@@ -847,7 +861,7 @@ Public Module Parser
 
     End Sub
 
-    Private Sub ParseData()
+    Private Sub Parse_Data()
 
         ' Consumir DATA
         NextToken()
@@ -879,7 +893,7 @@ Public Module Parser
         GuardarIRP_DATA(items)
     End Sub
 
-    Private Sub ParseBeep()
+    Private Sub Parse_Beep()
 
         ' Consumir BEEP
         NextToken()
@@ -907,7 +921,7 @@ Public Module Parser
         GuardarIRP_BEEP(exprDuration, exprPitch)
     End Sub
 
-    Private Sub ParseRun()
+    Private Sub Parse_Run()
 
         ' Consumir RUN
         NextToken()
@@ -927,7 +941,7 @@ Public Module Parser
         GuardarIRP_RUN(expr)
     End Sub
 
-    Private Sub ParseList()
+    Private Sub Parse_List()
 
         ' Consumir LIST
         NextToken()
@@ -961,13 +975,13 @@ Public Module Parser
         GuardarIRP_LIST(exprStart, Nothing)
     End Sub
 
-    Private Sub ParseLoad()
+    Private Sub Parse_Load()
         ParseFileStmt(TokenID.TK_LOAD)
     End Sub
-    Private Sub ParseSave()
+    Private Sub Parse_Save()
         ParseFileStmt(TokenID.TK_SAVE)
     End Sub
-    Private Sub ParseMerge()
+    Private Sub Parse_Merge()
         ParseFileStmt(TokenID.TK_MERGE)
     End Sub
 
@@ -986,12 +1000,12 @@ Public Module Parser
         GuardarIRP_FILE(id, expr)
     End Sub
 
-    Private Sub ParseSimpleStmt(id As TokenID)
+    Private Sub Parse_SimpleStmt(id As TokenID)
         NextToken()
         GuardarIRP_Token(id)
     End Sub
 
-    Private Sub ParseUnaryStmt(id As TokenID)
+    Private Sub Parse_UnaryStmt(id As TokenID)
 
         ' Consumir la palabra clave (INK, PAPER, BRIGHT, etc.)
         NextToken()
@@ -1006,7 +1020,7 @@ Public Module Parser
         GuardarIRP_UNARY(id, expr)
     End Sub
 
-    Private Sub ParseBinaryStmt(id As TokenID)
+    Private Sub Parse_BinaryStmt(id As TokenID)
 
         ' Consumir la palabra clave (POKE, OUT, etc.)
         NextToken()
@@ -1324,11 +1338,11 @@ Public Module Parser
         If stopChars = "" Then Return False
 
         Select Case Tid()
-            Case TokenID.TSP_COMA : Return stopChars.Contains(","c)
-            Case TokenID.TSP_PUNTOYCOMA : Return stopChars.Contains(";"c)
-            Case TokenID.TSP_PAR_CERRADO : Return stopChars.Contains(")"c)
-            Case TokenID.TSP_PAR_ABIERTO : Return stopChars.Contains("("c)
-            Case TokenID.TSP_DOSPUNTOS : Return stopChars.Contains(":"c)
+            Case TokenID.TSP_COMA : Return stopChars.Contains(Constantes.C_COMILLAS)
+            Case TokenID.TSP_PUNTOYCOMA : Return stopChars.Contains(Constantes.C_PUNTOYCOMA)
+            Case TokenID.TSP_PAR_CERRADO : Return stopChars.Contains(Constantes.C_PAR_CIE)
+            Case TokenID.TSP_PAR_ABIERTO : Return stopChars.Contains(Constantes.C_PAR_APE)
+            Case TokenID.TSP_DOSPUNTOS : Return stopChars.Contains(Constantes.C_DOSPUNTOS)
         End Select
 
         Return False
@@ -1358,10 +1372,10 @@ Public Module Parser
         End If
 
         Dim espacios As String
-        If columna <> 0 Then espacios = New String(" "c, columna) Else espacios = ""
+        If columna <> 0 Then espacios = New String(Constantes.C_ESPACIO, columna) Else espacios = ""
 
         MostrarError(opts, stReader, stWriter, NroLineaPrograma, columna, LineaParaMostrar,
-                     espacios & "^ " & descripcion)
+                     espacios & Constantes.Marca_Error & descripcion)
 
         ' EVITAR BUCLES INFINITOS, IR AL FIN DE LA LINEA
         While idx < tokensLinea.Count AndAlso Tid() <> TokenID.TCO_EOL
@@ -1379,7 +1393,7 @@ Public Module Parser
             columna = columna - 1
         End If
         MensajeError(opts, stReader, stWriter, True, NroLineaFichero, columna, LineaParaMostrar,
-                     New String(" "c, columna) & "^ " & descripcion, False)
+                     New String(Constantes.C_ESPACIO, columna) & Constantes.Marca_Error & descripcion, False)
 
     End Sub
 
@@ -1406,11 +1420,11 @@ Public Module Parser
         End If
 
         If Len(Linea) < 49 Then
-            Linea &= Space(50 - Len(Linea)) & $"{Constantes.MarcaComentario} {Comentario}"
+            Linea &= Space(50 - Len(Linea)) & $"{Constantes.Marca_Comentario} {Comentario}"
             GuardarIRP_Texto(Linea)
         Else
             GuardarIRP_Texto(Linea)
-            Linea = Space(50) & $"{Constantes.MarcaComentario} {Comentario}"
+            Linea = Space(50) & $"{Constantes.Marca_Comentario} {Comentario}"
             GuardarIRP_Texto(Linea)
         End If
     End Sub
@@ -1455,7 +1469,7 @@ Public Module Parser
             Exit Sub
         End If
 
-        sb.Append(" IDX(")
+        sb.Append($" {GetKindLetter(RPNKind.IDX)}(")
 
         For i = 0 To indices.Count - 1
             If i > 0 Then sb.Append(",")
@@ -1478,7 +1492,9 @@ Public Module Parser
         AddIndices(sb, indices)     ' Índices (si existen)
 
         ' --- Asignación ---
-        sb.Append(" := ")
+        sb.Append(" ")
+        sb.Append($"{GetKindLetter(RPNKind.ASSIGN)}({Constantes.C_IGUAL})")
+        sb.Append(" ")
 
         ' --- RValue ---
         sb.Append(RPN_ToText(expr))
@@ -1546,20 +1562,19 @@ Public Module Parser
     End Sub
 
 
-    Private Sub GuardarIRP_FOR(varName As String,
+    Private Sub GuardarIRP_FOR(varName As Token,
                                exprInit As List(Of RPN.RPN_Node),
                                exprLimit As List(Of RPN.RPN_Node),
                                exprStep As List(Of RPN.RPN_Node))
         Dim sb As New StringBuilder()
 
-        sb.Append($"V({varName}) := ")
+        sb.Append($"{GetKindLetter(RPNKind.VAR)}({varName.Value}) ")
+        sb.Append($"{GetKindLetter(RPNKind.ASSIGN)}({Constantes.C_IGUAL}) ")
         sb.Append(RPN_ToText(exprInit))
-        sb.Append(" TO ")
-        sb.Append(RPN_ToText(exprLimit))
+        sb.Append($"{GetKindLetter(RPNKind.FOR_TO)}({RPN_ToText(exprLimit)}) ")
 
         If exprStep IsNot Nothing Then
-            sb.Append(" STEP ")
-            sb.Append(RPN_ToText(exprStep))
+            sb.Append($"{GetKindLetter(RPNKind.FOR_STEP)}({RPN_ToText(exprStep)}) ")
         End If
 
         GuardarIRP_Token_Valor(TokenID.TK_FOR, sb.ToString())

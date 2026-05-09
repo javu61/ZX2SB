@@ -20,6 +20,8 @@ Public Module Constantes
     Public Const C_DOSPUNTOS As Char = ":"c                           ' Dos Puntos
     Public Const C_PAR_APE As Char = "("c                             ' (
     Public Const C_PAR_CIE As Char = ")"c                             ' )
+    Public Const C_IGUAL As Char = "="c                               ' =
+    Public Const C_DOLAR As Char = "$"c                               ' $
 
     Public Const S_VACIA As String = C_COMILLAS & C_COMILLAS          ' Entre comillas vacía
     Public Const S_ESPACIO As String = C_COMILLAS & " " & C_COMILLAS  ' Entre comillas un espacio
@@ -32,12 +34,13 @@ Public Module Constantes
 
     Public Const VER_PROG As String = "0.0" & ChrW(&H3B1)            ' Versión del programa Alfa
     'Public Const VER_PROG As String ="0.0" & ChrW(&H3B2)            ' Versión del programa Beta
-    Public Const MarcaAST As String = ChrW(&H2192)                   ' Marca para imprimir el AST  
-    Public Const MarcaWarning As String = ChrW(&H21D2)               ' Marca para imprimir los Warnings 
-    Public Const MarcaSRC = "-- SRC: "                               ' MArca de la línea original del fuente
+    Public Const Marca_AST As String = ChrW(&H2192)                   ' Marca para imprimir el AST  
+    Public Const Marca_Warning As String = ChrW(&H21D2)               ' Marca para imprimir los Warnings 
+    Public Const Marca_SRC = "-- SRC: "                               ' MArca de la línea original del fuente
     Public Const Sep_Comentario = ";"                                ' Separador inicial del comentario
-    Public Const MarcaComentario = " " & Sep_Comentario & " -- "     ' Marcas para los comentarios
-    Public Const MarcaGen = ChrW(&H21D2)                             ' Marca para el programa generado ⇒
+    Public Const Marca_Comentario = " " & Sep_Comentario & " -- "     ' Marcas para los comentarios
+    Public Const Marca_Gen = ChrW(&H21D2)                             ' Marca para el programa generado ⇒
+    Public Const Marca_Error = "^ "                                  ' Marca de la posición del error
 
     Public Const LOG_EXTENSION As String = ".log"
 
@@ -61,11 +64,13 @@ Public Module Constantes
     Public Const VAR_NOMBRE As String = "VAR"
     Public Const VAR_VERSION As String = "1.0"
 
-    Public Const DTA_EXTENSION As String = ".dat"
+    Public Const DATA_EXTENSION As String = ".dat"
     Public Const DATA_NOMBRE As String = "DATA"
     Public Const DATA_VERSION As String = "1.0"
 
     Public Const GQL_EXTENSION As String = ".sbg"
+    Public Const GQL_NOMBRE As String = "ZX2ST"
+    Public Const GQL_VERSION As String = "1.0"
     Public Const GQL_SEPARADOR As String = "::"
     Public Const GQL_FACTOR As Integer = 100
     Public Const GQL_INIT As String = "ZX2SB_INIT"

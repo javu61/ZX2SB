@@ -46,18 +46,12 @@ Public Module NormalizadorZX
             ' Primera línea, versión
             ' --------------------------------------------  
             If PrimeraLinea Then
-                If Not lineaLeida.StartsWith(Constantes.LEX_NOMBRE) Then
-                    ErrorNormalizador(0, "[ERROR] No es un fichero " & Constantes.LEX_NOMBRE & ": " & lineaLeida)
-                    Return (1)
+                Dim resultado As String = ""
+                If Not GetVersion(opts, lineaLeida, resultado) Then
+                    ErrorNormalizador(0, resultado)
+                Else
+                    GuardaSalida(resultado)
                 End If
-
-                If Not lineaLeida.StartsWith(Constantes.LEX_NOMBRE & " " & Constantes.LEX_VERSION) Then
-                    ErrorNormalizador(0, "[ERROR] Versión incorrecta del fichero " & Constantes.LEX_NOMBRE & ": " & lineaLeida)
-                    Return (1)
-                End If
-
-                GuardaSalida($"{Constantes.TKZ_NOMBRE} {Constantes.TKZ_VERSION}")
-
                 PrimeraLinea = False
                 Continue While
             End If
@@ -65,7 +59,7 @@ Public Module NormalizadorZX
             ' --------------------------------------------
             ' Línea original (contexto para el  error)
             ' --------------------------------------------            
-            If lineaLeida.StartsWith(MarcaSRC) Then
+            If lineaLeida.StartsWith(Marca_SRC) Then
                 LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, lineaLeida)
                 GuardaSalida(lineaLeida)
                 Continue While
@@ -222,7 +216,7 @@ Public Module NormalizadorZX
             columna = columna - 1
         End If
         MostrarError(opts, stReader, stWriter, NroLineaPrograma, columna, LineaParaMostrar,
-                     New String(" "c, columna) & "^ " & descripcion)
+                     New String(Constantes.C_ESPACIO, columna) & Constantes.Marca_Error & descripcion)
     End Sub
 
     Private Sub AddTokenEOL()

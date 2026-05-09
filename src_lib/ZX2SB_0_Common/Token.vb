@@ -97,7 +97,7 @@ Public Structure Token
         End If
 
         If Me.ID <> TokenID.TCO_UNKNOWN Then
-            aux = aux & Space(50 - Len(aux)) & Constantes.MarcaComentario & Me.ID.ToString
+            aux = aux & Space(50 - Len(aux)) & Constantes.Marca_Comentario & Me.ID.ToString
         End If
 
         Return aux
@@ -105,8 +105,9 @@ Public Structure Token
 
     Private Sub LineToTok(linea As String)
         ' Ejemplos esperados:
-        ' 1012 [12,5] A$    ; -- TK_PRINT
-        ' 1012 A$           ; -- TK_PRINT
+        '2142 V(pi1) := C(3)                                ; --  TK_LET
+        '2150 1700,C,V(pi1)                                 ; --  TK_PRINT TES_IDENT
+
 
         Me.ID = TokenID.TCO_NONE  'Si no hay nada, es vacío
         Me.Line = -1
@@ -114,7 +115,7 @@ Public Structure Token
         Me.Value = ""
 
         ' Quitar comentario desde el último ; hasta el final
-        If linea.Contains(Constantes.MarcaComentario) Then
+        If linea.Contains(Constantes.Marca_Comentario) Then
             For i As Integer = linea.Length - 1 To 0 Step -1
                 If linea(i) = Constantes.Sep_Comentario Then
                     linea = linea.Substring(0, i).TrimEnd()
@@ -127,7 +128,7 @@ Public Structure Token
             Exit Sub
         End If
 
-        Dim parts = linea.Split(" "c, 2)
+        Dim parts = linea.Split(Constantes.C_ESPACIO, 2)
         Dim id As TokenID = CType(Integer.Parse(parts(0)), TokenID)
         Dim line As Integer = -1
         Dim col As Integer = -1
@@ -374,13 +375,21 @@ Public Structure Token
     End Function
 
     Private Function DebeTenerRPN(id As TokenID) As Boolean
-        'Tokens TK_LET y TK_FOR no debe hacerse automáticamente, se hará en la función adecuada
-        If id = TokenID.TK_IF OrElse id = TokenID.TK_PRINT Then
-            Return True
-        Else
-            Return False
-        End If
+
+        Select Case id
+            Case TokenID.TK_LET,
+                 TokenID.TK_IF,
+                 TokenID.TK_PRINT,
+                 TokenID.TK_FOR
+
+                Return True
+
+        End Select
+
+        Return False
+
     End Function
+
 
 End Structure
 
