@@ -55,7 +55,7 @@ Public Module Renumerador
                 While Not ficEntrada.EndOfStream
                     Dim linea As String = ficEntrada.ReadLine()
                     LineaParaMostrar = NormalizarLinea(opts, NroLineaFichero, NroLineaPrograma, linea)
-                    AñadirEquivalencia(stWriter, NroLineaFichero, NroLineaPrograma)
+                    AñadirEquivalencia(NroLineaFichero, NroLineaPrograma)
                 End While
 
                 LineaSTOPFinal = CalcularNuevo(Equivalencias.Count + 1)
@@ -121,12 +121,12 @@ Public Module Renumerador
         End If
     End Function
 
-    Private Sub AñadirEquivalencia(writer As StreamWriter, NroLinea As Integer, NroAntiguo As Integer)
+    Private Sub AñadirEquivalencia(NroLinea As Integer, NroAntiguo As Integer)
         Dim pos As Integer = Equivalencias.IndexOf(NroAntiguo)
 
         If pos = -1 Then
             Equivalencias.Add(NroAntiguo)
-            GuardarEquivalencia(writer, NroAntiguo, CalcularNuevo(NroLinea))
+            GuardarEquivalencia(NroAntiguo, CalcularNuevo(NroLinea))
         End If
     End Sub
 
@@ -316,9 +316,9 @@ Public Module Renumerador
         Return LineaSTOPFinal
     End Function
 
-    Private Sub GuardarEquivalencia(writer As StreamWriter, origen As Integer, destino As Integer)
-        Dim linea As String = $"{origen}:{destino}"
-        GuardarFichero(linea, True)
+    Private Sub GuardarEquivalencia(origen As Integer, destino As Integer)
+        Dim linea As String = $"{Fix(origen / 100)} > {origen}:{destino}"
+        GuardarFicheroEQ(linea)
     End Sub
 
     Private Sub GuardarLinea(nroNuevo As Integer, linea As String)
@@ -342,7 +342,7 @@ Public Module Renumerador
         End If
 
         ' 4) Emitir
-        GuardarFichero(lineaFinal, False)
+        GuardarFichero(lineaFinal)
 
         ' 5) Si es apertura, indentar DESPUÉS
         If EsApertura(stmt) Then
@@ -351,11 +351,20 @@ Public Module Renumerador
     End Sub
 
 
-    Private Sub GuardarFichero(linea As String, eq As Boolean)
-        If (eq) Then linea = "[EQ] " & linea
+    Private Sub GuardarFichero(linea As String)
         stWriter.WriteLine(linea)
         If opts.Verbose Then
             MostrarVerbose(opts, linea)
+        End If
+    End Sub
+
+    Private Sub GuardarFicheroEQ(linea As String)
+        If opts.ModoDebug Then
+            linea = "[EQ] " & linea
+            stWriter.WriteLine(linea)
+            If opts.Verbose Then
+                MostrarVerbose(opts, linea)
+            End If
         End If
     End Sub
 

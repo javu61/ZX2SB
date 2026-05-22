@@ -3,7 +3,10 @@
 '  Definición de Elementos del PRINT
 ' ===========================================
 
+Imports System.ComponentModel
+Imports System.Data
 Imports System.Drawing
+Imports System.Formats
 Imports System.Runtime.CompilerServices
 Imports System.Text
 Imports System.Xml
@@ -15,31 +18,33 @@ Public Enum PrintSeparator
 End Enum
 Public Structure PrintItem
 
-    Public ID As TokenID
-    Public Value As String
-    Public Expr1 As List(Of RPN.RPN_Node)
-    Public Expr2 As List(Of RPN.RPN_Node)
-    Public Separator As PrintSeparator
+    Public prID As TokenID
+    Public prValue As String
+    Public prChannel As List(Of RPN.RPN_Node)
+    Public prExpr1 As List(Of RPN.RPN_Node)
+    Public prExpr2 As List(Of RPN.RPN_Node)
+    Public prSeparator As PrintSeparator
 
     Public Sub New(type As TokenID, valor As String, sep As PrintSeparator)
-        Me.ID = type
-        Me.Value = valor
-        Me.Separator = sep
+        Me.prID = type
+        Me.prValue = valor
+        Me.prSeparator = sep
     End Sub
 
 
     Public Sub New(type As TokenID)
-        Me.ID = type
-        Me.Value = ""
-        Me.Separator = PrintSeparator.N
+        Me.prID = type
+        Me.prValue = ""
+        Me.prSeparator = PrintSeparator.N
     End Sub
 
     Public Sub New(tk As Token)
         Dim p As PrintItem = FromToken(tk)
-        Me.ID = p.ID
-        Me.Value = p.Value
-        Me.Expr1 = p.Expr1
-        Me.Separator = p.Separator
+        Me.prID = p.prID
+        Me.prValue = p.prValue
+        Me.prExpr1 = p.prExpr1
+        Me.prExpr2 = p.prExpr2
+        Me.prSeparator = p.prSeparator
     End Sub
 
     Public Function ToText() As String
@@ -47,7 +52,7 @@ Public Structure PrintItem
         ' Solo se interpretan la primera y segunda coma.
         ' El resto del texto pertenece íntegramente a Value.
 
-        Return $"{CInt(Me.ID)},{Me.Separator},{Me.Value}"
+        Return $"{CInt(Me.prID)},{Me.prSeparator},{Me.prValue}"
     End Function
 
 
@@ -70,74 +75,66 @@ Public Structure PrintItem
             Throw New FormatException($"PRINT inválido: formato incorrecto → {tk.Value}")
         End If
 
-        Dim item As New PrintItem
+        Dim item As New PrintItem()
+        item.prID = CType(Integer.Parse(parts(0)), TokenID)
+        item.prSeparator = CType([Enum].Parse(GetType(PrintSeparator), parts(1)), PrintSeparator)
 
-        item.ID = CType(Integer.Parse(parts(0)), TokenID)
-        item.Separator = CType([Enum].Parse(GetType(PrintSeparator), parts(1)), PrintSeparator)
 
         Dim rpnText As String = parts(2)
 
-        'Si es AT tiene dos partes, el resto una
 
-
-        If item.ID = TokenID.TK_AT Then
-            Dim partes = SplitTopLevel(rpnText, ","c)
-
-            ' AT debe tener dos expresiones
+        Dim partes = SepararPorSeparador(item.prExpr1)
+        If item.prID = TokenID.TK_AT Then
+            'Si es AT tiene dos partes, el resto una
             If partes.Count <> 2 Then
                 Throw New FormatException($"PRINT AT inválido: esperaba 2 argumentos → {rpnText}")
             End If
 
-            item.Expr1 = ParseRPN_Texto(partes(0).Trim())
-            item.Expr2 = ParseRPN_Texto(partes(1).Trim())
-
+            item.prExpr1 = partes(0)
+            item.prExpr2 = partes(1)
         Else
-
             ' Caso normal
-            item.Expr1 = ParseRPN_Texto(rpnText)
+            If partes.Count <> 1 Then
+                Throw New FormatException($"PRINT Comando inválido: esperaba 1 argumento → {rpnText}")
+            End If
 
+            item.prExpr1 = partes(0)
         End If
-
-
-
-
         Return item
 
     End Function
 
-    Private Shared Function SplitTopLevel(text As String, sep As Char) As List(Of String)
 
-        Dim res As New List(Of String)
-        Dim level As Integer = 0
-        Dim start As Integer = 0
+    Private Function SepararPorSeparador(rpn As List(Of RPN_Node)) As List(Of List(Of RPN_Node))
 
-        For i As Integer = 0 To text.Length - 1
+        Dim resultado As New List(Of List(Of RPN_Node))
+        Dim actual As New List(Of RPN_Node)
 
-            Dim c As Char = text(i)
+        For Each node In rpn
 
-            Select Case c
+            If node.Kind = RPNKind.DATA_SEP Then
 
-                Case "("c
-                    level += 1
+                If actual.Count > 0 Then
+                    resultado.Add(New List(Of RPN_Node)(actual))
+                    actual.Clear()
+                End If
 
-                Case ")"c
-                    level -= 1
-
-                Case sep
-                    If level = 0 Then
-                        res.Add(text.Substring(start, i - start))
-                        start = i + 1
-                    End If
-
-            End Select
+            Else
+                actual.Add(node)
+            End If
 
         Next
 
-        res.Add(text.Substring(start))
+        If actual.Count > 0 Then
+            resultado.Add(actual)
 
-        Return res
+        End If
+
+        Return resultado
 
     End Function
+
+
 
     Private Function ParseRPN_Texto(text As String) As List(Of RPN_Node)
 
@@ -184,24 +181,50 @@ Public Structure PrintItem
 
             Select Case tipo
 
-                Case "V"c
+                Case GetKindLetter(RPNKind.VAR)
                     nodo.Kind = RPNKind.VAR
                     nodo.Value = contenido.ToString()
 
-                Case "C"c
+                Case GetKindLetter(RPNKind.CTE)
                     nodo.Kind = RPNKind.CTE
                     nodo.Value = contenido.ToString()
 
-                Case "F"c
+                Case GetKindLetter(RPNKind.FUN_CALL)
                     Dim parts = contenido.ToString().Split(","c)
                     nodo.Kind = RPNKind.FUN_CALL
                     nodo.Value = parts(0)
                     nodo.Arity = Integer.Parse(parts(1))
 
-                Case "B"c
+                    ' Reconstruir TokenID automáticamente
+                    Dim tkid As TokenID
+                    If [Enum].TryParse(parts(0), True, tkid) Then
+                        nodo.TokenID = tkid
+                    Else
+                        nodo.TokenID = TokenID.TCO_NONE
+                    End If
+
+                Case GetKindLetter(RPNKind.BINARY_OP)
                     nodo.Kind = RPNKind.BINARY_OP
                     nodo.Value = contenido.ToString()
 
+                Case GetKindLetter(RPNKind.UNARY_OP)
+                    nodo.Kind = RPNKind.UNARY_OP
+                    nodo.Value = contenido.ToString()
+                Case GetKindLetter(RPNKind.ASSIGN)
+                    nodo.Kind = RPNKind.ASSIGN
+                    nodo.Value = contenido.ToString()
+                Case GetKindLetter(RPNKind.IDX)
+                    nodo.Kind = RPNKind.IDX
+                    nodo.Value = contenido.ToString()
+                Case GetKindLetter(RPNKind.FOR_TO)
+                    nodo.Kind = RPNKind.FOR_TO
+                    nodo.Value = contenido.ToString()
+                Case GetKindLetter(RPNKind.FOR_STEP)
+                    nodo.Kind = RPNKind.FOR_STEP
+                    nodo.Value = contenido.ToString()
+                Case GetKindLetter(RPNKind.DATA_SEP)
+                    nodo.Kind = RPNKind.DATA_SEP
+                    nodo.Value = contenido.ToString()
             End Select
 
             res.Add(nodo)
@@ -212,5 +235,9 @@ Public Structure PrintItem
 
     End Function
 
+    Public Function IsPrintDirective() As Boolean
+        Dim tk As New Token(Me.prID)
+        Return tk.IsPrintDirective
+    End Function
 
 End Structure

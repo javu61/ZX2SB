@@ -12,6 +12,7 @@ Public Module Constantes
     Public Const MGSB As String = "JGeneratorSB"
     Public Const MRen As String = "JRenum"
 
+    Public Const QL_COMILLAS As String = "Chr$(34)"                   ' Caracter de Comillas en el QL
     Public Const C_COMILLAS As Char = ChrW(34)                        ' "
     Public Const C_ESPACIO As Char = " "c                             ' Espacio en blanco
     Public Const C_PUNTO As Char = "."c                               ' Punto
@@ -34,13 +35,15 @@ Public Module Constantes
 
     Public Const VER_PROG As String = "0.0" & ChrW(&H3B1)            ' Versión del programa Alfa
     'Public Const VER_PROG As String ="0.0" & ChrW(&H3B2)            ' Versión del programa Beta
-    Public Const Marca_AST As String = ChrW(&H2192)                   ' Marca para imprimir el AST  
-    Public Const Marca_Warning As String = ChrW(&H21D2)               ' Marca para imprimir los Warnings 
-    Public Const Marca_SRC = "-- SRC: "                               ' MArca de la línea original del fuente
+    Public Const Marca_AST As String = ChrW(&H2192)                  ' Marca para imprimir el AST  
+    Public Const Marca_Warning As String = ChrW(&H21D2)              ' Marca para imprimir los Warnings 
+    Public Const Marca_SRC = "-- SRC: "                              ' MArca de la línea original del fuente
     Public Const Sep_Comentario = ";"                                ' Separador inicial del comentario
-    Public Const Marca_Comentario = " " & Sep_Comentario & " -- "     ' Marcas para los comentarios
-    Public Const Marca_Gen = ChrW(&H21D2)                             ' Marca para el programa generado ⇒
+    Public Const Marca_Comentario = " " & Sep_Comentario & " -- "    ' Marcas para los comentarios
+    Public Const Separacion_Comentario = 60                          ' Cuanto se separan los comentarios de los tokens
+    Public Const Marca_Gen = ChrW(&H21D2)                            ' Marca para el programa generado ⇒
     Public Const Marca_Error = "^ "                                  ' Marca de la posición del error
+    Public Const Marca_Token = "TK_"                                 ' Como se inician los nombres de Tokens que son palabras reservadas
 
     Public Const LOG_EXTENSION As String = ".log"
 
@@ -67,6 +70,10 @@ Public Module Constantes
     Public Const DATA_EXTENSION As String = ".dat"
     Public Const DATA_NOMBRE As String = "DATA"
     Public Const DATA_VERSION As String = "1.0"
+
+    Public Const FOR_EXTENSION As String = ".for"
+    Public Const FOR_NOMBRE As String = "FOR"
+    Public Const FOR_VERSION As String = "1.0"
 
     Public Const GQL_EXTENSION As String = ".sbg"
     Public Const GQL_NOMBRE As String = "ZX2ST"

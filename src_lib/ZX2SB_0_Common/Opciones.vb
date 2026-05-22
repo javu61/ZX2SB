@@ -18,6 +18,7 @@
         Base
         Data
         Variables
+        ForNext
     End Enum
 
     Public Structure CmdOptions
@@ -34,6 +35,7 @@
         Public FSalidaSem As String
         Public FSalidaDat As String
         Public FSalidaVar As String
+        Public FSalidaFor As String
         Public FSalidaGSB As String
         Public FSalidaRen As String
         Public FSalida As String

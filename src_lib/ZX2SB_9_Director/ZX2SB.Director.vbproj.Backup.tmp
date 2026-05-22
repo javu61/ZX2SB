@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<AssemblyName>ZX2SB</AssemblyName>
+		<RootNamespace>ZX2SB.Director</RootNamespace>
+		<TargetFramework>net8.0</TargetFramework>
+		<OutputType>Exe</OutputType>
+
+		<OptionStrict>On</OptionStrict>
+		<OptionExplicit>On</OptionExplicit>
+
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\ZX2SB_0_Common\ZX2SB_0_Common.vbproj" />
+		<ProjectReference Include="..\..\src\ZX2SB_1_Lexer\ZX2SB_1_Lexer.vbproj" />
+		<ProjectReference Include="..\..\src\ZX2SB_1_Normalizador\ZX2SB_1_NormalizadorZX.vbproj" />
+		<ProjectReference Include="..\..\src\ZX2SB_2_Parser\ZX2SB_2_Parser.vbproj" />
+		<ProjectReference Include="..\..\src\ZX2SB_3_Semantic\ZX2SB_3_Semantic.vbproj" />
+		<ProjectReference Include="..\..\src\ZX2SB_4_Generator\ZX2SB_4_Generator.vbproj" />
+		<ProjectReference Include="..\..\src\ZX2SB_5_Renumerador\ZX2SB_5_Renumerador.vbproj" />
+		<ProjectReference Include="..\ZX2SB_0_Common\ZX2SB_0_Common.vbproj" />
+		<ProjectReference Include="..\ZX2SB_1_Lexer\ZX2SB_1_Lexer.vbproj" />
+		<ProjectReference Include="..\ZX2SB_1_Normalizador\ZX2SB_1_NormalizadorZX.vbproj" />
+		<ProjectReference Include="..\ZX2SB_2_Parser\ZX2SB_2_Parser.vbproj" />
+		<ProjectReference Include="..\ZX2SB_3_Semantic\ZX2SB_3_Semantic.vbproj" />
+		<ProjectReference Include="..\ZX2SB_4_Generator\ZX2SB_4_Generator.vbproj" />
+		<ProjectReference Include="..\ZX2SB_5_Renumerador\ZX2SB_5_Renumerador.vbproj" />
+	</ItemGroup>
+</Project>

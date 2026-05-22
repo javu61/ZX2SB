@@ -1,12 +1,106 @@
-[JSemantic] Fichero C:\Proyectos\ZX2SB\Ejemplos\hello.log borrado
-[JSemantic]  
-[JSemantic] - Entrada.: C:\Proyectos\ZX2SB\Ejemplos\hello.irp
-[JSemantic] - Salida..: C:\Proyectos\ZX2SB\Ejemplos\hello.irs
-[JSemantic] - Opciones: --p 
-[JSemantic]  
-[JSemantic]  
-[JSemantic]  
-[JSemantic] [ERROR] Could not find file 'C:\Proyectos\ZX2SB\Ejemplos\hello.irp'.
-[JSemantic]  
-[JSemantic] [ERROR] Finalizado con 1 error
-[JSemantic] [JSemantic] Eliminando ficheros generados, revise el log
+[ZX2SB] Fichero C:\Proyectos\ZX2SB\Ejemplos\hello.log borrado
+[ZX2SB]  
+[ZX2SB] - Entrada.: C:\Proyectos\ZX2SB\Ejemplos\hello.bas
+[ZX2SB] - Salida..: 
+[ZX2SB] - Opciones: --n 
+[ZX2SB]  
+[ZX2SB]  
+[ZX2SB] [DIRECTOR] Ejecutando Lexer
+[JLexer] 002: 10 LET A(sin 4)) = 28*C(
+[JLexer] 003: 19 LET a=INT(RND*28)+1 
+[JLexer] 004: 11 PRINT INT (B + SIN 4) * 5
+[JLexer] 005: 11 PRINT #3," pulsa una tecla para continuar"
+[JLexer] 006: 12 LET OP=1 : OPEN #3,"Fichero"
+[JLexer] 007: 13 CLOSE #3
+[JLexer] 008: 14 PRINT SIN 13
+[JLexer] 009: 15 GO TO 20 : GO TO20 : GOTO 20: GOTO20
+[JLexer] 010: 16 GO SUB 20 : GO SUB20 : GOSUB 20: GOSUB20
+[JLexer] 011: 1 REM *******************
+[JLexer] 012: 2 REM * Cesar Hernandez *
+[JLexer] 013: 3 REM *  {7F} MONSER S.A.  *
+[JLexer] 014: 4 REM *   Tragaperras   *
+[JLexer] 015: 5 REM *******************
+[JLexer] 016: 6 REM
+[JLexer] 017: 7 REM
+[JLexer] 018: 22 REM "**rutina instrucciones***"
+[JLexer] 019: 23 REM
+[JLexer] 020: 25 BORDER 6: PAPER 2: INK 6: CLS
+[JLexer] 021: 40 PRINT AT 5,5;"I N S T R U C C I O N E S"
+[JLexer] 022: 45 PRINT AT 7,0;"Tienes 500 pts. inicialmente."
+[JLexer] 023: 50 PRINT AT 8,0;"Puedes jugar cualquier cantidad."
+[JLexer] 024: 55 PRINT AT 9,0;"Si coinciden dos 1as. capitales"
+[JLexer] 025: 60 PRINT AT 11,3;"Multiplicas tu apuesta por 3"
+[JLexer] 026: 65 PRINT AT 13,0;"Si coinciden tres capitales"
+[JLexer] 027: 70 PRINT AT 15,3;"Multiplicas apuesta por 10"
+[JLexer] 028: 75 PRINT AT 17,0;"En otro caso,pierdes lo apostado"
+[JLexer] 029: 80 PRINT AT 19,10;" ahora... S U E R T E"
+[JLexer] 030: 290 INK 5
+[JLexer] 031: 300 PRINT #1;" pulsa una tecla para continuar"
+[JLexer] 032: 310 IF INKEY$<>"" THEN GO TO 500
+[JLexer] 033: 320 GO TO 310
+[JLexer] 034: 500 LET dinero=500: CLS
+[JLexer] 035: 1000 REM
+[JLexer] 036: 1001 REM ***  apuesta  ***
+[JLexer] 037: 1002 REM
+[JLexer] 038: 1005 INK 5: PAPER 0: BEEP .2,0: CLS
+[JLexer] 039: 1010 CLS: PRINT AT 15,3;"Dispones de: ";dinero;" pesetas.": BEEP .3,0
+[JLexer] 040: 1015 INPUT "Cuanto apuestas esta vez? ";apuesta
+[JLexer] 041: 1020 IF apuesta>dinero THEN GO TO 1010
+[JLexer] 042: 1030 IF apuesta<1 THEN GO TO 1010
+[JLexer] 043: 1050 PRINT AT 17,3;"Veamos que suerte tienes               ": BEEP .2,5
+[JLexer] 044: 1055 PAUSE 100
+[JLexer] 045: 1057 REM
+[JLexer] 046: 1058 REM * voy a buscar nombre *
+[JLexer] 047: 1060 GO SUB 6000
+[JLexer] 048: 1065 PLOT 10,120: DRAW 0,20: DRAW 60,0: DRAW 0,-20: DRAW -60,0
+[JLexer] 049: 1070 PLOT 90,120: DRAW 0,20: DRAW 60,0: DRAW 0,-20: DRAW -60,0
+[JLexer] 050: 1075 PLOT 170,120: DRAW 0,20: DRAW 60,0: DRAW 0,-20: DRAW -60,0
+[JLexer] 051: 1080 PRINT AT 5,2;c$
+[JLexer] 052: 1085 PRINT AT 5,12;p$
+[JLexer] 053: 1090 PRINT AT 5,22;k$
+[JLexer] 054: 1092 PAUSE 50
+[JLexer] 055: 1100 IF c$<>p$ THEN GO TO 2000
+[JLexer] 056: 1110 IF p$=k$ THEN GO TO 1500
+[JLexer] 057: 1120 PRINT AT 17,1;"Enhorabuena, solo fallaste una!         ": BEEP .2,0
+[JLexer] 058: 1125 PAUSE 100
+[JLexer] 059: 1130 LET apuesta=apuesta*3
+[JLexer] 060: 1140 LET dinero=dinero+apuesta
+[JLexer] 061: 1150 GO TO 1010
+[JLexer] 062: 1500 PRINT AT 17,1;"Maravilloso, diste en la diana!          ": BEEP .2,5
+[JLexer] 063: 1505 PAUSE 100
+[JLexer] 064: 1510 LET apuesta=apuesta*10: GO TO 1140
+[JLexer] 065: 2000 PRINT AT 17,1;"Lo siento,no hubo suerte,repite": BEEP .3,0
+[JLexer] 066: 2005 PAUSE 150
+[JLexer] 067: 2010 LET dinero=dinero-apuesta
+[JLexer] 068: 2020 IF dinero=0 THEN GO TO 2100
+[JLexer] 069: 2030 GO TO 1010
+[JLexer] 070: 2110 PRINT AT 18,0;"Ademas, dejas de jugar"
+[JLexer] 071: 2120 PRINT AT 19,0;"Te quedaste sin nada"
+[JLexer] 072: 2121 FOR m=1 TO 20
+[JLexer] 073: 2122 BEEP .2,2
+[JLexer] 074: 2123 NEXT m
+[JLexer] 075: 2130 GO TO 300
+[JLexer] 076: 6000 REM
+[JLexer] 077: 6001 REM *** Buscar nombres ***
+[JLexer] 078: 6002 REM
+[JLexer] 079: 6010 RESTORE 7000
+[JLexer] 080: 6020 LET a=INT(RND*28)+1
+[JLexer] 081: 6030 FOR n=1 TO a
+[JLexer] 082: 6040 READ c$: NEXT n
+[JLexer] 083: 6050 RESTORE 8000
+[JLexer] 084: 6060 LET a=INT(RND*28)+1
+[JLexer] 085: 6070 FOR n=1 TO a
+[JLexer] 086: 6080 READ p$: NEXT n
+[JLexer] 087: 6090 RESTORE 9000
+[JLexer] 088: 6100 LET a=INT(RND*28)+1
+[JLexer] 089: 6110 FOR n=1 TO a
+[JLexer] 090: 6120 READ k$: NEXT n
+[JLexer] 091: 6180 RETURN
+[JLexer] 092: 6500 REM
+[JLexer] 093: 6501 REM aqui van los datas
+[JLexer] 094: 6502 REM
+[JLexer] 095: 7000 DATA "madrid","madrid","cuenca","cuenca","toledo","madrid","cuenca","toledo","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca"
+[JLexer] 096: 8000 DATA "madrid","madrid","cuenca","cuenca","toledo","madrid","cuenca","toledo","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca"
+[JLexer] 097: 9000 DATA "madrid","madrid","cuenca","cuenca","toledo","madrid","cuenca","toledo","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca"
+[JLexer] [DIRECTOR] Ejecutando Normalizador
+[JNormalizar] 002: 10 LET A(sin 4)) = 28*C(

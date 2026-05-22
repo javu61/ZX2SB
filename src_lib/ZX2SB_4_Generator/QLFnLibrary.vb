@@ -6,9 +6,18 @@
 
 Imports System.ComponentModel
 Imports System.Runtime.InteropServices.JavaScript.JSType
+Imports System.Text
 Imports System.Text.RegularExpressions
+Imports System.Xml
+Imports ZX2SB.Generator.QLFnLibrary
 
-Public Class QLFnLibrary
+Public Module QLFnLibrary
+
+    Public Structure stData
+        Public Numero As Integer
+        Public Cadena As Boolean
+        Public Valor As String
+    End Structure
 
 
     ' ------------------------------------------------------------
@@ -19,47 +28,16 @@ Public Class QLFnLibrary
         Dim lines As New List(Of String)
 
         ' ¿Devuelve valor?
-        Dim EsFuncion As Boolean = If(Token.GetTipo(tk.ID) = TokenTipo.TT_FUNCION, True, False)
+        Dim EsFuncion As Boolean = tk.IsFunction()
 
         ' Lista de parámetros
         Dim paramList As String = ""
 
-        Select Case tk.ID
-                ' -------------------------------------------------
-                ' Funciones SIN parámetros
-                ' -------------------------------------------------
-            Case TokenID.TCO_INIT, TokenID.TK_RND, TokenID.TK_PI, TokenID.TK_CLEAR
-                paramList = ""
-
-                 ' -------------------------------------------------
-                ' Funciones con UN parámetro NUMÉRICO
-                ' -------------------------------------------------
-            Case TokenID.TK_CHR_S,
-                 TokenID.TK_LEN,
-                 TokenID.TK_CODE,
-                 TokenID.TK_BIN,
-                 TokenID.TK_RANDOMIZE_USR,
-                 TokenID.TK_PEEK,
-                 TokenID.TK_CLEAR_RAM
-                paramList = "(a)"     ' a es numérico
-
-                ' -------------------------------------------------
-                ' Funciones con UN parámetro CADENA
-                ' -------------------------------------------------
-            Case TokenID.TK_VAL_S, TokenID.TK_STR_S, TokenID.TK_SCREEN_S
-                paramList = "(a$)"    ' a$ es cadena
-
-                ' -------------------------------------------------
-                ' Funciones con DOS parámetros NUMÉRICOS
-                ' -------------------------------------------------
-            Case TokenID.TK_ATTR, TokenID.TK_POINT, TokenID.TK_POKE
-                paramList = "(a,b)"   ' ambos numéricos
-
-                ' -------------------------------------------------
-                ' Comandos / procedimientos (por defecto)
-                ' -------------------------------------------------
-            Case Else
-                paramList = "(a)"     ' seguro por defecto
+        Select Case tk.getAridad
+            Case TokenAridad.TA_NR1 : paramList = "(a)"                     ' Funciones con UN parámetro NUMÉRICO
+            Case TokenAridad.TA_ST1 : paramList = "(a$)"                    ' Funciones con UN parámetro CADENA
+            Case TokenAridad.TA_NR2 : paramList = "(a,b)"                   ' Funciones con DOS parámetros NUMÉRICOS
+            Case Else : paramList = ""                                      ' Sin parámetros en el resto de casos
         End Select
 
         ' Cabecera
@@ -67,9 +45,9 @@ Public Class QLFnLibrary
             lines.Add($"{startLine} DEFine PROC " & Constantes.GQL_INIT)
         Else
             If EsFuncion Then
-                lines.Add($"{startLine} DEFine Function {tk.FNMnemonic}{paramList}")
+                lines.Add($"{startLine} DEFine Function {tk.Mnemonic}{paramList}")
             Else
-                lines.Add($"{startLine} DEFine PROC {tk.FNMnemonic}{paramList}")
+                lines.Add($"{startLine} DEFine PROC {tk.Mnemonic}{paramList}")
             End If
         End If
 
@@ -85,7 +63,7 @@ Public Class QLFnLibrary
         If tk.ID = TokenID.TCO_INIT Then
             lines.Add($"{startLine} End DEFine " & Constantes.GQL_INIT)
         Else
-            lines.Add($"{startLine} End DEFine {tk.FNMnemonic}")
+            lines.Add($"{startLine} End DEFine {tk.Mnemonic}")
         End If
 
         Return lines
@@ -116,7 +94,6 @@ Public Class QLFnLibrary
 
             Case TokenID.TK_BIN  'BIN: Convierte un número binario en decimal. -> No existe en el QL
                 Return Generate_BIN()
-
 
                 ' ====================================================
                 ' Atributos de pantalla
@@ -314,6 +291,31 @@ Public Class QLFnLibrary
         Return Lineas
     End Function
 
+
+    ' -----------------------------------------------------------------------
+    ' Inicialización del sistema
+    ' -----------------------------------------------------------------------
+    Public Function Generate_ProgramInit() As List(Of String)
+        Dim Lin As Integer = 0
+        Dim lon = 60
+        Dim Lineas As New List(Of String)
+
+        MontarRem(Lineas, Lin, lon, StrDup(lon, "*"))
+        MontarRem(Lineas, Lin, lon, $" GENERADO POR ZX2SB {Constantes.VER_PROG} by javu61 ({Now.ToString})")
+        MontarRem(Lineas, Lin, lon, StrDup(lon, "*"))
+        MontarRem(Lineas, Lin, lon, " Si el resultado no es correcto, por favor contacta")
+        MontarRem(Lineas, Lin, lon, " javu61@hotmail.com, intentaré solucionarlo")
+        MontarRem(Lineas, Lin, lon, StrDup(lon, "*"))
+        AddLinea(Lineas, Lin, 1, Constantes.GQL_INIT)
+
+        Return Lineas
+    End Function
+
+    Private Sub MontarRem(ByRef Lineas As List(Of String), ByRef Lin As Integer, lon As Integer, texto As String)
+        AddLinea(Lineas, Lin, 1, $"REM *" & texto & Space(lon - Len(texto)) & "*")
+    End Sub
+
+
     Private Function Generate_INIT() As List(Of String)
         Dim Lineas As New List(Of String)
         Lineas.Add("MODE 8:WINDOW 512,256,0,0:CLS")
@@ -323,33 +325,17 @@ Public Class QLFnLibrary
         Lineas.Add("PRINT " & Constantes.C_COMILLAS & "   #       #       #####    #####  ###### " & Constantes.C_COMILLAS)
         Lineas.Add("PRINT " & Constantes.C_COMILLAS & "  #       # #      #             # #     #" & Constantes.C_COMILLAS)
         Lineas.Add("PRINT " & Constantes.C_COMILLAS & " #       #   #     #             # #     #" & Constantes.C_COMILLAS)
-        Lineas.Add("PRINT " & Constantes.C_COMILLAS & "#       #     #    #             # #     #" & Constantes.C_COMILLAS)
-        Lineas.Add("PRINT " & Constantes.C_COMILLAS & "###### #       #   #####    #####  ###### " & Constantes.C_COMILLAS)
+        Lineas.Add("PRINT " & Constantes.C_COMILLAS & "######  #     #    #####    #####  ###### " & Constantes.C_COMILLAS)
         Lineas.Add("PRINT:PRINT " & Constantes.C_COMILLAS & "ZX2SB v" & Constantes.VER_PROG & Constantes.C_COMILLAS & ":PRINT " & Constantes.C_COMILLAS & "by javu61@hotmail.com" & Constantes.C_COMILLAS)
         Lineas.Add("PAUSE 75:WINDOW 405,250,52,3:BORDER 5,0,1:PAPER 0:CLS")
         Return Lineas
     End Function
 
-    Public Function GenerateProgramInit() As List(Of String)
-        Dim Lin As Integer = 0
-        Dim lon = 60
-        Dim Lineas As New List(Of String)
+    Private Sub AddLinea(Lineas As List(Of String), ByRef nroLinea As Integer, paso As Integer, texto As String)
+        nroLinea += paso
+        Lineas.Add($"{nroLinea} {texto}")
+    End Sub
 
-        Lineas.Add(MontarRem(Lin, lon, StrDup(lon, "*")))
-        Lineas.Add(MontarRem(Lin, lon, " PROGRAMA GENERADO POR ZX2SB " & Constantes.VER_PROG & " by javu61"))
-        Lineas.Add(MontarRem(Lin, lon, StrDup(lon, "*")))
-        Lineas.Add(MontarRem(Lin, lon, " Si el resultado no es correcto, por favor contacta"))
-        Lineas.Add(MontarRem(Lin, lon, " javu61@hotmail.com, intentaré solucionarlo"))
-        Lineas.Add(MontarRem(Lin, lon, StrDup(lon, "*")))
-        Lin += 1
-        Lineas.Add($"{Lin} " & Constantes.GQL_INIT)
-        Return Lineas
-    End Function
-
-    Private Function MontarRem(ByRef nroLinea As Integer, lon As Integer, texto As String) As String
-        nroLinea += 1
-        Return $"{nroLinea} REM *" & texto & Space(lon - Len(texto)) & "*"
-    End Function
-End Class
+End Module
 
 

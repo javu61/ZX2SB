@@ -24,6 +24,7 @@ Public Module ProcesosGenerales
         opts.FSalidaSem = ""
         opts.FSalidaVar = ""
         opts.FSalidaDat = ""
+        opts.FSalidaFor = ""
         opts.FSalidaGSB = ""
         opts.FSalidaRen = ""
         opts.FSalida = ""
@@ -296,6 +297,7 @@ Public Module ProcesosGenerales
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.SEM_EXTENSION & " con el arbol EDP ajustado en modo de texto IR")
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.VAR_EXTENSION & " con las variables detectadas")
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.DATA_EXTENSION & " con los DATA detectados")
+            MostrarMensaje(opts, "Genera: un fichero " & Constantes.FOR_EXTENSION & " con los FOR/NEXT detectados")
         End If
         If opts.Modulo = Constantes.MGSB Or opts.Modulo = Constantes.MDir Then
             MostrarMensaje(opts, "Genera: un fichero " & Constantes.GQL_EXTENSION & " con los DATA detectados")
@@ -399,7 +401,13 @@ Public Module ProcesosGenerales
                     Return opts.FSalidaLex
                 End If
             Case Constantes.MSem : Return opts.FSalidaPar
-            Case Constantes.MGSB : Return opts.FSalidaSem
+            Case Constantes.MGSB
+                Select Case opts.Fase
+                    Case SubFases.Base : Return opts.FSalidaSem
+                    Case SubFases.Data : Return opts.FSalidaDat
+                End Select
+
+
             Case Constantes.MRen : Return opts.FSalidaGSB
         End Select
         Return ""
@@ -416,6 +424,7 @@ Public Module ProcesosGenerales
                     Case SubFases.Base : Return opts.FSalidaSem
                     Case SubFases.Variables : Return opts.FSalidaVar
                     Case SubFases.Data : Return opts.FSalidaDat
+                    Case SubFases.ForNext : Return opts.FSalidaFor
                 End Select
             Case Constantes.MGSB : Return opts.FSalidaGSB
             Case Constantes.MRen : Return opts.FSalidaRen
@@ -436,6 +445,7 @@ Public Module ProcesosGenerales
         opts.FSalidaSem = Path.ChangeExtension(opts.FEntrada, Constantes.SEM_EXTENSION)
         opts.FSalidaVar = Path.ChangeExtension(opts.FEntrada, Constantes.VAR_EXTENSION)
         opts.FSalidaDat = Path.ChangeExtension(opts.FEntrada, Constantes.DATA_EXTENSION)
+        opts.FSalidaFor = Path.ChangeExtension(opts.FEntrada, Constantes.FOR_EXTENSION)
         opts.FSalidaGSB = Path.ChangeExtension(opts.FEntrada, Constantes.GQL_EXTENSION)
         If (opts.FSalida = "") Then
             opts.FSalidaRen = Path.ChangeExtension(opts.FEntrada, "")
@@ -443,8 +453,6 @@ Public Module ProcesosGenerales
         Else
             opts.FSalidaRen = opts.FSalida
         End If
-        opts.FSalidaVar = Path.ChangeExtension(opts.FEntrada, Constantes.VAR_EXTENSION)
-        opts.FSalidaDat = Path.ChangeExtension(opts.FEntrada, Constantes.DATA_EXTENSION)
         opts.FLines = Path.ChangeExtension(opts.FEntrada, Constantes.LIN_EXTENSION)
         opts.FLog = Path.ChangeExtension(opts.FEntrada, Constantes.LOG_EXTENSION)    ' Fichero de log es común a todos
 
@@ -459,7 +467,6 @@ Public Module ProcesosGenerales
                 Case Procesos.Lexer
                     ListaFicheros.Add(opts.FSalidaLex)
 
-
                 Case Procesos.Normalizador
                     ListaFicheros.Add(opts.FSalidaNor)
 
@@ -470,6 +477,7 @@ Public Module ProcesosGenerales
                     ListaFicheros.Add(opts.FSalidaSem)
                     ListaFicheros.Add(opts.FSalidaVar)
                     ListaFicheros.Add(opts.FSalidaDat)
+                    ListaFicheros.Add(opts.FSalidaFor)
 
                 Case Procesos.Generador
                     ListaFicheros.Add(opts.FSalidaGSB)
@@ -649,12 +657,12 @@ Public Module ProcesosGenerales
         If Linea2 <> "" Then MostrarLineaDeError(opts, Linea2, Warning)
         MostrarMensaje(opts, "-")
 
-        If Not opts.Batch AndAlso Not opts.NoPararPorError Then
+        If (Not opts.Batch) AndAlso (Not opts.NoPararPorError) Then
             Dim mens As String = ""
             If final Then
                 mens = "                 ¿Desea mantener el fichero generado"
             Else
-                mens = "                 ¿Desea continuar"
+                mens = $"                 ¿Desea continuar"
             End If
             If (Not Preguntar(mens)) Then
                 If reader IsNot Nothing Then reader.Close()
@@ -696,7 +704,7 @@ Public Module ProcesosGenerales
                     msg = "[WARNING] " & msg
                 End If
                 GrabarLog(opts, msg)
-                If Not opts.Batch Then
+                If (Not opts.Batch) Then
                     Console.WriteLine(Separador(opts, msg))
                 End If
             End If
@@ -754,10 +762,21 @@ Public Module ProcesosGenerales
                     Case SubFases.Data
                         ver_Origen = ""
                         prg_Destino = Constantes.DATA_NOMBRE & " " & Constantes.DATA_VERSION
+                    Case SubFases.ForNext
+                        ver_Origen = ""
+                        prg_Destino = Constantes.FOR_NOMBRE & " " & Constantes.FOR_VERSION
                 End Select
+
             Case Constantes.MGSB
-                ver_Origen = Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION
-                prg_Destino = Constantes.GQL_NOMBRE & " " & Constantes.GQL_VERSION
+                Select Case opts.Fase
+                    Case SubFases.Base
+                        ver_Origen = Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION
+                        prg_Destino = Constantes.GQL_NOMBRE & " " & Constantes.GQL_VERSION
+                    Case SubFases.Data
+                        ver_Origen = Constantes.DATA_NOMBRE & " " & Constantes.DATA_VERSION
+                        prg_Destino = ""
+                End Select
+
             Case Constantes.MRen
                 ver_Origen = Constantes.GQL_NOMBRE & " " & Constantes.GQL_VERSION
                 prg_Destino = ""

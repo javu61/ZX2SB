@@ -2,8 +2,10 @@ Option Strict On
 Option Explicit On
 
 Imports System
+Imports System.Drawing
 Imports System.IO
 Imports System.Text
+Imports System.Text.Json
 Imports System.Text.RegularExpressions
 Imports System.Xml
 Imports ZX2SB
@@ -27,32 +29,35 @@ Public Module QLGenerator
     Dim IFContador As Integer = 0       ' Cuantos IF tenemos abiertos
 
     ' Funciones FN usadas durante la traducción
-    Private ReadOnly FuncionesFNUsadas As New List(Of Token)
+    Private FuncionesFNUsadas As New HashSet(Of TokenID)
 
     ' Pila de seguimiento de bucles FOR
     Private ForStack As New Stack(Of String)
 
-    ' Generador auxiliar de FN
-    Private AuxFN As QLFnLibrary
+    Dim lData As New List(Of QLFnLibrary.stData)
 
     ' ============================================================
     ' Punto de entrada
     ' ============================================================
     Public Function Ejecutar(_Opts As CmdOptions) As Integer
         opts = _Opts
+
+        'Leer las lineas de DATA desde el fichero auxiliar
+        LeerData()
+
+        'Bloque pincipal
+        opts.Fase = SubFases.Base
         stWriter = New StreamWriter(ObtenerFicheroSalida(opts), False, New UTF8Encoding(False))
+        stWriter.NewLine = ChrW(10)   ' Fín de línea para el QL es solo LF (ASCII 10)
         stReader = New StreamReader(ObtenerFicheroEntrada(opts))
         NroErrores = 0
+        PrimeraLinea = True
 
         FuncionesFNUsadas.Clear()
-        AuxFN = New QLFnLibrary()
-
-        stWriter.NewLine = ChrW(10)   ' Fín de línea para el QL es solo LF (ASCII 10)
 
         'Cabecera del programa
         Dim startLine As Integer = 1
-        GrabarFuncion(stWriter, startLine, AuxFN.GenerateProgramInit())
-
+        GrabarFuncion(startLine, QLFnLibrary.Generate_ProgramInit())
 
         While Not stReader.EndOfStream
             Dim LineaLeida As String = stReader.ReadLine()
@@ -64,23 +69,9 @@ Public Module QLGenerator
             If PrimeraLinea Then
                 Dim resultado As String = ""
                 If Not GetVersion(opts, LineaLeida, resultado) Then
-                    EmitirError(stWriter, 0, resultado)
+                    ErrorGenerador(0, resultado)
                 Else
-                    GrabarSalida(stWriter, "REM --> " & resultado, False)
-                End If
-                PrimeraLinea = False
-                Continue While
-            End If
-
-            If PrimeraLinea Then
-                If Not LineaLeida.StartsWith(Constantes.SEM_NOMBRE) Then
-                    EmitirError(stWriter, 0, "[ERROR] No es un fichero " & Constantes.SEM_NOMBRE & ": " & LineaLeida)
-                    Return (1)
-                End If
-
-                If Not LineaLeida.StartsWith(Constantes.SEM_NOMBRE & " " & Constantes.SEM_VERSION) Then
-                    EmitirError(stWriter, 0, "[ERROR] Versión incorrecta del fichero " & Constantes.LEX_NOMBRE & ": " & LineaLeida)
-                    Return (1)
+                    ' No se guarda la versión aquí
                 End If
                 PrimeraLinea = False
                 Continue While
@@ -98,7 +89,7 @@ Public Module QLGenerator
                 ' ⚠️ TODA sentencia debe llevar número de línea, pero estas las dejamos sin nro para
                 '    verlas en el fichero generado pero no en el QL, solo si estamos en modo debug
                 If (opts.ModoDebug) Then
-                    GrabarSalida(stWriter, "REM --> " & LineaParaMostrar, False)
+                    GrabarSalida("REM --> " & LineaParaMostrar, False)
                 End If
                 Continue While
             End If
@@ -117,12 +108,12 @@ Public Module QLGenerator
                 Case TokenID.TCO_LINE
                     ' Nro de línea
                     If Not Integer.TryParse(auxTok.Value, LineaZXActual) Then
-                        EmitirError(stWriter, 0, $"Número de línea ZX inválido: '{auxTok.Value}'")
+                        ErrorGenerador(0, $"Número de línea ZX inválido: '{auxTok.Value}'")
                         LineaZXActual = -1
                     End If
                 Case Else
                     ' Sentencia ejecutable
-                    GenerarSentenciaQL(stWriter, LineaZXActual, auxTok)
+                    GenerarSentenciaQL(auxTok)
             End Select
 
         End While
@@ -136,7 +127,7 @@ Public Module QLGenerator
         ' Cierre final
         ' -----------------------------------------
         If Not EncontradoEOF Then
-            EmitirError(stWriter, 0, "[ERROR GENERADOR] Fichero IRS incompleto: falta EOF, posible fichero truncado")
+            ErrorGenerador(0, "[ERROR GENERADOR] Fichero IRS incompleto: falta EOF, posible fichero truncado")
             Return 1
         End If
 
@@ -146,6 +137,54 @@ Public Module QLGenerator
         Return 0
 
     End Function
+
+    Private Sub LeerData()
+        ' -----------------------------------------
+        ' DATA
+        ' -----------------------------------------
+        opts.Fase = SubFases.Data
+        stReader = New StreamReader(ObtenerFicheroEntrada(opts))
+
+        While Not stReader.EndOfStream
+            Dim LineaLeida As String = stReader.ReadLine()
+            If String.IsNullOrWhiteSpace(LineaLeida) Then Continue While
+
+            ' ----------------------------------------------------------
+            ' Primera línea, Debe contener tipo y versión del fichero
+            ' ----------------------------------------------------------
+            If PrimeraLinea Then
+                Dim resultado As String = ""
+                If Not GetVersion(opts, LineaLeida, resultado) Then
+                    ErrorGenerador(0, resultado)
+                Else
+                    ' No se guarda la versión aquí
+                End If
+                PrimeraLinea = False
+                Continue While
+            End If
+
+            ' ----------------------------------------------------------------------------
+            ' Línea de los DATA
+            ' ----------------------------------------------------------------------------
+            Dim partes = LineaLeida.Split(New Char() {Constantes.C_ESPACIO}, 4, StringSplitOptions.RemoveEmptyEntries)
+            If partes(0) = "DATA" AndAlso partes(1) = "NODE" AndAlso partes(2) <> "" AndAlso partes(3) <> "" Then
+                Dim d As stData
+
+                If Integer.TryParse(partes(2), d.Numero) Then
+                    d.Cadena = (partes(3)(0) = Constantes.C_COMILLAS)
+                    d.Valor = partes(3)
+                    lData.Add(d)
+                Else
+                    ' opcional: registrar error
+                    ErrorGenerador(0, $"Número de línea DATA inválido: {partes(2)}")
+                End If
+            End If
+
+        End While
+
+        stReader.Close()
+    End Sub
+
 
     ' =========================================================
     ' Traducción de una sentencia ZX → SuperBASIC QL
@@ -158,56 +197,35 @@ Public Module QLGenerator
         Return $"{nroInterno} {codigo}"
     End Function
 
-    Private Sub GenerarSentenciaQL(writer As StreamWriter, numeroLineaActual As Integer, tk As Token)
+    Private Sub GenerarSentenciaQL(tk As Token)
         Dim cmd As String = tk.Mnemonic
         Dim stmt As String = tk.Value
 
-        Select Case Token.GetFamily(tk.ID)
+
+        Select Case tk.GetFamily()
             Case TokenFamily.TF_BLOQUES
-                GenerarConBloques(writer, tk, numeroLineaActual)
+                GenerarConBloques(tk)
 
-            Case TokenFamily.TF_GENERAFN,
-                 TokenFamily.TF_NOSOPORTADO,
-                 TokenFamily.TF_GENERAL
-                EmitirLinea(writer, SentenciaSimpleQL(writer, tk), False)
+            Case TokenFamily.TF_GENERAFN, TokenFamily.TF_NOSOPORTADO
+                EmitirLinea(SentenciaSimpleQL(tk), False)
 
+            Case TokenFamily.TF_GENERAL
+                EmitirLinea(SentenciaSimpleQL(tk), False)
 
             Case TokenFamily.TF_ESPECIALES
                 ' Esto son EOL, EOF, LINE, no generan nada aquí
 
             Case Else
                 'No puede llegar nada, pero por si acaso me falta alguna en las listas
-                EmitirError(writer, 0, $"REM [SIN TRADUCCION ==>] {cmd} {stmt}")
+                ErrorGenerador(0, $"REM [SIN TRADUCCION ==>] {cmd} {stmt}")
         End Select
     End Sub
 
-    Private Function SentenciaSimpleQL(writer As StreamWriter, tk As Token) As String
+    Private Function SentenciaSimpleQL(tk As Token) As String
         Dim cmd As String = tk.Mnemonic
         Dim stmt As String = tk.Value
 
-        Select Case Token.GetFamily(tk.ID)
-            Case TokenFamily.TF_GENERAFN,
-                 TokenFamily.TF_NOSOPORTADO
-
-                ' REGISTRAR SIEMPRE EL USO DE LA FN
-                FuncionesFNUsadas.Add(tk)
-
-                If tk.IsFunction Then
-                    ' FUNCIÓN
-                    If stmt <> "" Then
-                        Return $"{tk.FNMnemonic}({stmt})"
-                    Else
-                        Return $"{tk.FNMnemonic}"
-                    End If
-                Else
-                    ' PROCEDIMIENTO o SENTENCIA
-                    If stmt <> "" Then
-                        Return $"{tk.FNMnemonic} {stmt}"
-                    Else
-                        Return $"{tk.FNMnemonic}"
-                    End If
-                End If
-
+        Select Case tk.GetFamily()
             Case TokenFamily.TF_GENERAL
                 If (tk.ID = TokenID.TK_GOTO) OrElse (tk.ID = TokenID.TK_GOSUB) Then
                     If IsNumeric(stmt) Then
@@ -220,32 +238,61 @@ Public Module QLGenerator
                     Return $"{cmd} {stmt}"
                 End If
 
+            Case TokenFamily.TF_GENERAFN,
+                 TokenFamily.TF_NOSOPORTADO
+
+                ' REGISTRAR SIEMPRE EL USO DE LA FN
+                RegistrarFN(tk)
+
+                If tk.IsFunction Then
+                    ' FUNCIÓN
+                    If stmt <> "" Then
+                        Return $"{tk.Mnemonic}({stmt})"
+                    Else
+                        Return $"{tk.Mnemonic}"
+                    End If
+                Else
+                    ' PROCEDIMIENTO o SENTENCIA
+                    If stmt <> "" Then
+                        Return $"{tk.Mnemonic} {stmt}"
+                    Else
+                        Return $"{tk.Mnemonic}"
+                    End If
+                End If
+
             Case Else
                 'No puede llegar nada, pero por si acaso
-                EmitirError(writer, 0, "Sentencias por bloques no soportadas")
+                ErrorGenerador(0, "Sentencias por bloques no soportadas")
         End Select
         Return ""
     End Function
 
-    Private Sub GenerarConBloques(writer As StreamWriter, tk As Token, numeroLineaActual As Integer)
+    Private Sub GenerarConBloques(tk As Token)
         Select Case tk.ID
             Case TokenID.TK_REM
-                GenerarRem(writer, tk)
+                Generar_REM(tk)
 
             Case TokenID.TK_LET
-                GenerarLet(writer, tk)
+                Generar_LET(tk)
 
             Case TokenID.TK_PRINT
-                GenerarPRINT(writer, numeroLineaActual, tk)
+                Generar_PRINT(tk)
 
             Case TokenID.TK_IF
-                GenerarIF(writer, tk)
+                Generar_IF(tk)
 
             Case TokenID.TK_FOR
-                GenerarFor(writer, tk)
+                Generar_FOR(tk)
 
             Case TokenID.TK_NEXT
-                GenerarNext(writer, tk)
+                Generar_NEXT(tk)
+
+            Case TokenID.TK_DATA
+                Generar_DATA(tk)
+
+            Case TokenID.TK_DIM
+                Generar_DIM(tk)
+
         End Select
     End Sub
 
@@ -280,11 +327,11 @@ Public Module QLGenerator
     ' stmt Print G
     ' =========================================================
 
-    Private Sub GenerarIF(writer As StreamWriter, tkIF As Token)
+    Private Sub Generar_IF(tkIF As Token)
         Dim expr As String
 
         If tkIF.RPN IsNot Nothing AndAlso tkIF.RPN.Count > 0 Then
-            expr = RPNToInfix(tkIF.RPN)
+            expr = RPN.RPNToInfix(tkIF.RPN)
         Else
             expr = tkIF.Value ' fallback
         End If
@@ -292,7 +339,7 @@ Public Module QLGenerator
         Dim lineaIF As String = $"IF {expr} THEN"
 
 
-        EmitirLinea(writer, lineaIF, True)
+        EmitirLinea(lineaIF, True)
 
         IFContador += 1
     End Sub
@@ -300,7 +347,7 @@ Public Module QLGenerator
     Private Sub CerrarIF(writer As StreamWriter)
 
         While IFContador > 0
-            EmitirLinea(writer, "End If", True)  'No es un token, solo es del QL
+            EmitirLinea("End If", True)  'No es un token, solo es del QL
             IFContador -= 1
         End While
 
@@ -314,7 +361,7 @@ Public Module QLGenerator
     '   True  -> la sentencia ha sido emitida dentro del IF
     '   False -> no hay IF activo, la sentencia es normal
     ' ---------------------------------------------------------
-    Private Function ProcesadoPorIF(writer As StreamWriter, sentenciaQL As String) As Boolean
+    Private Function ProcesadoPorIF(sentenciaQL As String) As Boolean
 
         ' Si no hay IF activo, no hacemos nada
         If IFContador = 0 Then
@@ -322,7 +369,7 @@ Public Module QLGenerator
         End If
 
         ' Estamos dentro de un IF: emitir la sentencia dentro del bloque
-        EmitirLinea(writer, sentenciaQL, True)
+        EmitirLinea(sentenciaQL, True)
 
         Return True
 
@@ -331,81 +378,56 @@ Public Module QLGenerator
     ' =========================================================
     ' Emisión de FOR/NEXT
     ' =========================================================
-    Private Sub GenerarFor(writer As StreamWriter, tkFOR As Token)
+    Private Sub Generar_FOR(tkFOR As Token)
 
-        Dim RPNAux = tkFOR.RPN
-        Dim texto = tkFOR.Value
+        Dim varName As String = ""
+        Dim initExprL As New List(Of RPN_Node)
+        Dim limitExprL As New List(Of RPN_Node)
+        Dim stepExprL As New List(Of RPN_Node)
 
-        If RPNAux Is Nothing OrElse RPNAux.Count = 0 Then
-            EmitirError(writer, 0, "FOR sin RPN")
+        If Not Descomponer.dFOR(tkFOR.RPN, varName, initExprL, limitExprL, stepExprL) Then
+            ErrorGenerador(0, "FOR inválido")
             Exit Sub
         End If
 
-        ' ------------------------------------------------------
-        ' Separar por TO (texto)
-        ' ------------------------------------------------------
-        Dim partes = texto.Split(New String() {"TO"}, StringSplitOptions.None)
+        ' ---------------------------------
+        ' Construir expresiones
+        ' ---------------------------------
+        Dim initExpr As String = RPN.RPNToInfix(initExprL)
+        Dim limitExpr As String = RPN.RPNToInfix(limitExprL)
 
-        If partes.Length <> 2 Then
-            EmitirError(writer, 0, "FOR inválido: falta TO")
-            Exit Sub
-        End If
+        Dim linea As String
 
-        ' ------------------------------------------------------
-        ' Parte izquierda: V(j) := C(1)
-        ' ------------------------------------------------------
-        Dim lhsRPN = RPNAux.TakeWhile(Function(n) n.Kind <> RPNKind.ASSIGN).ToList()
-        Dim idxAssign = RPNAux.FindIndex(Function(n) n.Kind = RPNKind.ASSIGN)
-
-        Dim initRPN = RPNAux.GetRange(idxAssign + 1, 1) ' C(1)
-
-        Dim varName As String
-
-        If lhsRPN.Count > 0 AndAlso lhsRPN(0).Kind = RPNKind.VAR Then
-            varName = lhsRPN(0).Value.ToUpperInvariant()
+        If stepExprL IsNot Nothing AndAlso stepExprL.Count > 0 Then
+            Dim stepExpr As String = RPN.RPNToInfix(stepExprL)
+            linea = $"FOR {varName.ToUpperInvariant()}={initExpr} TO {limitExpr} STEP {stepExpr}"
         Else
-            EmitirError(writer, 0, "FOR inválido: variable incorrecta")
-            Exit Sub
+            linea = $"FOR {varName.ToUpperInvariant()}={initExpr} TO {limitExpr}"
         End If
 
-        Dim initExpr = RPN.RPNToInfix(initRPN)
+        EmitirLinea(linea, False)
 
-        ' ------------------------------------------------------
-        ' Parte derecha: límite
-        ' ------------------------------------------------------
-        Dim limitText = partes(1).Trim()
-
-        Dim limitRPN = ParseRPN(limitText)
-        Dim limitExpr = RPN.RPNToInfix(limitRPN)
-
-        ' ------------------------------------------------------
-        ' Construcción final
-        ' ------------------------------------------------------
-        Dim linea As String = $"FOR {varName}={initExpr} TO {limitExpr}"
-
-        EmitirLinea(writer, linea, False)
-
-        ' registrar FOR
+        ' SOLO para el generador (no semántico)
         ForStack.Push(varName)
 
     End Sub
 
-    Private Sub GenerarNext(writer As StreamWriter, tk As Token)
+    Private Sub Generar_NEXT(tk As Token)
 
         Dim varName As String = tk.Value.ToUpperInvariant()
 
         If ForStack.Count = 0 Then
-            EmitirWarning(writer, $"NEXT {varName} sin FOR previo")
+            EmitirWarning($"NEXT {varName} sin FOR previo")
 
         ElseIf ForStack.Peek() <> varName Then
-            EmitirWarning(writer, $"FOR/NEXT no estructurado: se cierra {varName}, pero esperaba {ForStack.Peek()}")
+            EmitirWarning($"FOR/NEXT no estructurado: se cierra {varName}, pero esperaba {ForStack.Peek()}")
             EliminarForDePila(varName)
 
         Else
             ForStack.Pop()
         End If
 
-        EmitirLinea(writer, $"END FOR {varName}", False)
+        EmitirLinea($"END FOR {varName}", False)
 
     End Sub
 
@@ -440,9 +462,83 @@ Public Module QLGenerator
     End Sub
 
     ' =========================================================
+    ' Emisión de DATA
+    ' =========================================================
+    Private Sub Generar_DATA(tk As Token)
+        ' tk.Value contiene solo contantes:
+        ' C(80) , C(120) , C("OTRA CADENA") , C(0)
+
+        Dim sb As New StringBuilder()
+        sb.Append("DATA ")
+
+        Dim actual As New List(Of RPN_Node)
+        Dim first As Boolean = True
+
+        For Each node In tk.RPN
+
+            If node.Kind = RPNKind.DATA_SEP Then
+
+                If actual.Count > 0 Then
+
+                    If Not first Then sb.Append(" ,")
+                    sb.Append(GenerarElementoDATA(actual))
+
+                    actual.Clear()
+                    first = False
+
+                End If
+
+            Else
+                actual.Add(node)
+            End If
+
+        Next
+
+        If actual.Count > 0 Then
+            If Not first Then sb.Append(" ,")
+            sb.Append(GenerarElementoDATA(actual))
+        End If
+
+        EmitirLinea(sb.ToString(), False)
+
+    End Sub
+    Private Function GenerarElementoDATA(expr As List(Of RPN_Node)) As String
+
+        ' ---------------------------------
+        ' Caso simple: constante o variable
+        ' ---------------------------------
+        If expr.Count = 1 Then
+
+            Dim n = expr(0)
+
+            Select Case n.Kind
+
+                Case RPNKind.CTE
+
+                    If n.TokenID = TokenID.TES_STRING Then
+                        Return $"""{n.Value}"""
+                    Else
+                        Return n.Value
+                    End If
+
+                Case RPNKind.VAR
+                    Return n.Value
+
+            End Select
+
+        End If
+
+        ' ---------------------------------
+        ' Caso complejo: expresión
+        ' ---------------------------------
+        Return RPN.RPNToInfix(expr)
+
+    End Function
+
+    ' =========================================================
     ' Emisión de REM
     ' =========================================================
-    Private Sub GenerarRem(writer As StreamWriter, tk As Token)
+    Private Sub Generar_REM(tk As Token)
         If opts.SinComentarios Then
             Exit Sub
         End If
@@ -451,7 +547,7 @@ Public Module QLGenerator
         If Left(comentario, 1) = Constantes.C_COMILLAS And Right(comentario, 1) = Constantes.C_COMILLAS Then
             comentario = Mid(comentario, 2, Len(comentario) - 2)
         End If
-        EmitirLinea(writer, $"{tk.Mnemonic} {comentario}", False)
+        EmitirLinea($"{tk.Mnemonic} {comentario}", False)
 
     End Sub
 
@@ -459,164 +555,67 @@ Public Module QLGenerator
     ' =========================================================
     ' Emisión de LET (ZX → SuperBASIC QL)
     ' =========================================================
-    Private Sub GenerarLet(writer As StreamWriter, tk As Token)
+    Private Sub Generar_LET(tk As Token)
 
-        Dim rpn = tk.RPN
+        Dim auxRpn = tk.RPN
 
-        If rpn Is Nothing OrElse rpn.Count = 0 Then
-            EmitirError(writer, 0, "LET sin RPN")
+        If auxRpn Is Nothing OrElse auxRpn.Count = 0 Then
+            ErrorGenerador(0, "LET sin RPN")
             Exit Sub
         End If
 
         ' ------------------------------------------------------
         ' Buscar asignación A(=)
         ' ------------------------------------------------------
-        Dim idxAssign = rpn.FindIndex(Function(n) n.Kind = RPNKind.ASSIGN)
+        Dim idxAssign = auxRpn.FindIndex(Function(n) n.Kind = RPNKind.ASSIGN)
 
         If idxAssign < 0 Then
-            EmitirError(writer, 0, "LET inválido: falta asignación")
+            ErrorGenerador(0, "LET inválido: falta asignación")
             Exit Sub
         End If
 
         ' ------------------------------------------------------
         ' Separar LHS / RHS
         ' ------------------------------------------------------
-        Dim lhs = rpn.GetRange(0, idxAssign)
-        Dim rhs = rpn.GetRange(idxAssign + 1, rpn.Count - idxAssign - 1)
+        Dim lhs = auxRpn.GetRange(0, idxAssign)
+        Dim rhs = auxRpn.GetRange(idxAssign + 1, auxRpn.Count - idxAssign - 1)
 
         If lhs.Count = 0 Then
-            EmitirError(writer, 0, "LET inválido: LHS vacío")
+            ErrorGenerador(0, "LET inválido: LHS vacío")
             Exit Sub
         End If
 
         ' ------------------------------------------------------
-        ' Construir LHS (variable + índices)
+        ' Construir AMBOS LADOS
         ' ------------------------------------------------------
-        Dim lhsExpr As String
 
-        ' variable base
-        If lhs(0).Kind <> RPNKind.VAR Then
-            EmitirError(writer, 0, "LET inválido: variable incorrecta")
-            Exit Sub
-        End If
-
-        Dim varName = lhs(0).Value
-
-        ' comprobar si hay índices (I -> IDX)
-        Dim idxNode = lhs.FirstOrDefault(Function(n) n.Kind = RPNKind.FUN_CALL AndAlso n.Value = "IDX")
-
-        Dim tieneIDX = lhs.Any(Function(n) n.Kind = RPNKind.FUN_CALL AndAlso n.Value = "IDX")
-
-        If tieneIDX Then
-            ' Extraer argumentos desde RPN usando stack
-            Dim args = ExtraerArgsDesdeRPN(lhs, idxNode.Arity)
-
-            lhsExpr = $"{varName}({String.Join(",", args)})"
-
-        Else
-            lhsExpr = varName
-        End If
-
-        ' ------------------------------------------------------
-        ' Construir RHS
-        ' ------------------------------------------------------
-        Dim rhsExpr As String = RPNToInfix(rhs)
+        Dim lhsExpr As String = RPN.RPNToInfix(lhs)
+        Dim rhsExpr As String = RPN.RPNToInfix(rhs)
 
         ' ------------------------------------------------------
         ' Emitir LET (sin palabra LET en QL)
         ' ------------------------------------------------------
-        EmitirLinea(writer, $"{lhsExpr}={rhsExpr}", False)
+        EmitirLinea($"{lhsExpr}={rhsExpr}", False)
 
     End Sub
-
-    Private Function ExtraerArgsDesdeRPN(rpn As List(Of RPN_Node), arity As Integer) As List(Of String)
-
-        Dim stack As New Stack(Of String)
-
-        For Each n In rpn
-
-            Select Case n.Kind
-
-                Case RPNKind.VAR
-                    stack.Push(n.Value)
-
-                Case RPNKind.CTE
-                    stack.Push(n.Value)
-
-                Case RPNKind.BINARY_OP
-                    Dim b = stack.Pop()
-                    Dim a = stack.Pop()
-                    stack.Push($"{a}{n.Value}{b}")
-
-                Case RPNKind.UNARY_OP
-                    Dim a = stack.Pop()
-                    stack.Push($"{n.Value}{a}")
-
-                Case RPNKind.FUN_CALL
-
-                    If n.Value = "IDX" Then
-                        ' Extraer argumentos reales
-                        Dim args As New List(Of String)
-
-                        For i = 1 To n.Arity
-                            args.Insert(0, stack.Pop())
-                        Next
-
-                        Return args
-                    Else
-                        ' Función normal
-                        Dim args As New List(Of String)
-
-                        For i = 1 To n.Arity
-                            args.Insert(0, stack.Pop())
-                        Next
-
-                        stack.Push($"{n.Value}({String.Join(",", args)})")
-                    End If
-
-            End Select
-
-        Next
-
-        Return New List(Of String)
-
-    End Function
-
 
     ' =========================================================
     ' Emisión de PRINT (ZX → SuperBASIC QL)
     ' =========================================================
-    Private Sub GenerarPRINT(writer As StreamWriter, numeroLineaActual As Integer, tk As Token)
+    Private Sub Generar_PRINT(tk As Token)
 
         Dim item As New PrintItem(tk)
+        item.FromToken(tk)
         Dim comando As String = "PRINT "
 
         ' -----------------------------------------
         ' Directivas fuera del PRINT
         ' -----------------------------------------
-        If tk.IsPrintDirective AndAlso item.ID <> TokenID.TK_TAB Then
-
-            Select Case item.ID
-
-                Case TokenID.TK_AT
-                    Dim x = RPN.RPNToInfix(item.Expr1)
-                    Dim y = RPN.RPNToInfix(item.Expr2)
-
-                    EmitirLinea(writer, $"AT {x},{y}", False)
-
-                Case TokenID.TK_INK, TokenID.TK_PAPER
-                    Dim expr = RPN.RPNToInfix(item.Expr1)
-
-                    EmitirLinea(writer, $"{item.ID.ToString.Replace("TK_", "")} {expr}", False)
-
-            End Select
-
-            ' Si hay coma, forzar PRINT
-            If item.Separator = PrintSeparator.C Then
-                EmitirLinea(writer, comando & Constantes.C_COMA, False)
+        If item.IsPrintDirective Then
+            'Si ha sido tratada no hay mas que hacer
+            If EmitirDirectivaPRINT(item) Then
+                Return
             End If
-
-            Return
         End If
 
         ' -----------------------------------------
@@ -625,15 +624,25 @@ Public Module QLGenerator
         Dim sb As New StringBuilder
         sb.Append(comando)
 
-        If item.ID = TokenID.TK_TAB Then
-
-            Dim expr = RPN.RPNToInfix(item.Expr1)
+        If item.prID = TokenID.TK_TAB Then
+            If (item.prExpr1 Is Nothing) Then
+                ErrorGenerador(0, $"Comando TAB mal formado, no tiene valor")
+            End If
+            Dim expr = RPN.RPNToInfix(item.prExpr1)
             sb.Append("TO " & expr)
 
         Else
+            If item.prExpr1 IsNot Nothing Then
+                ' REGISTRAR EL USO DE LAS FN en los PRINT
+                For Each node In item.prExpr1
+                    Select Case Token.GetFamilyFromID(node.TokenID)
+                        Case TokenFamily.TF_GENERAFN, TokenFamily.TF_NOSOPORTADO
+                            Dim tkaux As New Token(node.TokenID)
+                            RegistrarFN(tkaux)
+                    End Select
+                Next
 
-            If item.Expr1 IsNot Nothing Then
-                Dim expr = RPN.RPNToInfix(item.Expr1)
+                Dim expr = RPN.RPNToInfix(item.prExpr1)
                 sb.Append(expr)
             End If
 
@@ -642,7 +651,7 @@ Public Module QLGenerator
         ' -----------------------------------------
         ' Separador
         ' -----------------------------------------
-        Select Case item.Separator
+        Select Case item.prSeparator
             Case PrintSeparator.P
                 sb.Append(";")
             Case PrintSeparator.C
@@ -651,67 +660,164 @@ Public Module QLGenerator
                 ' nada
         End Select
 
-        EmitirLinea(writer, sb.ToString(), False)
+        EmitirLinea(sb.ToString(), False)
 
     End Sub
 
-    Private Function EmitirTAB(item As PrintItem) As String
+    Private Function EmitirDirectivaPRINT(item As PrintItem) As Boolean
+        Select Case item.prID
+            Case TokenID.TK_TAB
+                Return (False)
 
-        If item.Expr1 Is Nothing Then
-            Return "TO 0"
+            Case TokenID.TK_AT
+                If (item.prExpr1 Is Nothing) Or (item.prExpr2 Is Nothing) Then
+                    ErrorGenerador(0, "AT al formado, no tiene las dos coordenadas")
+                    Return True
+                End If
+
+                Dim x = RPN.RPNToInfix(item.prExpr1)
+                Dim y = RPN.RPNToInfix(item.prExpr2)
+
+                EmitirLinea($"AT {x},{y}", False)
+
+            Case Else
+                Dim tk As New Token(item.prID)
+                Dim cmd As String = tk.Mnemonic
+                If (item.prExpr1 Is Nothing) Then
+                    ErrorGenerador(0, $"Comando {cmd} mal formado, no tiene valor")
+                    Return True
+                End If
+                Dim value = RPN.RPNToInfix(item.prExpr1)
+
+                EmitirLinea($"{cmd} {value}", False)
+        End Select
+
+        ' Si hay coma tras el comando, forzar un nuevo PRINT con ella
+        If item.prSeparator = PrintSeparator.C Then
+            EmitirLinea("PRINT " & Constantes.C_COMA, False)
+        End If
+        Return (True)
+    End Function
+
+
+    ' =========================================================
+    ' Emisión de DIM
+    ' =========================================================
+    Private Sub Generar_DIM(tk As Token)
+
+        Dim rpn = tk.RPN
+
+        If rpn Is Nothing OrElse rpn.Count = 0 Then
+            ErrorGenerador(0, "DIM sin RPN")
+            Exit Sub
         End If
 
-        Dim expr = RPN.RPNToInfix(item.Expr1)
+        Dim nombre As String = ""
+        Dim dimensiones As New List(Of String)
 
-        Return "TO " & expr
+        ' ---------------------------------
+        ' Analizar RPN
+        ' ---------------------------------
+        For i As Integer = 0 To rpn.Count - 1
 
-    End Function
+            Dim n = rpn(i)
+
+            Select Case n.Kind
+
+                Case RPNKind.VAR
+                    ' base array
+                    Dim pos = n.Value.IndexOf(","c)
+                    nombre = n.Value.Substring(0, pos)
+
+                Case RPNKind.CTE
+                    ' dimensión literal
+                    dimensiones.Add(n.Value)
+
+                Case RPNKind.IDX
+                    ' indica nº dimensiones → ya lo tenemos en lista
+                    ' opcional validar:
+                    If dimensiones.Count <> n.Arity Then
+                        ErrorGenerador(0, $"DIM inconsistente en {nombre}")
+                    End If
+
+            End Select
+
+        Next
+
+        ' ---------------------------------
+        ' Construir salida
+        ' ---------------------------------
+        Dim sb As New StringBuilder
+        sb.Append("DIM ")
+        sb.Append(nombre)
+
+        If dimensiones.Count > 0 Then
+            sb.Append("(")
+            For i = 0 To dimensiones.Count - 1
+                sb.Append(dimensiones(i))
+                If i < dimensiones.Count - 1 Then sb.Append(",")
+            Next
+            sb.Append(")")
+        End If
+
+        EmitirLinea(sb.ToString(), False)
+
+    End Sub
 
 
     Private Sub EmitirFuncionesAuxiliares(writer As StreamWriter)
 
         Dim startLine As Integer = 9000
-        GrabarSeparador(writer, startLine)
-        GrabarSalida(writer, $"{startLine} REM =========================================", True)
+        GrabarSeparador(startLine)
+        GrabarSalida($"{startLine} REM =========================================", True)
         startLine += 10
-        GrabarSalida(writer, $"{startLine} REM ===== FUNCIONES AUXILIARES ZX BASIC =====", True)
+        GrabarSalida($"{startLine} REM ===== FUNCIONES AUXILIARES ZX BASIC =====", True)
         startLine += 10
-        GrabarSalida(writer, $"{startLine} REM =========================================", True)
+        GrabarSalida($"{startLine} REM =========================================", True)
         startLine += 10
-        GrabarSeparador(writer, startLine)
+        GrabarSeparador(startLine)
 
         'Añadimos la rutina de inicialización siempre
         Dim fInit As New Token(TokenID.TCO_INIT)
-        GrabarFuncion(writer, startLine, AuxFN.GenerateFnProcedure(startLine, fInit, opts.Funciones))
+        GrabarFuncion(startLine, QLFnLibrary.GenerateFnProcedure(startLine, fInit, opts.Funciones))
 
         If FuncionesFNUsadas.Count <> 0 Then
-            For Each fn In FuncionesFNUsadas
-                GrabarFuncion(writer, startLine, AuxFN.GenerateFnProcedure(startLine, fn, opts.Funciones))
+            For Each tkid In FuncionesFNUsadas
+                Dim tk As New Token(tkid)
+                GrabarFuncion(startLine, QLFnLibrary.GenerateFnProcedure(startLine, tk, opts.Funciones))
             Next
         End If
     End Sub
 
-    Private Sub GrabarFuncion(writer As StreamWriter, ByRef LineaFinal As Integer, ListaLineas As List(Of String))
+    Private Sub GrabarFuncion(ByRef LineaFinal As Integer, ListaLineas As List(Of String))
         For Each l In ListaLineas
-            GrabarSalida(writer, l, True)
+            GrabarSalida(l, True)
         Next
 
         LineaFinal += ListaLineas.Count * 10 + 10
-        GrabarSeparador(writer, LineaFinal)
+        GrabarSeparador(LineaFinal)
     End Sub
 
-    Private Sub EmitirLinea(writer As StreamWriter, sentenciaQL As String, DesdeIF As Boolean)
-        If (DesdeIF) OrElse (Not ProcesadoPorIF(writer, sentenciaQL)) Then
-            GrabarSalida(writer, GenerarLineaNumerada(sentenciaQL), True)
+    Private Sub EmitirLinea(sentenciaQL As String, DesdeIF As Boolean)
+        If (DesdeIF) OrElse (Not ProcesadoPorIF(sentenciaQL)) Then
+            GrabarSalida(GenerarLineaNumerada(sentenciaQL), True)
         End If
     End Sub
 
+    ' =============================================
+    ' REGISTRAR EL USO DE LA FN SI NO EXISTE
+    ' =============================================
+    Private Sub RegistrarFN(tk As Token)
+        If Not FuncionesFNUsadas.Contains(tk.ID) Then
+            FuncionesFNUsadas.Add(tk.ID)
+        End If
+    End Sub
 
 
     ' ============================================================
     ' ERRORES
     ' ============================================================
-    Private Sub EmitirError(writer As StreamWriter, columna As Integer, descripcion As String)
+    Private Sub ErrorGenerador(columna As Integer, descripcion As String)
         NroErrores += 1
         If (columna <> 0) Then
             columna = columna - 1
@@ -721,26 +827,24 @@ Public Module QLGenerator
                      New String(Constantes.C_ESPACIO, columna) & Constantes.Marca_Error & descripcion)
     End Sub
 
-    Private Sub EmitirWarning(writer As StreamWriter, mensaje As String)
+    Private Sub EmitirWarning(mensaje As String)
         NroWarnings += 1
 
         ' 1) Aviso por consola
-        If Not opts.Silencioso Then
-            MostrarWarning(opts, stReader, stwriter, NroLineaFichero, 0, $"[WARNING {NroWarnings}] {mensaje}", "")
-        End If
+        MostrarWarning(opts, stReader, stWriter, NroLineaFichero, 0, $"[WARNING {NroWarnings}] {mensaje}", "")
 
         ' 2) Aviso dentro del código SuperBASIC
         '    (REM obligatorio en QL)
-        GrabarSalida(writer, $"REM WARNING: {mensaje}", False)
+        GrabarSalida($"REM WARNING: {mensaje}", False)
 
     End Sub
 
-    Private Sub GrabarSalida(writer As StreamWriter, linea As String, generada As Boolean)
+    Private Sub GrabarSalida(linea As String, generada As Boolean)
         If (linea = "-") Then
             linea = Constantes.GQL_SEPARADOR
         End If
 
-        writer.WriteLine(linea)
+        stWriter.WriteLine(linea)
 
         If (generada) Then
             linea = "   " & linea
@@ -750,10 +854,12 @@ Public Module QLGenerator
         End If
 
     End Sub
-    Private Sub GrabarSeparador(writer As StreamWriter, ByRef nroLinea As Integer)
-        GrabarSalida(writer, $"{nroLinea} " & Constantes.GQL_SEPARADOR, True)
+    Private Sub GrabarSeparador(ByRef nroLinea As Integer)
+        GrabarSalida($"{nroLinea} " & Constantes.GQL_SEPARADOR, True)
         nroLinea += 10
 
     End Sub
+
+
 
 End Module

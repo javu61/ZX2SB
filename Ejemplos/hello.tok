@@ -1,0 +1,1049 @@
+TOK 1.0 (Generado 22/05/2026 10:16:55)
+-- SRC:  10 LET A(sin 4)) = 28*C(
+99902 [1,1] 10                                               ; -- TCO_LINE
+21932 [1,4]                                                  ; -- TK_LET
+17900 [1,8] a                                                ; -- TES_IDENT
+15914 [1,9]                                                  ; -- TSP_PAR_ABIERTO
+12139 [1,10]                                                 ; -- TK_SIN
+17901 [1,14] 4                                               ; -- TES_NUMBER
+15915 [1,15]                                                 ; -- TSP_PAR_CERRADO
+15915 [1,16]                                                 ; -- TSP_PAR_CERRADO
+14905 [1,18]                                                 ; -- TOP_EQ
+17901 [1,20] 28                                              ; -- TES_NUMBER
+14902 [1,22]                                                 ; -- TOP_MUL
+17900 [1,23] c                                               ; -- TES_IDENT
+15914 [1,24]                                                 ; -- TSP_PAR_ABIERTO
+99901 [1,0]                                                  ; -- TCO_EOL
+-- SRC:  19 LET a=INT(RND*28)+1
+99902 [2,1] 19                                               ; -- TCO_LINE
+21932 [2,4]                                                  ; -- TK_LET
+17900 [2,8] a                                                ; -- TES_IDENT
+14905 [2,9]                                                  ; -- TOP_EQ
+12134 [2,10]                                                 ; -- TK_INT
+15914 [2,13]                                                 ; -- TSP_PAR_ABIERTO
+12001 [2,14]                                                 ; -- TK_RND
+14902 [2,17]                                                 ; -- TOP_MUL
+17901 [2,18] 28                                              ; -- TES_NUMBER
+15915 [2,20]                                                 ; -- TSP_PAR_CERRADO
+14900 [2,21]                                                 ; -- TOP_PLUS
+17901 [2,22] 1                                               ; -- TES_NUMBER
+99901 [2,0]                                                  ; -- TCO_EOL
+-- SRC:  11 PRINT INT (B + SIN 4) * 5
+99902 [3,1] 11                                               ; -- TCO_LINE
+21935 [3,4]                                                  ; -- TK_PRINT
+12134 [3,10]                                                 ; -- TK_INT
+15914 [3,14]                                                 ; -- TSP_PAR_ABIERTO
+17900 [3,15] b                                               ; -- TES_IDENT
+14900 [3,17]                                                 ; -- TOP_PLUS
+12139 [3,19]                                                 ; -- TK_SIN
+17901 [3,23] 4                                               ; -- TES_NUMBER
+15915 [3,24]                                                 ; -- TSP_PAR_CERRADO
+14902 [3,26]                                                 ; -- TOP_MUL
+17901 [3,28] 5                                               ; -- TES_NUMBER
+99901 [3,0]                                                  ; -- TCO_EOL
+-- SRC:  11 PRINT #3," pulsa una tecla para continuar"
+99902 [4,1] 11                                               ; -- TCO_LINE
+21935 [4,4]                                                  ; -- TK_PRINT
+15919 [4,10]                                                 ; -- TK_CANAL
+17901 [4,11] 3                                               ; -- TES_NUMBER
+15916 [4,12]                                                 ; -- TSP_COMA
+17902 [4,13] :31:" pulsa una tecla para continuar"           ; -- TES_STRING
+99901 [4,0]                                                  ; -- TCO_EOL
+-- SRC:  12 LET OP=1 : OPEN #3,"Fichero"
+99902 [5,1] 12                                               ; -- TCO_LINE
+21932 [5,4]                                                  ; -- TK_LET
+17900 [5,8] op                                               ; -- TES_IDENT
+14905 [5,10]                                                 ; -- TOP_EQ
+17901 [5,11] 1                                               ; -- TES_NUMBER
+15918 [5,13]                                                 ; -- TSP_DOSPUNTOS
+41917 [5,15]                                                 ; -- TK_OPEN
+15919 [5,20]                                                 ; -- TK_CANAL
+17901 [5,21] 3                                               ; -- TES_NUMBER
+15916 [5,22]                                                 ; -- TSP_COMA
+17902 [5,23] :7:"Fichero"                                    ; -- TES_STRING
+99901 [5,0]                                                  ; -- TCO_EOL
+-- SRC:  13 CLOSE #3
+99902 [6,1] 13                                               ; -- TCO_LINE
+41918 [6,4]                                                  ; -- TK_CLOSE
+15919 [6,10]                                                 ; -- TK_CANAL
+17901 [6,11] 3                                               ; -- TES_NUMBER
+99901 [6,0]                                                  ; -- TCO_EOL
+-- SRC:  14 PRINT SIN 13
+99902 [7,1] 14                                               ; -- TCO_LINE
+21935 [7,4]                                                  ; -- TK_PRINT
+12139 [7,10]                                                 ; -- TK_SIN
+17901 [7,14] 13                                              ; -- TES_NUMBER
+99901 [7,0]                                                  ; -- TCO_EOL
+-- SRC:  15 GO TO 20 : GO TO20 : GOTO 20: GOTO20
+99902 [8,1] 15                                               ; -- TCO_LINE
+17900 [8,4] go                                               ; -- TES_IDENT
+11942 [8,7]                                                  ; -- TK_TO
+17901 [8,10] 20                                              ; -- TES_NUMBER
+15918 [8,13]                                                 ; -- TSP_DOSPUNTOS
+17900 [8,15] go                                              ; -- TES_IDENT
+17900 [8,18] to20                                            ; -- TES_IDENT
+15918 [8,23]                                                 ; -- TSP_DOSPUNTOS
+11929 [8,25]                                                 ; -- TK_GOTO
+17901 [8,30] 20                                              ; -- TES_NUMBER
+15918 [8,32]                                                 ; -- TSP_DOSPUNTOS
+17900 [8,34] goto20                                          ; -- TES_IDENT
+99901 [8,0]                                                  ; -- TCO_EOL
+-- SRC:  16 GO SUB 20 : GO SUB20 : GOSUB 20: GOSUB20
+99902 [9,1] 16                                               ; -- TCO_LINE
+17900 [9,4] go                                               ; -- TES_IDENT
+17900 [9,7] sub                                              ; -- TES_IDENT
+17901 [9,11] 20                                              ; -- TES_NUMBER
+15918 [9,14]                                                 ; -- TSP_DOSPUNTOS
+17900 [9,16] go                                              ; -- TES_IDENT
+17900 [9,19] sub20                                           ; -- TES_IDENT
+15918 [9,25]                                                 ; -- TSP_DOSPUNTOS
+11928 [9,27]                                                 ; -- TK_GOSUB
+17901 [9,33] 20                                              ; -- TES_NUMBER
+15918 [9,35]                                                 ; -- TSP_DOSPUNTOS
+17900 [9,37] gosub20                                         ; -- TES_IDENT
+99901 [9,0]                                                  ; -- TCO_EOL
+-- SRC:  1 REM *******************
+99902 [10,1] 1                                               ; -- TCO_LINE
+21936 [10,3]                                                 ; -- TK_REM
+17902 [10,7] :19:"*******************"                       ; -- TES_STRING
+99901 [10,0]                                                 ; -- TCO_EOL
+-- SRC:  2 REM * Cesar Hernandez *
+99902 [11,1] 2                                               ; -- TCO_LINE
+21936 [11,3]                                                 ; -- TK_REM
+17902 [11,7] :19:"* Cesar Hernandez *"                       ; -- TES_STRING
+99901 [11,0]                                                 ; -- TCO_EOL
+-- SRC:  3 REM *  {7F} MONSER S.A.  *
+99902 [12,1] 3                                               ; -- TCO_LINE
+21936 [12,3]                                                 ; -- TK_REM
+17902 [12,7] :22:"*  {7F} MONSER S.A.  *"                    ; -- TES_STRING
+99901 [12,0]                                                 ; -- TCO_EOL
+-- SRC:  4 REM *   Tragaperras   *
+99902 [13,1] 4                                               ; -- TCO_LINE
+21936 [13,3]                                                 ; -- TK_REM
+17902 [13,7] :19:"*   Tragaperras   *"                       ; -- TES_STRING
+99901 [13,0]                                                 ; -- TCO_EOL
+-- SRC:  5 REM *******************
+99902 [14,1] 5                                               ; -- TCO_LINE
+21936 [14,3]                                                 ; -- TK_REM
+17902 [14,7] :19:"*******************"                       ; -- TES_STRING
+99901 [14,0]                                                 ; -- TCO_EOL
+-- SRC:  6 REM
+99902 [15,1] 6                                               ; -- TCO_LINE
+21936 [15,3]                                                 ; -- TK_REM
+17902 [15,6] :0:""                                           ; -- TES_STRING
+99901 [15,0]                                                 ; -- TCO_EOL
+-- SRC:  7 REM
+99902 [16,1] 7                                               ; -- TCO_LINE
+21936 [16,3]                                                 ; -- TK_REM
+17902 [16,6] :0:""                                           ; -- TES_STRING
+99901 [16,0]                                                 ; -- TCO_EOL
+-- SRC:  22 REM "**rutina instrucciones***"
+99902 [17,1] 22                                              ; -- TCO_LINE
+21936 [17,4]                                                 ; -- TK_REM
+17902 [17,8] :27:""**rutina instrucciones***""               ; -- TES_STRING
+99901 [17,0]                                                 ; -- TCO_EOL
+-- SRC:  23 REM
+99902 [18,1] 23                                              ; -- TCO_LINE
+21936 [18,4]                                                 ; -- TK_REM
+17902 [18,7] :0:""                                           ; -- TES_STRING
+99901 [18,0]                                                 ; -- TCO_EOL
+-- SRC:  25 BORDER 6: PAPER 2: INK 6: CLS
+99902 [19,1] 25                                              ; -- TCO_LINE
+13900 [19,4]                                                 ; -- TK_BORDER
+17901 [19,11] 6                                              ; -- TES_NUMBER
+15918 [19,12]                                                ; -- TSP_DOSPUNTOS
+16907 [19,14]                                                ; -- TK_PAPER
+17901 [19,20] 2                                              ; -- TES_NUMBER
+15918 [19,21]                                                ; -- TSP_DOSPUNTOS
+16904 [19,23]                                                ; -- TK_INK
+17901 [19,27] 6                                              ; -- TES_NUMBER
+15918 [19,28]                                                ; -- TSP_DOSPUNTOS
+11921 [19,30]                                                ; -- TK_CLS
+99901 [19,0]                                                 ; -- TCO_EOL
+-- SRC:  40 PRINT AT 5,5;"I N S T R U C C I O N E S"
+99902 [20,1] 40                                              ; -- TCO_LINE
+21935 [20,4]                                                 ; -- TK_PRINT
+16901 [20,10]                                                ; -- TK_AT
+17901 [20,13] 5                                              ; -- TES_NUMBER
+15916 [20,14]                                                ; -- TSP_COMA
+17901 [20,15] 5                                              ; -- TES_NUMBER
+15917 [20,16]                                                ; -- TSP_PUNTOYCOMA
+17902 [20,17] :25:"I N S T R U C C I O N E S"                ; -- TES_STRING
+99901 [20,0]                                                 ; -- TCO_EOL
+-- SRC:  45 PRINT AT 7,0;"Tienes 500 pts. inicialmente."
+99902 [21,1] 45                                              ; -- TCO_LINE
+21935 [21,4]                                                 ; -- TK_PRINT
+16901 [21,10]                                                ; -- TK_AT
+17901 [21,13] 7                                              ; -- TES_NUMBER
+15916 [21,14]                                                ; -- TSP_COMA
+17901 [21,15] 0                                              ; -- TES_NUMBER
+15917 [21,16]                                                ; -- TSP_PUNTOYCOMA
+17902 [21,17] :29:"Tienes 500 pts. inicialmente."            ; -- TES_STRING
+99901 [21,0]                                                 ; -- TCO_EOL
+-- SRC:  50 PRINT AT 8,0;"Puedes jugar cualquier cantidad."
+99902 [22,1] 50                                              ; -- TCO_LINE
+21935 [22,4]                                                 ; -- TK_PRINT
+16901 [22,10]                                                ; -- TK_AT
+17901 [22,13] 8                                              ; -- TES_NUMBER
+15916 [22,14]                                                ; -- TSP_COMA
+17901 [22,15] 0                                              ; -- TES_NUMBER
+15917 [22,16]                                                ; -- TSP_PUNTOYCOMA
+17902 [22,17] :32:"Puedes jugar cualquier cantidad."         ; -- TES_STRING
+99901 [22,0]                                                 ; -- TCO_EOL
+-- SRC:  55 PRINT AT 9,0;"Si coinciden dos 1as. capitales"
+99902 [23,1] 55                                              ; -- TCO_LINE
+21935 [23,4]                                                 ; -- TK_PRINT
+16901 [23,10]                                                ; -- TK_AT
+17901 [23,13] 9                                              ; -- TES_NUMBER
+15916 [23,14]                                                ; -- TSP_COMA
+17901 [23,15] 0                                              ; -- TES_NUMBER
+15917 [23,16]                                                ; -- TSP_PUNTOYCOMA
+17902 [23,17] :31:"Si coinciden dos 1as. capitales"          ; -- TES_STRING
+99901 [23,0]                                                 ; -- TCO_EOL
+-- SRC:  60 PRINT AT 11,3;"Multiplicas tu apuesta por 3"
+99902 [24,1] 60                                              ; -- TCO_LINE
+21935 [24,4]                                                 ; -- TK_PRINT
+16901 [24,10]                                                ; -- TK_AT
+17901 [24,13] 11                                             ; -- TES_NUMBER
+15916 [24,15]                                                ; -- TSP_COMA
+17901 [24,16] 3                                              ; -- TES_NUMBER
+15917 [24,17]                                                ; -- TSP_PUNTOYCOMA
+17902 [24,18] :28:"Multiplicas tu apuesta por 3"             ; -- TES_STRING
+99901 [24,0]                                                 ; -- TCO_EOL
+-- SRC:  65 PRINT AT 13,0;"Si coinciden tres capitales"
+99902 [25,1] 65                                              ; -- TCO_LINE
+21935 [25,4]                                                 ; -- TK_PRINT
+16901 [25,10]                                                ; -- TK_AT
+17901 [25,13] 13                                             ; -- TES_NUMBER
+15916 [25,15]                                                ; -- TSP_COMA
+17901 [25,16] 0                                              ; -- TES_NUMBER
+15917 [25,17]                                                ; -- TSP_PUNTOYCOMA
+17902 [25,18] :27:"Si coinciden tres capitales"              ; -- TES_STRING
+99901 [25,0]                                                 ; -- TCO_EOL
+-- SRC:  70 PRINT AT 15,3;"Multiplicas apuesta por 10"
+99902 [26,1] 70                                              ; -- TCO_LINE
+21935 [26,4]                                                 ; -- TK_PRINT
+16901 [26,10]                                                ; -- TK_AT
+17901 [26,13] 15                                             ; -- TES_NUMBER
+15916 [26,15]                                                ; -- TSP_COMA
+17901 [26,16] 3                                              ; -- TES_NUMBER
+15917 [26,17]                                                ; -- TSP_PUNTOYCOMA
+17902 [26,18] :26:"Multiplicas apuesta por 10"               ; -- TES_STRING
+99901 [26,0]                                                 ; -- TCO_EOL
+-- SRC:  75 PRINT AT 17,0;"En otro caso,pierdes lo apostado"
+99902 [27,1] 75                                              ; -- TCO_LINE
+21935 [27,4]                                                 ; -- TK_PRINT
+16901 [27,10]                                                ; -- TK_AT
+17901 [27,13] 17                                             ; -- TES_NUMBER
+15916 [27,15]                                                ; -- TSP_COMA
+17901 [27,16] 0                                              ; -- TES_NUMBER
+15917 [27,17]                                                ; -- TSP_PUNTOYCOMA
+17902 [27,18] :32:"En otro caso,pierdes lo apostado"         ; -- TES_STRING
+99901 [27,0]                                                 ; -- TCO_EOL
+-- SRC:  80 PRINT AT 19,10;" ahora... S U E R T E"
+99902 [28,1] 80                                              ; -- TCO_LINE
+21935 [28,4]                                                 ; -- TK_PRINT
+16901 [28,10]                                                ; -- TK_AT
+17901 [28,13] 19                                             ; -- TES_NUMBER
+15916 [28,15]                                                ; -- TSP_COMA
+17901 [28,16] 10                                             ; -- TES_NUMBER
+15917 [28,18]                                                ; -- TSP_PUNTOYCOMA
+17902 [28,19] :21:" ahora... S U E R T E"                    ; -- TES_STRING
+99901 [28,0]                                                 ; -- TCO_EOL
+-- SRC:  290 INK 5
+99902 [29,1] 290                                             ; -- TCO_LINE
+16904 [29,5]                                                 ; -- TK_INK
+17901 [29,9] 5                                               ; -- TES_NUMBER
+99901 [29,0]                                                 ; -- TCO_EOL
+-- SRC:  300 PRINT #1;" pulsa una tecla para continuar"
+99902 [30,1] 300                                             ; -- TCO_LINE
+21935 [30,5]                                                 ; -- TK_PRINT
+15919 [30,11]                                                ; -- TK_CANAL
+17901 [30,12] 1                                              ; -- TES_NUMBER
+15917 [30,13]                                                ; -- TSP_PUNTOYCOMA
+17902 [30,14] :31:" pulsa una tecla para continuar"          ; -- TES_STRING
+99901 [30,0]                                                 ; -- TCO_EOL
+-- SRC:  310 IF INKEY$<>"" THEN GO TO 500
+99902 [31,1] 310                                             ; -- TCO_LINE
+21930 [31,5]                                                 ; -- TK_IF
+17900 [31,8] inkey$                                          ; -- TES_IDENT
+14906 [31,14]                                                ; -- TOP_NE
+17902 [31,16] :0:""                                          ; -- TES_STRING
+11941 [31,19]                                                ; -- TK_THEN
+17900 [31,24] go                                             ; -- TES_IDENT
+11942 [31,27]                                                ; -- TK_TO
+17901 [31,30] 500                                            ; -- TES_NUMBER
+99901 [31,0]                                                 ; -- TCO_EOL
+-- SRC:  320 GO TO 310
+99902 [32,1] 320                                             ; -- TCO_LINE
+17900 [32,5] go                                              ; -- TES_IDENT
+11942 [32,8]                                                 ; -- TK_TO
+17901 [32,11] 310                                            ; -- TES_NUMBER
+99901 [32,0]                                                 ; -- TCO_EOL
+-- SRC:  500 LET dinero=500: CLS
+99902 [33,1] 500                                             ; -- TCO_LINE
+21932 [33,5]                                                 ; -- TK_LET
+17900 [33,9] dinero                                          ; -- TES_IDENT
+14905 [33,15]                                                ; -- TOP_EQ
+17901 [33,16] 500                                            ; -- TES_NUMBER
+15918 [33,19]                                                ; -- TSP_DOSPUNTOS
+11921 [33,21]                                                ; -- TK_CLS
+99901 [33,0]                                                 ; -- TCO_EOL
+-- SRC:  1000 REM
+99902 [34,1] 1000                                            ; -- TCO_LINE
+21936 [34,6]                                                 ; -- TK_REM
+17902 [34,9] :0:""                                           ; -- TES_STRING
+99901 [34,0]                                                 ; -- TCO_EOL
+-- SRC:  1001 REM ***  apuesta  ***
+99902 [35,1] 1001                                            ; -- TCO_LINE
+21936 [35,6]                                                 ; -- TK_REM
+17902 [35,10] :17:"***  apuesta  ***"                        ; -- TES_STRING
+99901 [35,0]                                                 ; -- TCO_EOL
+-- SRC:  1002 REM
+99902 [36,1] 1002                                            ; -- TCO_LINE
+21936 [36,6]                                                 ; -- TK_REM
+17902 [36,9] :0:""                                           ; -- TES_STRING
+99901 [36,0]                                                 ; -- TCO_EOL
+-- SRC:  1005 INK 5: PAPER 0: BEEP .2,0: CLS
+99902 [37,1] 1005                                            ; -- TCO_LINE
+16904 [37,6]                                                 ; -- TK_INK
+17901 [37,10] 5                                              ; -- TES_NUMBER
+15918 [37,11]                                                ; -- TSP_DOSPUNTOS
+16907 [37,13]                                                ; -- TK_PAPER
+17901 [37,19] 0                                              ; -- TES_NUMBER
+15918 [37,20]                                                ; -- TSP_DOSPUNTOS
+33904 [37,22]                                                ; -- TK_BEEP
+17901 [37,27] 0.2                                            ; -- TES_NUMBER
+15916 [37,29]                                                ; -- TSP_COMA
+17901 [37,30] 0                                              ; -- TES_NUMBER
+15918 [37,31]                                                ; -- TSP_DOSPUNTOS
+11921 [37,33]                                                ; -- TK_CLS
+99901 [37,0]                                                 ; -- TCO_EOL
+-- SRC:  1010 CLS: PRINT AT 15,3;"Dispones de: ";dinero;" pesetas.": BEEP .3,0
+99902 [38,1] 1010                                            ; -- TCO_LINE
+11921 [38,6]                                                 ; -- TK_CLS
+15918 [38,9]                                                 ; -- TSP_DOSPUNTOS
+21935 [38,11]                                                ; -- TK_PRINT
+16901 [38,17]                                                ; -- TK_AT
+17901 [38,20] 15                                             ; -- TES_NUMBER
+15916 [38,22]                                                ; -- TSP_COMA
+17901 [38,23] 3                                              ; -- TES_NUMBER
+15917 [38,24]                                                ; -- TSP_PUNTOYCOMA
+17902 [38,25] :13:"Dispones de: "                            ; -- TES_STRING
+15917 [38,40]                                                ; -- TSP_PUNTOYCOMA
+17900 [38,41] dinero                                         ; -- TES_IDENT
+15917 [38,47]                                                ; -- TSP_PUNTOYCOMA
+17902 [38,48] :9:" pesetas."                                 ; -- TES_STRING
+15918 [38,59]                                                ; -- TSP_DOSPUNTOS
+33904 [38,61]                                                ; -- TK_BEEP
+17901 [38,66] 0.3                                            ; -- TES_NUMBER
+15916 [38,68]                                                ; -- TSP_COMA
+17901 [38,69] 0                                              ; -- TES_NUMBER
+99901 [38,0]                                                 ; -- TCO_EOL
+-- SRC:  1015 INPUT "Cuanto apuestas esta vez? ";apuesta
+99902 [39,1] 1015                                            ; -- TCO_LINE
+11931 [39,6]                                                 ; -- TK_INPUT
+17902 [39,12] :26:"Cuanto apuestas esta vez? "               ; -- TES_STRING
+15917 [39,40]                                                ; -- TSP_PUNTOYCOMA
+17900 [39,41] apuesta                                        ; -- TES_IDENT
+99901 [39,0]                                                 ; -- TCO_EOL
+-- SRC:  1020 IF apuesta>dinero THEN GO TO 1010
+99902 [40,1] 1020                                            ; -- TCO_LINE
+21930 [40,6]                                                 ; -- TK_IF
+17900 [40,9] apuesta                                         ; -- TES_IDENT
+14908 [40,16]                                                ; -- TOP_GT
+17900 [40,17] dinero                                         ; -- TES_IDENT
+11941 [40,24]                                                ; -- TK_THEN
+17900 [40,29] go                                             ; -- TES_IDENT
+11942 [40,32]                                                ; -- TK_TO
+17901 [40,35] 1010                                           ; -- TES_NUMBER
+99901 [40,0]                                                 ; -- TCO_EOL
+-- SRC:  1030 IF apuesta<1 THEN GO TO 1010
+99902 [41,1] 1030                                            ; -- TCO_LINE
+21930 [41,6]                                                 ; -- TK_IF
+17900 [41,9] apuesta                                         ; -- TES_IDENT
+14907 [41,16]                                                ; -- TOP_LT
+17901 [41,17] 1                                              ; -- TES_NUMBER
+11941 [41,19]                                                ; -- TK_THEN
+17900 [41,24] go                                             ; -- TES_IDENT
+11942 [41,27]                                                ; -- TK_TO
+17901 [41,30] 1010                                           ; -- TES_NUMBER
+99901 [41,0]                                                 ; -- TCO_EOL
+-- SRC:  1050 PRINT AT 17,3;"Veamos que suerte tienes               ": BEEP .2,5
+99902 [42,1] 1050                                            ; -- TCO_LINE
+21935 [42,6]                                                 ; -- TK_PRINT
+16901 [42,12]                                                ; -- TK_AT
+17901 [42,15] 17                                             ; -- TES_NUMBER
+15916 [42,17]                                                ; -- TSP_COMA
+17901 [42,18] 3                                              ; -- TES_NUMBER
+15917 [42,19]                                                ; -- TSP_PUNTOYCOMA
+17902 [42,20] :39:"Veamos que suerte tienes               "  ; -- TES_STRING
+15918 [42,61]                                                ; -- TSP_DOSPUNTOS
+33904 [42,63]                                                ; -- TK_BEEP
+17901 [42,68] 0.2                                            ; -- TES_NUMBER
+15916 [42,70]                                                ; -- TSP_COMA
+17901 [42,71] 5                                              ; -- TES_NUMBER
+99901 [42,0]                                                 ; -- TCO_EOL
+-- SRC:  1055 PAUSE 100
+99902 [43,1] 1055                                            ; -- TCO_LINE
+11934 [43,6]                                                 ; -- TK_PAUSE
+17901 [43,12] 100                                            ; -- TES_NUMBER
+99901 [43,0]                                                 ; -- TCO_EOL
+-- SRC:  1057 REM
+99902 [44,1] 1057                                            ; -- TCO_LINE
+21936 [44,6]                                                 ; -- TK_REM
+17902 [44,9] :0:""                                           ; -- TES_STRING
+99901 [44,0]                                                 ; -- TCO_EOL
+-- SRC:  1058 REM * voy a buscar nombre *
+99902 [45,1] 1058                                            ; -- TCO_LINE
+21936 [45,6]                                                 ; -- TK_REM
+17902 [45,10] :23:"* voy a buscar nombre *"                  ; -- TES_STRING
+99901 [45,0]                                                 ; -- TCO_EOL
+-- SRC:  1060 GO SUB 6000
+99902 [46,1] 1060                                            ; -- TCO_LINE
+17900 [46,6] go                                              ; -- TES_IDENT
+17900 [46,9] sub                                             ; -- TES_IDENT
+17901 [46,13] 6000                                           ; -- TES_NUMBER
+99901 [46,0]                                                 ; -- TCO_EOL
+-- SRC:  1065 PLOT 10,120: DRAW 0,20: DRAW 60,0: DRAW 0,-20: DRAW -60,0
+99902 [47,1] 1065                                            ; -- TCO_LINE
+13903 [47,6]                                                 ; -- TK_PLOT
+17901 [47,11] 10                                             ; -- TES_NUMBER
+15916 [47,13]                                                ; -- TSP_COMA
+17901 [47,14] 120                                            ; -- TES_NUMBER
+15918 [47,17]                                                ; -- TSP_DOSPUNTOS
+13902 [47,19]                                                ; -- TK_DRAW
+17901 [47,24] 0                                              ; -- TES_NUMBER
+15916 [47,25]                                                ; -- TSP_COMA
+17901 [47,26] 20                                             ; -- TES_NUMBER
+15918 [47,28]                                                ; -- TSP_DOSPUNTOS
+13902 [47,30]                                                ; -- TK_DRAW
+17901 [47,35] 60                                             ; -- TES_NUMBER
+15916 [47,37]                                                ; -- TSP_COMA
+17901 [47,38] 0                                              ; -- TES_NUMBER
+15918 [47,39]                                                ; -- TSP_DOSPUNTOS
+13902 [47,41]                                                ; -- TK_DRAW
+17901 [47,46] 0                                              ; -- TES_NUMBER
+15916 [47,47]                                                ; -- TSP_COMA
+14901 [47,48]                                                ; -- TOP_MINUS
+17901 [47,49] 20                                             ; -- TES_NUMBER
+15918 [47,51]                                                ; -- TSP_DOSPUNTOS
+13902 [47,53]                                                ; -- TK_DRAW
+14901 [47,58]                                                ; -- TOP_MINUS
+17901 [47,59] 60                                             ; -- TES_NUMBER
+15916 [47,61]                                                ; -- TSP_COMA
+17901 [47,62] 0                                              ; -- TES_NUMBER
+99901 [47,0]                                                 ; -- TCO_EOL
+-- SRC:  1070 PLOT 90,120: DRAW 0,20: DRAW 60,0: DRAW 0,-20: DRAW -60,0
+99902 [48,1] 1070                                            ; -- TCO_LINE
+13903 [48,6]                                                 ; -- TK_PLOT
+17901 [48,11] 90                                             ; -- TES_NUMBER
+15916 [48,13]                                                ; -- TSP_COMA
+17901 [48,14] 120                                            ; -- TES_NUMBER
+15918 [48,17]                                                ; -- TSP_DOSPUNTOS
+13902 [48,19]                                                ; -- TK_DRAW
+17901 [48,24] 0                                              ; -- TES_NUMBER
+15916 [48,25]                                                ; -- TSP_COMA
+17901 [48,26] 20                                             ; -- TES_NUMBER
+15918 [48,28]                                                ; -- TSP_DOSPUNTOS
+13902 [48,30]                                                ; -- TK_DRAW
+17901 [48,35] 60                                             ; -- TES_NUMBER
+15916 [48,37]                                                ; -- TSP_COMA
+17901 [48,38] 0                                              ; -- TES_NUMBER
+15918 [48,39]                                                ; -- TSP_DOSPUNTOS
+13902 [48,41]                                                ; -- TK_DRAW
+17901 [48,46] 0                                              ; -- TES_NUMBER
+15916 [48,47]                                                ; -- TSP_COMA
+14901 [48,48]                                                ; -- TOP_MINUS
+17901 [48,49] 20                                             ; -- TES_NUMBER
+15918 [48,51]                                                ; -- TSP_DOSPUNTOS
+13902 [48,53]                                                ; -- TK_DRAW
+14901 [48,58]                                                ; -- TOP_MINUS
+17901 [48,59] 60                                             ; -- TES_NUMBER
+15916 [48,61]                                                ; -- TSP_COMA
+17901 [48,62] 0                                              ; -- TES_NUMBER
+99901 [48,0]                                                 ; -- TCO_EOL
+-- SRC:  1075 PLOT 170,120: DRAW 0,20: DRAW 60,0: DRAW 0,-20: DRAW -60,0
+99902 [49,1] 1075                                            ; -- TCO_LINE
+13903 [49,6]                                                 ; -- TK_PLOT
+17901 [49,11] 170                                            ; -- TES_NUMBER
+15916 [49,14]                                                ; -- TSP_COMA
+17901 [49,15] 120                                            ; -- TES_NUMBER
+15918 [49,18]                                                ; -- TSP_DOSPUNTOS
+13902 [49,20]                                                ; -- TK_DRAW
+17901 [49,25] 0                                              ; -- TES_NUMBER
+15916 [49,26]                                                ; -- TSP_COMA
+17901 [49,27] 20                                             ; -- TES_NUMBER
+15918 [49,29]                                                ; -- TSP_DOSPUNTOS
+13902 [49,31]                                                ; -- TK_DRAW
+17901 [49,36] 60                                             ; -- TES_NUMBER
+15916 [49,38]                                                ; -- TSP_COMA
+17901 [49,39] 0                                              ; -- TES_NUMBER
+15918 [49,40]                                                ; -- TSP_DOSPUNTOS
+13902 [49,42]                                                ; -- TK_DRAW
+17901 [49,47] 0                                              ; -- TES_NUMBER
+15916 [49,48]                                                ; -- TSP_COMA
+14901 [49,49]                                                ; -- TOP_MINUS
+17901 [49,50] 20                                             ; -- TES_NUMBER
+15918 [49,52]                                                ; -- TSP_DOSPUNTOS
+13902 [49,54]                                                ; -- TK_DRAW
+14901 [49,59]                                                ; -- TOP_MINUS
+17901 [49,60] 60                                             ; -- TES_NUMBER
+15916 [49,62]                                                ; -- TSP_COMA
+17901 [49,63] 0                                              ; -- TES_NUMBER
+99901 [49,0]                                                 ; -- TCO_EOL
+-- SRC:  1080 PRINT AT 5,2;c$
+99902 [50,1] 1080                                            ; -- TCO_LINE
+21935 [50,6]                                                 ; -- TK_PRINT
+16901 [50,12]                                                ; -- TK_AT
+17901 [50,15] 5                                              ; -- TES_NUMBER
+15916 [50,16]                                                ; -- TSP_COMA
+17901 [50,17] 2                                              ; -- TES_NUMBER
+15917 [50,18]                                                ; -- TSP_PUNTOYCOMA
+17900 [50,19] c$                                             ; -- TES_IDENT
+99901 [50,0]                                                 ; -- TCO_EOL
+-- SRC:  1085 PRINT AT 5,12;p$
+99902 [51,1] 1085                                            ; -- TCO_LINE
+21935 [51,6]                                                 ; -- TK_PRINT
+16901 [51,12]                                                ; -- TK_AT
+17901 [51,15] 5                                              ; -- TES_NUMBER
+15916 [51,16]                                                ; -- TSP_COMA
+17901 [51,17] 12                                             ; -- TES_NUMBER
+15917 [51,19]                                                ; -- TSP_PUNTOYCOMA
+17900 [51,20] p$                                             ; -- TES_IDENT
+99901 [51,0]                                                 ; -- TCO_EOL
+-- SRC:  1090 PRINT AT 5,22;k$
+99902 [52,1] 1090                                            ; -- TCO_LINE
+21935 [52,6]                                                 ; -- TK_PRINT
+16901 [52,12]                                                ; -- TK_AT
+17901 [52,15] 5                                              ; -- TES_NUMBER
+15916 [52,16]                                                ; -- TSP_COMA
+17901 [52,17] 22                                             ; -- TES_NUMBER
+15917 [52,19]                                                ; -- TSP_PUNTOYCOMA
+17900 [52,20] k$                                             ; -- TES_IDENT
+99901 [52,0]                                                 ; -- TCO_EOL
+-- SRC:  1092 PAUSE 50
+99902 [53,1] 1092                                            ; -- TCO_LINE
+11934 [53,6]                                                 ; -- TK_PAUSE
+17901 [53,12] 50                                             ; -- TES_NUMBER
+99901 [53,0]                                                 ; -- TCO_EOL
+-- SRC:  1100 IF c$<>p$ THEN GO TO 2000
+99902 [54,1] 1100                                            ; -- TCO_LINE
+21930 [54,6]                                                 ; -- TK_IF
+17900 [54,9] c$                                              ; -- TES_IDENT
+14906 [54,11]                                                ; -- TOP_NE
+17900 [54,13] p$                                             ; -- TES_IDENT
+11941 [54,16]                                                ; -- TK_THEN
+17900 [54,21] go                                             ; -- TES_IDENT
+11942 [54,24]                                                ; -- TK_TO
+17901 [54,27] 2000                                           ; -- TES_NUMBER
+99901 [54,0]                                                 ; -- TCO_EOL
+-- SRC:  1110 IF p$=k$ THEN GO TO 1500
+99902 [55,1] 1110                                            ; -- TCO_LINE
+21930 [55,6]                                                 ; -- TK_IF
+17900 [55,9] p$                                              ; -- TES_IDENT
+14905 [55,11]                                                ; -- TOP_EQ
+17900 [55,12] k$                                             ; -- TES_IDENT
+11941 [55,15]                                                ; -- TK_THEN
+17900 [55,20] go                                             ; -- TES_IDENT
+11942 [55,23]                                                ; -- TK_TO
+17901 [55,26] 1500                                           ; -- TES_NUMBER
+99901 [55,0]                                                 ; -- TCO_EOL
+-- SRC:  1120 PRINT AT 17,1;"Enhorabuena, solo fallaste una!         ": BEEP .2,0
+99902 [56,1] 1120                                            ; -- TCO_LINE
+21935 [56,6]                                                 ; -- TK_PRINT
+16901 [56,12]                                                ; -- TK_AT
+17901 [56,15] 17                                             ; -- TES_NUMBER
+15916 [56,17]                                                ; -- TSP_COMA
+17901 [56,18] 1                                              ; -- TES_NUMBER
+15917 [56,19]                                                ; -- TSP_PUNTOYCOMA
+17902 [56,20] :40:"Enhorabuena, solo fallaste una!         "
+                                                             ; -- TES_STRING
+15918 [56,62]                                                ; -- TSP_DOSPUNTOS
+33904 [56,64]                                                ; -- TK_BEEP
+17901 [56,69] 0.2                                            ; -- TES_NUMBER
+15916 [56,71]                                                ; -- TSP_COMA
+17901 [56,72] 0                                              ; -- TES_NUMBER
+99901 [56,0]                                                 ; -- TCO_EOL
+-- SRC:  1125 PAUSE 100
+99902 [57,1] 1125                                            ; -- TCO_LINE
+11934 [57,6]                                                 ; -- TK_PAUSE
+17901 [57,12] 100                                            ; -- TES_NUMBER
+99901 [57,0]                                                 ; -- TCO_EOL
+-- SRC:  1130 LET apuesta=apuesta*3
+99902 [58,1] 1130                                            ; -- TCO_LINE
+21932 [58,6]                                                 ; -- TK_LET
+17900 [58,10] apuesta                                        ; -- TES_IDENT
+14905 [58,17]                                                ; -- TOP_EQ
+17900 [58,18] apuesta                                        ; -- TES_IDENT
+14902 [58,25]                                                ; -- TOP_MUL
+17901 [58,26] 3                                              ; -- TES_NUMBER
+99901 [58,0]                                                 ; -- TCO_EOL
+-- SRC:  1140 LET dinero=dinero+apuesta
+99902 [59,1] 1140                                            ; -- TCO_LINE
+21932 [59,6]                                                 ; -- TK_LET
+17900 [59,10] dinero                                         ; -- TES_IDENT
+14905 [59,16]                                                ; -- TOP_EQ
+17900 [59,17] dinero                                         ; -- TES_IDENT
+14900 [59,23]                                                ; -- TOP_PLUS
+17900 [59,24] apuesta                                        ; -- TES_IDENT
+99901 [59,0]                                                 ; -- TCO_EOL
+-- SRC:  1150 GO TO 1010
+99902 [60,1] 1150                                            ; -- TCO_LINE
+17900 [60,6] go                                              ; -- TES_IDENT
+11942 [60,9]                                                 ; -- TK_TO
+17901 [60,12] 1010                                           ; -- TES_NUMBER
+99901 [60,0]                                                 ; -- TCO_EOL
+-- SRC:  1500 PRINT AT 17,1;"Maravilloso, diste en la diana!          ": BEEP .2,5
+99902 [61,1] 1500                                            ; -- TCO_LINE
+21935 [61,6]                                                 ; -- TK_PRINT
+16901 [61,12]                                                ; -- TK_AT
+17901 [61,15] 17                                             ; -- TES_NUMBER
+15916 [61,17]                                                ; -- TSP_COMA
+17901 [61,18] 1                                              ; -- TES_NUMBER
+15917 [61,19]                                                ; -- TSP_PUNTOYCOMA
+17902 [61,20] :41:"Maravilloso, diste en la diana!          "
+                                                             ; -- TES_STRING
+15918 [61,63]                                                ; -- TSP_DOSPUNTOS
+33904 [61,65]                                                ; -- TK_BEEP
+17901 [61,70] 0.2                                            ; -- TES_NUMBER
+15916 [61,72]                                                ; -- TSP_COMA
+17901 [61,73] 5                                              ; -- TES_NUMBER
+99901 [61,0]                                                 ; -- TCO_EOL
+-- SRC:  1505 PAUSE 100
+99902 [62,1] 1505                                            ; -- TCO_LINE
+11934 [62,6]                                                 ; -- TK_PAUSE
+17901 [62,12] 100                                            ; -- TES_NUMBER
+99901 [62,0]                                                 ; -- TCO_EOL
+-- SRC:  1510 LET apuesta=apuesta*10: GO TO 1140
+99902 [63,1] 1510                                            ; -- TCO_LINE
+21932 [63,6]                                                 ; -- TK_LET
+17900 [63,10] apuesta                                        ; -- TES_IDENT
+14905 [63,17]                                                ; -- TOP_EQ
+17900 [63,18] apuesta                                        ; -- TES_IDENT
+14902 [63,25]                                                ; -- TOP_MUL
+17901 [63,26] 10                                             ; -- TES_NUMBER
+15918 [63,28]                                                ; -- TSP_DOSPUNTOS
+17900 [63,30] go                                             ; -- TES_IDENT
+11942 [63,33]                                                ; -- TK_TO
+17901 [63,36] 1140                                           ; -- TES_NUMBER
+99901 [63,0]                                                 ; -- TCO_EOL
+-- SRC:  2000 PRINT AT 17,1;"Lo siento,no hubo suerte,repite": BEEP .3,0
+99902 [64,1] 2000                                            ; -- TCO_LINE
+21935 [64,6]                                                 ; -- TK_PRINT
+16901 [64,12]                                                ; -- TK_AT
+17901 [64,15] 17                                             ; -- TES_NUMBER
+15916 [64,17]                                                ; -- TSP_COMA
+17901 [64,18] 1                                              ; -- TES_NUMBER
+15917 [64,19]                                                ; -- TSP_PUNTOYCOMA
+17902 [64,20] :31:"Lo siento,no hubo suerte,repite"          ; -- TES_STRING
+15918 [64,53]                                                ; -- TSP_DOSPUNTOS
+33904 [64,55]                                                ; -- TK_BEEP
+17901 [64,60] 0.3                                            ; -- TES_NUMBER
+15916 [64,62]                                                ; -- TSP_COMA
+17901 [64,63] 0                                              ; -- TES_NUMBER
+99901 [64,0]                                                 ; -- TCO_EOL
+-- SRC:  2005 PAUSE 150
+99902 [65,1] 2005                                            ; -- TCO_LINE
+11934 [65,6]                                                 ; -- TK_PAUSE
+17901 [65,12] 150                                            ; -- TES_NUMBER
+99901 [65,0]                                                 ; -- TCO_EOL
+-- SRC:  2010 LET dinero=dinero-apuesta
+99902 [66,1] 2010                                            ; -- TCO_LINE
+21932 [66,6]                                                 ; -- TK_LET
+17900 [66,10] dinero                                         ; -- TES_IDENT
+14905 [66,16]                                                ; -- TOP_EQ
+17900 [66,17] dinero                                         ; -- TES_IDENT
+14901 [66,23]                                                ; -- TOP_MINUS
+17900 [66,24] apuesta                                        ; -- TES_IDENT
+99901 [66,0]                                                 ; -- TCO_EOL
+-- SRC:  2020 IF dinero=0 THEN GO TO 2100
+99902 [67,1] 2020                                            ; -- TCO_LINE
+21930 [67,6]                                                 ; -- TK_IF
+17900 [67,9] dinero                                          ; -- TES_IDENT
+14905 [67,15]                                                ; -- TOP_EQ
+17901 [67,16] 0                                              ; -- TES_NUMBER
+11941 [67,18]                                                ; -- TK_THEN
+17900 [67,23] go                                             ; -- TES_IDENT
+11942 [67,26]                                                ; -- TK_TO
+17901 [67,29] 2100                                           ; -- TES_NUMBER
+99901 [67,0]                                                 ; -- TCO_EOL
+-- SRC:  2030 GO TO 1010
+99902 [68,1] 2030                                            ; -- TCO_LINE
+17900 [68,6] go                                              ; -- TES_IDENT
+11942 [68,9]                                                 ; -- TK_TO
+17901 [68,12] 1010                                           ; -- TES_NUMBER
+99901 [68,0]                                                 ; -- TCO_EOL
+-- SRC:  2110 PRINT AT 18,0;"Ademas, dejas de jugar"
+99902 [69,1] 2110                                            ; -- TCO_LINE
+21935 [69,6]                                                 ; -- TK_PRINT
+16901 [69,12]                                                ; -- TK_AT
+17901 [69,15] 18                                             ; -- TES_NUMBER
+15916 [69,17]                                                ; -- TSP_COMA
+17901 [69,18] 0                                              ; -- TES_NUMBER
+15917 [69,19]                                                ; -- TSP_PUNTOYCOMA
+17902 [69,20] :22:"Ademas, dejas de jugar"                   ; -- TES_STRING
+99901 [69,0]                                                 ; -- TCO_EOL
+-- SRC:  2120 PRINT AT 19,0;"Te quedaste sin nada"
+99902 [70,1] 2120                                            ; -- TCO_LINE
+21935 [70,6]                                                 ; -- TK_PRINT
+16901 [70,12]                                                ; -- TK_AT
+17901 [70,15] 19                                             ; -- TES_NUMBER
+15916 [70,17]                                                ; -- TSP_COMA
+17901 [70,18] 0                                              ; -- TES_NUMBER
+15917 [70,19]                                                ; -- TSP_PUNTOYCOMA
+17902 [70,20] :20:"Te quedaste sin nada"                     ; -- TES_STRING
+99901 [70,0]                                                 ; -- TCO_EOL
+-- SRC:  2121 FOR m=1 TO 20
+99902 [71,1] 2121                                            ; -- TCO_LINE
+21926 [71,6]                                                 ; -- TK_FOR
+17900 [71,10] m                                              ; -- TES_IDENT
+14905 [71,11]                                                ; -- TOP_EQ
+17901 [71,12] 1                                              ; -- TES_NUMBER
+11942 [71,14]                                                ; -- TK_TO
+17901 [71,17] 20                                             ; -- TES_NUMBER
+99901 [71,0]                                                 ; -- TCO_EOL
+-- SRC:  2122 BEEP .2,2
+99902 [72,1] 2122                                            ; -- TCO_LINE
+33904 [72,6]                                                 ; -- TK_BEEP
+17901 [72,11] 0.2                                            ; -- TES_NUMBER
+15916 [72,13]                                                ; -- TSP_COMA
+17901 [72,14] 2                                              ; -- TES_NUMBER
+99901 [72,0]                                                 ; -- TCO_EOL
+-- SRC:  2123 NEXT m
+99902 [73,1] 2123                                            ; -- TCO_LINE
+21933 [73,6]                                                 ; -- TK_NEXT
+17900 [73,11] m                                              ; -- TES_IDENT
+99901 [73,0]                                                 ; -- TCO_EOL
+-- SRC:  2130 GO TO 300
+99902 [74,1] 2130                                            ; -- TCO_LINE
+17900 [74,6] go                                              ; -- TES_IDENT
+11942 [74,9]                                                 ; -- TK_TO
+17901 [74,12] 300                                            ; -- TES_NUMBER
+99901 [74,0]                                                 ; -- TCO_EOL
+-- SRC:  6000 REM
+99902 [75,1] 6000                                            ; -- TCO_LINE
+21936 [75,6]                                                 ; -- TK_REM
+17902 [75,9] :0:""                                           ; -- TES_STRING
+99901 [75,0]                                                 ; -- TCO_EOL
+-- SRC:  6001 REM *** Buscar nombres ***
+99902 [76,1] 6001                                            ; -- TCO_LINE
+21936 [76,6]                                                 ; -- TK_REM
+17902 [76,10] :22:"*** Buscar nombres ***"                   ; -- TES_STRING
+99901 [76,0]                                                 ; -- TCO_EOL
+-- SRC:  6002 REM
+99902 [77,1] 6002                                            ; -- TCO_LINE
+21936 [77,6]                                                 ; -- TK_REM
+17902 [77,9] :0:""                                           ; -- TES_STRING
+99901 [77,0]                                                 ; -- TCO_EOL
+-- SRC:  6010 RESTORE 7000
+99902 [78,1] 6010                                            ; -- TCO_LINE
+11951 [78,6]                                                 ; -- TK_RESTORE
+17901 [78,14] 7000                                           ; -- TES_NUMBER
+99901 [78,0]                                                 ; -- TCO_EOL
+-- SRC:  6020 LET a=INT(RND*28)+1
+99902 [79,1] 6020                                            ; -- TCO_LINE
+21932 [79,6]                                                 ; -- TK_LET
+17900 [79,10] a                                              ; -- TES_IDENT
+14905 [79,11]                                                ; -- TOP_EQ
+12134 [79,12]                                                ; -- TK_INT
+15914 [79,15]                                                ; -- TSP_PAR_ABIERTO
+12001 [79,16]                                                ; -- TK_RND
+14902 [79,19]                                                ; -- TOP_MUL
+17901 [79,20] 28                                             ; -- TES_NUMBER
+15915 [79,22]                                                ; -- TSP_PAR_CERRADO
+14900 [79,23]                                                ; -- TOP_PLUS
+17901 [79,24] 1                                              ; -- TES_NUMBER
+99901 [79,0]                                                 ; -- TCO_EOL
+-- SRC:  6030 FOR n=1 TO a
+99902 [80,1] 6030                                            ; -- TCO_LINE
+21926 [80,6]                                                 ; -- TK_FOR
+17900 [80,10] n                                              ; -- TES_IDENT
+14905 [80,11]                                                ; -- TOP_EQ
+17901 [80,12] 1                                              ; -- TES_NUMBER
+11942 [80,14]                                                ; -- TK_TO
+17900 [80,17] a                                              ; -- TES_IDENT
+99901 [80,0]                                                 ; -- TCO_EOL
+-- SRC:  6040 READ c$: NEXT n
+99902 [81,1] 6040                                            ; -- TCO_LINE
+11950 [81,6]                                                 ; -- TK_READ
+17900 [81,11] c$                                             ; -- TES_IDENT
+15918 [81,13]                                                ; -- TSP_DOSPUNTOS
+21933 [81,15]                                                ; -- TK_NEXT
+17900 [81,20] n                                              ; -- TES_IDENT
+99901 [81,0]                                                 ; -- TCO_EOL
+-- SRC:  6050 RESTORE 8000
+99902 [82,1] 6050                                            ; -- TCO_LINE
+11951 [82,6]                                                 ; -- TK_RESTORE
+17901 [82,14] 8000                                           ; -- TES_NUMBER
+99901 [82,0]                                                 ; -- TCO_EOL
+-- SRC:  6060 LET a=INT(RND*28)+1
+99902 [83,1] 6060                                            ; -- TCO_LINE
+21932 [83,6]                                                 ; -- TK_LET
+17900 [83,10] a                                              ; -- TES_IDENT
+14905 [83,11]                                                ; -- TOP_EQ
+12134 [83,12]                                                ; -- TK_INT
+15914 [83,15]                                                ; -- TSP_PAR_ABIERTO
+12001 [83,16]                                                ; -- TK_RND
+14902 [83,19]                                                ; -- TOP_MUL
+17901 [83,20] 28                                             ; -- TES_NUMBER
+15915 [83,22]                                                ; -- TSP_PAR_CERRADO
+14900 [83,23]                                                ; -- TOP_PLUS
+17901 [83,24] 1                                              ; -- TES_NUMBER
+99901 [83,0]                                                 ; -- TCO_EOL
+-- SRC:  6070 FOR n=1 TO a
+99902 [84,1] 6070                                            ; -- TCO_LINE
+21926 [84,6]                                                 ; -- TK_FOR
+17900 [84,10] n                                              ; -- TES_IDENT
+14905 [84,11]                                                ; -- TOP_EQ
+17901 [84,12] 1                                              ; -- TES_NUMBER
+11942 [84,14]                                                ; -- TK_TO
+17900 [84,17] a                                              ; -- TES_IDENT
+99901 [84,0]                                                 ; -- TCO_EOL
+-- SRC:  6080 READ p$: NEXT n
+99902 [85,1] 6080                                            ; -- TCO_LINE
+11950 [85,6]                                                 ; -- TK_READ
+17900 [85,11] p$                                             ; -- TES_IDENT
+15918 [85,13]                                                ; -- TSP_DOSPUNTOS
+21933 [85,15]                                                ; -- TK_NEXT
+17900 [85,20] n                                              ; -- TES_IDENT
+99901 [85,0]                                                 ; -- TCO_EOL
+-- SRC:  6090 RESTORE 9000
+99902 [86,1] 6090                                            ; -- TCO_LINE
+11951 [86,6]                                                 ; -- TK_RESTORE
+17901 [86,14] 9000                                           ; -- TES_NUMBER
+99901 [86,0]                                                 ; -- TCO_EOL
+-- SRC:  6100 LET a=INT(RND*28)+1
+99902 [87,1] 6100                                            ; -- TCO_LINE
+21932 [87,6]                                                 ; -- TK_LET
+17900 [87,10] a                                              ; -- TES_IDENT
+14905 [87,11]                                                ; -- TOP_EQ
+12134 [87,12]                                                ; -- TK_INT
+15914 [87,15]                                                ; -- TSP_PAR_ABIERTO
+12001 [87,16]                                                ; -- TK_RND
+14902 [87,19]                                                ; -- TOP_MUL
+17901 [87,20] 28                                             ; -- TES_NUMBER
+15915 [87,22]                                                ; -- TSP_PAR_CERRADO
+14900 [87,23]                                                ; -- TOP_PLUS
+17901 [87,24] 1                                              ; -- TES_NUMBER
+99901 [87,0]                                                 ; -- TCO_EOL
+-- SRC:  6110 FOR n=1 TO a
+99902 [88,1] 6110                                            ; -- TCO_LINE
+21926 [88,6]                                                 ; -- TK_FOR
+17900 [88,10] n                                              ; -- TES_IDENT
+14905 [88,11]                                                ; -- TOP_EQ
+17901 [88,12] 1                                              ; -- TES_NUMBER
+11942 [88,14]                                                ; -- TK_TO
+17900 [88,17] a                                              ; -- TES_IDENT
+99901 [88,0]                                                 ; -- TCO_EOL
+-- SRC:  6120 READ k$: NEXT n
+99902 [89,1] 6120                                            ; -- TCO_LINE
+11950 [89,6]                                                 ; -- TK_READ
+17900 [89,11] k$                                             ; -- TES_IDENT
+15918 [89,13]                                                ; -- TSP_DOSPUNTOS
+21933 [89,15]                                                ; -- TK_NEXT
+17900 [89,20] n                                              ; -- TES_IDENT
+99901 [89,0]                                                 ; -- TCO_EOL
+-- SRC:  6180 RETURN
+99902 [90,1] 6180                                            ; -- TCO_LINE
+11937 [90,6]                                                 ; -- TK_RETURN
+99901 [90,0]                                                 ; -- TCO_EOL
+-- SRC:  6500 REM
+99902 [91,1] 6500                                            ; -- TCO_LINE
+21936 [91,6]                                                 ; -- TK_REM
+17902 [91,9] :0:""                                           ; -- TES_STRING
+99901 [91,0]                                                 ; -- TCO_EOL
+-- SRC:  6501 REM aqui van los datas
+99902 [92,1] 6501                                            ; -- TCO_LINE
+21936 [92,6]                                                 ; -- TK_REM
+17902 [92,10] :18:"aqui van los datas"                       ; -- TES_STRING
+99901 [92,0]                                                 ; -- TCO_EOL
+-- SRC:  6502 REM
+99902 [93,1] 6502                                            ; -- TCO_LINE
+21936 [93,6]                                                 ; -- TK_REM
+17902 [93,9] :0:""                                           ; -- TES_STRING
+99901 [93,0]                                                 ; -- TCO_EOL
+-- SRC:  7000 DATA "madrid","madrid","cuenca","cuenca","toledo","madrid","cuenca","toledo","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca"
+99902 [94,1] 7000                                            ; -- TCO_LINE
+21952 [94,6]                                                 ; -- TK_DATA
+17902 [94,11] :6:"madrid"                                    ; -- TES_STRING
+15916 [94,19]                                                ; -- TSP_COMA
+17902 [94,20] :6:"madrid"                                    ; -- TES_STRING
+15916 [94,28]                                                ; -- TSP_COMA
+17902 [94,29] :6:"cuenca"                                    ; -- TES_STRING
+15916 [94,37]                                                ; -- TSP_COMA
+17902 [94,38] :6:"cuenca"                                    ; -- TES_STRING
+15916 [94,46]                                                ; -- TSP_COMA
+17902 [94,47] :6:"toledo"                                    ; -- TES_STRING
+15916 [94,55]                                                ; -- TSP_COMA
+17902 [94,56] :6:"madrid"                                    ; -- TES_STRING
+15916 [94,64]                                                ; -- TSP_COMA
+17902 [94,65] :6:"cuenca"                                    ; -- TES_STRING
+15916 [94,73]                                                ; -- TSP_COMA
+17902 [94,74] :6:"toledo"                                    ; -- TES_STRING
+15916 [94,82]                                                ; -- TSP_COMA
+17902 [94,83] :6:"madrid"                                    ; -- TES_STRING
+15916 [94,91]                                                ; -- TSP_COMA
+17902 [94,92] :6:"toledo"                                    ; -- TES_STRING
+15916 [94,100]                                               ; -- TSP_COMA
+17902 [94,101] :6:"cuenca"                                   ; -- TES_STRING
+15916 [94,109]                                               ; -- TSP_COMA
+17902 [94,110] :6:"madrid"                                   ; -- TES_STRING
+15916 [94,118]                                               ; -- TSP_COMA
+17902 [94,119] :6:"toledo"                                   ; -- TES_STRING
+15916 [94,127]                                               ; -- TSP_COMA
+17902 [94,128] :6:"cuenca"                                   ; -- TES_STRING
+15916 [94,136]                                               ; -- TSP_COMA
+17902 [94,137] :6:"madrid"                                   ; -- TES_STRING
+15916 [94,145]                                               ; -- TSP_COMA
+17902 [94,146] :6:"toledo"                                   ; -- TES_STRING
+15916 [94,154]                                               ; -- TSP_COMA
+17902 [94,155] :6:"cuenca"                                   ; -- TES_STRING
+15916 [94,163]                                               ; -- TSP_COMA
+17902 [94,164] :6:"madrid"                                   ; -- TES_STRING
+15916 [94,172]                                               ; -- TSP_COMA
+17902 [94,173] :6:"toledo"                                   ; -- TES_STRING
+15916 [94,181]                                               ; -- TSP_COMA
+17902 [94,182] :6:"cuenca"                                   ; -- TES_STRING
+15916 [94,190]                                               ; -- TSP_COMA
+17902 [94,191] :6:"madrid"                                   ; -- TES_STRING
+15916 [94,199]                                               ; -- TSP_COMA
+17902 [94,200] :6:"toledo"                                   ; -- TES_STRING
+15916 [94,208]                                               ; -- TSP_COMA
+17902 [94,209] :6:"cuenca"                                   ; -- TES_STRING
+15916 [94,217]                                               ; -- TSP_COMA
+17902 [94,218] :6:"madrid"                                   ; -- TES_STRING
+15916 [94,226]                                               ; -- TSP_COMA
+17902 [94,227] :6:"toledo"                                   ; -- TES_STRING
+15916 [94,235]                                               ; -- TSP_COMA
+17902 [94,236] :6:"cuenca"                                   ; -- TES_STRING
+15916 [94,244]                                               ; -- TSP_COMA
+17902 [94,245] :6:"madrid"                                   ; -- TES_STRING
+15916 [94,253]                                               ; -- TSP_COMA
+17902 [94,254] :6:"toledo"                                   ; -- TES_STRING
+15916 [94,262]                                               ; -- TSP_COMA
+17902 [94,263] :6:"cuenca"                                   ; -- TES_STRING
+99901 [94,0]                                                 ; -- TCO_EOL
+-- SRC:  8000 DATA "madrid","madrid","cuenca","cuenca","toledo","madrid","cuenca","toledo","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca"
+99902 [95,1] 8000                                            ; -- TCO_LINE
+21952 [95,6]                                                 ; -- TK_DATA
+17902 [95,11] :6:"madrid"                                    ; -- TES_STRING
+15916 [95,19]                                                ; -- TSP_COMA
+17902 [95,20] :6:"madrid"                                    ; -- TES_STRING
+15916 [95,28]                                                ; -- TSP_COMA
+17902 [95,29] :6:"cuenca"                                    ; -- TES_STRING
+15916 [95,37]                                                ; -- TSP_COMA
+17902 [95,38] :6:"cuenca"                                    ; -- TES_STRING
+15916 [95,46]                                                ; -- TSP_COMA
+17902 [95,47] :6:"toledo"                                    ; -- TES_STRING
+15916 [95,55]                                                ; -- TSP_COMA
+17902 [95,56] :6:"madrid"                                    ; -- TES_STRING
+15916 [95,64]                                                ; -- TSP_COMA
+17902 [95,65] :6:"cuenca"                                    ; -- TES_STRING
+15916 [95,73]                                                ; -- TSP_COMA
+17902 [95,74] :6:"toledo"                                    ; -- TES_STRING
+15916 [95,82]                                                ; -- TSP_COMA
+17902 [95,83] :6:"madrid"                                    ; -- TES_STRING
+15916 [95,91]                                                ; -- TSP_COMA
+17902 [95,92] :6:"toledo"                                    ; -- TES_STRING
+15916 [95,100]                                               ; -- TSP_COMA
+17902 [95,101] :6:"cuenca"                                   ; -- TES_STRING
+15916 [95,109]                                               ; -- TSP_COMA
+17902 [95,110] :6:"madrid"                                   ; -- TES_STRING
+15916 [95,118]                                               ; -- TSP_COMA
+17902 [95,119] :6:"toledo"                                   ; -- TES_STRING
+15916 [95,127]                                               ; -- TSP_COMA
+17902 [95,128] :6:"cuenca"                                   ; -- TES_STRING
+15916 [95,136]                                               ; -- TSP_COMA
+17902 [95,137] :6:"madrid"                                   ; -- TES_STRING
+15916 [95,145]                                               ; -- TSP_COMA
+17902 [95,146] :6:"toledo"                                   ; -- TES_STRING
+15916 [95,154]                                               ; -- TSP_COMA
+17902 [95,155] :6:"cuenca"                                   ; -- TES_STRING
+15916 [95,163]                                               ; -- TSP_COMA
+17902 [95,164] :6:"madrid"                                   ; -- TES_STRING
+15916 [95,172]                                               ; -- TSP_COMA
+17902 [95,173] :6:"toledo"                                   ; -- TES_STRING
+15916 [95,181]                                               ; -- TSP_COMA
+17902 [95,182] :6:"cuenca"                                   ; -- TES_STRING
+15916 [95,190]                                               ; -- TSP_COMA
+17902 [95,191] :6:"madrid"                                   ; -- TES_STRING
+15916 [95,199]                                               ; -- TSP_COMA
+17902 [95,200] :6:"toledo"                                   ; -- TES_STRING
+15916 [95,208]                                               ; -- TSP_COMA
+17902 [95,209] :6:"cuenca"                                   ; -- TES_STRING
+15916 [95,217]                                               ; -- TSP_COMA
+17902 [95,218] :6:"madrid"                                   ; -- TES_STRING
+15916 [95,226]                                               ; -- TSP_COMA
+17902 [95,227] :6:"toledo"                                   ; -- TES_STRING
+15916 [95,235]                                               ; -- TSP_COMA
+17902 [95,236] :6:"cuenca"                                   ; -- TES_STRING
+15916 [95,244]                                               ; -- TSP_COMA
+17902 [95,245] :6:"madrid"                                   ; -- TES_STRING
+15916 [95,253]                                               ; -- TSP_COMA
+17902 [95,254] :6:"toledo"                                   ; -- TES_STRING
+15916 [95,262]                                               ; -- TSP_COMA
+17902 [95,263] :6:"cuenca"                                   ; -- TES_STRING
+99901 [95,0]                                                 ; -- TCO_EOL
+-- SRC:  9000 DATA "madrid","madrid","cuenca","cuenca","toledo","madrid","cuenca","toledo","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca","madrid","toledo","cuenca"
+99902 [96,1] 9000                                            ; -- TCO_LINE
+21952 [96,6]                                                 ; -- TK_DATA
+17902 [96,11] :6:"madrid"                                    ; -- TES_STRING
+15916 [96,19]                                                ; -- TSP_COMA
+17902 [96,20] :6:"madrid"                                    ; -- TES_STRING
+15916 [96,28]                                                ; -- TSP_COMA
+17902 [96,29] :6:"cuenca"                                    ; -- TES_STRING
+15916 [96,37]                                                ; -- TSP_COMA
+17902 [96,38] :6:"cuenca"                                    ; -- TES_STRING
+15916 [96,46]                                                ; -- TSP_COMA
+17902 [96,47] :6:"toledo"                                    ; -- TES_STRING
+15916 [96,55]                                                ; -- TSP_COMA
+17902 [96,56] :6:"madrid"                                    ; -- TES_STRING
+15916 [96,64]                                                ; -- TSP_COMA
+17902 [96,65] :6:"cuenca"                                    ; -- TES_STRING
+15916 [96,73]                                                ; -- TSP_COMA
+17902 [96,74] :6:"toledo"                                    ; -- TES_STRING
+15916 [96,82]                                                ; -- TSP_COMA
+17902 [96,83] :6:"madrid"                                    ; -- TES_STRING
+15916 [96,91]                                                ; -- TSP_COMA
+17902 [96,92] :6:"toledo"                                    ; -- TES_STRING
+15916 [96,100]                                               ; -- TSP_COMA
+17902 [96,101] :6:"cuenca"                                   ; -- TES_STRING
+15916 [96,109]                                               ; -- TSP_COMA
+17902 [96,110] :6:"madrid"                                   ; -- TES_STRING
+15916 [96,118]                                               ; -- TSP_COMA
+17902 [96,119] :6:"toledo"                                   ; -- TES_STRING
+15916 [96,127]                                               ; -- TSP_COMA
+17902 [96,128] :6:"cuenca"                                   ; -- TES_STRING
+15916 [96,136]                                               ; -- TSP_COMA
+17902 [96,137] :6:"madrid"                                   ; -- TES_STRING
+15916 [96,145]                                               ; -- TSP_COMA
+17902 [96,146] :6:"toledo"                                   ; -- TES_STRING
+15916 [96,154]                                               ; -- TSP_COMA
+17902 [96,155] :6:"cuenca"                                   ; -- TES_STRING
+15916 [96,163]                                               ; -- TSP_COMA
+17902 [96,164] :6:"madrid"                                   ; -- TES_STRING
+15916 [96,172]                                               ; -- TSP_COMA
+17902 [96,173] :6:"toledo"                                   ; -- TES_STRING
+15916 [96,181]                                               ; -- TSP_COMA
+17902 [96,182] :6:"cuenca"                                   ; -- TES_STRING
+15916 [96,190]                                               ; -- TSP_COMA
+17902 [96,191] :6:"madrid"                                   ; -- TES_STRING
+15916 [96,199]                                               ; -- TSP_COMA
+17902 [96,200] :6:"toledo"                                   ; -- TES_STRING
+15916 [96,208]                                               ; -- TSP_COMA
+17902 [96,209] :6:"cuenca"                                   ; -- TES_STRING
+15916 [96,217]                                               ; -- TSP_COMA
+17902 [96,218] :6:"madrid"                                   ; -- TES_STRING
+15916 [96,226]                                               ; -- TSP_COMA
+17902 [96,227] :6:"toledo"                                   ; -- TES_STRING
+15916 [96,235]                                               ; -- TSP_COMA
+17902 [96,236] :6:"cuenca"                                   ; -- TES_STRING
+15916 [96,244]                                               ; -- TSP_COMA
+17902 [96,245] :6:"madrid"                                   ; -- TES_STRING
+15916 [96,253]                                               ; -- TSP_COMA
+17902 [96,254] :6:"toledo"                                   ; -- TES_STRING
+15916 [96,262]                                               ; -- TSP_COMA
+17902 [96,263] :6:"cuenca"                                   ; -- TES_STRING
+99901 [96,0]                                                 ; -- TCO_EOL
+99900 [96,0]                                                 ; -- TCO_EOF

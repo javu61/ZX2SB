@@ -19,4 +19,9 @@ Public Structure SemanticContext
 	' -----------------------------
 	Public DataNodes As List(Of DataNode)
 
+	' -----------------------------
+	' Pila del FOR
+	' -----------------------------
+	Public ListaFOR As List(Of ForNextInfo)
+
 End Structure

@@ -1,18 +1,36 @@
 ﻿Imports System.Formats
+Imports System.Text
 
 Public Module RPN
-
+    Public Const UNARY_MINUS As String = "UNARY_MINUS"
     Public Enum RPNKind
         VAR          ' Variable o símbolo (A, B$, ARR)
         CTE          ' Constante literal (5, "HELLO")
         UNARY_OP     ' Operador unario (UNARY_MINUS, NOT)
         BINARY_OP    ' Operador binario (+, -, *, AND, =, etc.)
-        FUN_CALL     ' Llamada a función o acceso a array
+        FUN_CALL     ' Llamada a función 
         ASSIGN       ' Asignación en un LET, separa L y R
-        IDX          ' Indices
+        IDX          ' Acceso a array con indices
         FOR_TO       ' TO del FOR
         FOR_STEP     ' STEP del FOR
+        DATA_SEP     ' Separador de DATA (la coma)
     End Enum
+
+    Public Function PrecedenciaFromTxt(op As String) As Integer
+        Select Case op
+
+            Case "^" : Return 7
+            Case RPN.UNARY_MINUS : Return 6
+            Case "*", "/" : Return 5
+            Case "+", "-" : Return 4
+            Case "=", "<>", "<", ">", "<=", ">=" : Return 3
+            Case "NOT" : Return 2
+            Case "AND" : Return 1
+            Case "OR" : Return 0
+
+        End Select
+        Return -1
+    End Function
 
     Public Structure RPN_Node
         Public Kind As RPNKind
@@ -51,6 +69,7 @@ Public Module RPN
             Case RPNKind.IDX : Return "I"c
             Case RPNKind.FOR_TO : Return "T"c
             Case RPNKind.FOR_STEP : Return "S"c
+            Case RPNKind.DATA_SEP : Return "M"c
         End Select
         Return CChar(Constantes.CADENAVACIA)
     End Function
@@ -59,8 +78,6 @@ Public Module RPN
     ' ============================================================
     ' Procesar el RPN
     ' ============================================================
-
-
     Public Function ParseRPN(text As String) As List(Of RPN.RPN_Node)
 
         Dim rpn As New List(Of RPN.RPN_Node)
@@ -81,13 +98,13 @@ Public Module RPN
             If i >= text.Length Then Exit While
 
             ' --- tipo de nodo ---
-            Dim kindLetter As Char = text(i)
+            Dim KindRecibido As Char = text(i)
             i += 1
 
             ' --- esperar '(' ---
             If i >= text.Length OrElse text(i) <> "("c Then
                 Throw New FormatException(
-                $"IR: ParseRPN inválido: esperaba '(' tras '{kindLetter}'")
+                $"IR: ParseRPN inválido: esperaba '(' tras '{KindRecibido}'")
             End If
 
             i += 1 ' consumir '('
@@ -118,7 +135,7 @@ Public Module RPN
             i += 1 ' consumir ')'
 
             ' --- construir nodo ---
-            Select Case kindLetter
+            Select Case KindRecibido
 
                 Case GetKindLetter(RPNKind.ASSIGN)
                     rpn.Add(New RPN_Node With {
@@ -141,15 +158,13 @@ Public Module RPN
                 Case GetKindLetter(RPNKind.UNARY_OP)
                     rpn.Add(New RPN_Node With {
                         .Kind = RPNKind.UNARY_OP,
-                        .Value = content,
-                        .Arity = 1
+                        .Value = content
                     })
 
                 Case GetKindLetter(RPNKind.BINARY_OP)
                     rpn.Add(New RPN_Node With {
                         .Kind = RPNKind.BINARY_OP,
-                        .Value = content,
-                        .Arity = 2
+                        .Value = content
                     })
 
                 Case GetKindLetter(RPNKind.FUN_CALL)
@@ -166,7 +181,7 @@ Public Module RPN
                     rpn.Add(New RPN_Node With {
                         .Kind = RPNKind.IDX,
                         .Value = "",
-                        .Arity = parts.Count
+                        .Arity = Integer.Parse(parts(0))
                     })
 
                 Case GetKindLetter(RPNKind.FOR_TO)
@@ -184,8 +199,17 @@ Public Module RPN
                             .Kind = RPNKind.FOR_STEP,
                             .Value = content
                         })
+
+
+                Case GetKindLetter(RPNKind.DATA_SEP)   ' separación DATA
+                    rpn.Add(New RPN_Node With {
+                            .Kind = RPNKind.DATA_SEP,
+                            .Value = ",",
+                            .Arity = 0
+                        })
+
                 Case Else
-                    Throw New FormatException($"IR RPN inválido: tipo desconocido '{kindLetter}'")
+                    Throw New FormatException($"IR RPN inválido: tipo desconocido '{KindRecibido}'")
 
             End Select
 
@@ -195,7 +219,6 @@ Public Module RPN
 
     End Function
 
-
     Public Function RPNToInfix(rpn As List(Of RPN_Node)) As String
 
         If rpn Is Nothing OrElse rpn.Count = 0 Then
@@ -203,6 +226,12 @@ Public Module RPN
         End If
 
         Dim stack As New Stack(Of String)
+
+        Dim z As New StringBuilder
+
+        For Each n In rpn
+            z.Append($"{n.Kind}_{n.Value}_{n.Arity}:")
+        Next
 
         For Each n In rpn
 
@@ -216,17 +245,38 @@ Public Module RPN
 
                 Case RPNKind.BINARY_OP
                     If stack.Count < 2 Then Continue For
+
                     Dim b = stack.Pop()
                     Dim a = stack.Pop()
-                    stack.Push($"{a}{n.Value}{b}")
+                    Dim op = n.Value.ToUpperInvariant()
+
+
+                    Dim precOp = GetPrecedence(op)
+
+                    ' ✅ Extraer operadores si los hay (simple detección)
+                    Dim aNeedsParens = ExtraerPrecedencia(a) < precOp
+                    Dim bNeedsParens = ExtraerPrecedencia(b) < precOp
+
+                    If aNeedsParens Then a = $"({a})"
+                    If bNeedsParens Then b = $"({b})"
+
+                    If op = "AND" OrElse op = "OR" OrElse op = "XOR" Then
+                        stack.Push($"{a} {op} {b}")
+                    Else
+                        stack.Push($"{a}{op}{b}")
+                    End If
+
+                    ' Opcional: añadir paréntesis para prevenir problemas de precedencia
+
 
                 Case RPNKind.UNARY_OP
                     If stack.Count < 1 Then Continue For
+
                     Dim a = stack.Pop()
+                    If n.Value = UNARY_MINUS Then n.Value = "-"
                     stack.Push($"{n.Value}{a}")
 
                 Case RPNKind.FUN_CALL
-                    ' Función tipo F(c,1)
                     Dim args As New List(Of String)
 
                     For i As Integer = 1 To n.Arity
@@ -235,140 +285,66 @@ Public Module RPN
                         End If
                     Next
 
-                    stack.Push($"{n.Value}({String.Join(",", args)})")
+                    Dim aux As String = $"{GetNombreFuncion(n.Value)}"
+                    If args.Count <> 0 Then
+                        aux &= $"({String.Join(",", args)})"
+                    End If
+                    stack.Push(aux)
 
                 Case RPNKind.IDX
-                    ' IDX → array A(i,j)
                     Dim args As New List(Of String)
 
+                    ' sacar argumentos (z*4+f, bx+c+5)
                     For i As Integer = 1 To n.Arity
-                        If stack.Count > 0 Then
-                            args.Insert(0, stack.Pop())
-                        End If
+                        Dim st As String = stack.Pop()
+                        args.Insert(0, st)
                     Next
 
-                    ' El nombre base de la variable está justo antes
-                    If stack.Count > 0 Then
-                        Dim arr = stack.Pop()
-                        stack.Push($"{arr}({String.Join(",", args)})")
-                    End If
+                    ' baseVar SIEMPRE es el siguiente
+                    If stack.Count = 0 Then Continue For
 
+                    Dim baseVar = stack.Pop()
+
+                    ' construir correctamente
+                    stack.Push($"{baseVar}({String.Join(",", args)})")
             End Select
 
         Next
 
-        Return If(stack.Count > 0, stack.Pop(), "")
+        If (stack.Count > 0) Then Return stack.Pop() Else Return ""
 
     End Function
 
-    Public Function RPN_To_Infix(expr As String) As String
+    Private Function GetNombreFuncion(nombre As String) As String
+        Dim tkid As TokenID
 
-        Dim stack As New Stack(Of String)
-
-        ' Tokenizar por espacios de nivel superior
-        Dim tokens As List(Of String) = TokenizarRPN(expr)
-
-        For Each tk In tokens
-
-            ' --------------------------
-            ' Variable: V(x)
-            ' --------------------------
-            If tk.StartsWith("V(") Then
-                stack.Push(ExtraerContenido(tk))
-
-                ' --------------------------
-                ' Constante: C(n)
-                ' --------------------------
-            ElseIf tk.StartsWith("C(") Then
-                stack.Push(ExtraerContenido(tk))
-
-                ' --------------------------
-                ' Operador binario: B(+), B(*), B(^)...
-                ' --------------------------
-            ElseIf tk.StartsWith("B(") Then
-                Dim op As String = ExtraerContenido(tk)
-                Dim rhs As String = stack.Pop()
-                Dim lhs As String = stack.Pop()
-                stack.Push($"{lhs}{op}{rhs}")
-
-                ' --------------------------
-                ' Función: F(nombre,argc)
-                ' --------------------------
-            ElseIf tk.StartsWith("F(") Then
-                Dim inner As String = ExtraerContenido(tk)
-                Dim parts = inner.Split(Constantes.C_COMA)
-                Dim fname As String = parts(0)
-                Dim argc As Integer = Integer.Parse(parts(1))
-
-                Dim args As New List(Of String)
-                For i As Integer = 1 To argc
-                    args.Insert(0, stack.Pop())
-                Next
-
-                stack.Push($"{fname}({String.Join(Constantes.C_COMA, args)})")
-
-                ' --------------------------
-                ' I(...) → índices de array
-                ' --------------------------
-            ElseIf tk.StartsWith("I(") Then
-                Dim inner As String = ExtraerContenido(tk)
-
-                ' Separar índices de nivel superior
-                Dim indices = SplitTopLevel(inner, Constantes.C_COMA)
-                Dim idxExpr As New List(Of String)
-
-                For Each idx In indices
-                    idxExpr.Add(RPN_To_Infix(idx.Trim()))
-                Next
-
-                Dim baseVar As String = stack.Pop()
-                stack.Push($"{baseVar}({String.Join(Constantes.C_COMA, idxExpr)})")
-
-            Else
-                Throw New Exception($"Token RPN desconocido: {tk}")
-            End If
-
-        Next
-
-        If stack.Count <> 1 Then
-            Throw New Exception("RPN inválida: pila no reducida a 1 elemento")
+        If [Enum].TryParse(nombre, True, tkid) Then
+            Dim tk As New Token(tkid)
+            Return (tk.Mnemonic)
         End If
 
-        Return stack.Pop()
+        Return "ERROR_EN: nombre"
+    End Function
+    Private Function GetPrecedence(op As String) As Integer
+        Select Case op.ToUpperInvariant()
+            Case "^" : Return 4
+            Case "*", "/" : Return 3
+            Case "+", "-" : Return 2
+            Case "AND", "OR", "XOR" : Return 1
+            Case Else : Return 0
+        End Select
     End Function
 
-    Private Function TokenizarRPN(text As String) As List(Of String)
-        Dim res As New List(Of String)
-        Dim level As Integer = 0
-        Dim start As Integer = 0
 
-        For i As Integer = 0 To text.Length - 1
-            Select Case text(i)
-                Case Constantes.C_PAR_CIE
-                    level += 1
-                Case Constantes.C_PAR_CIE
-                    level -= 1
-                Case Constantes.C_ESPACIO
-                    If level = 0 Then
-                        res.Add(text.Substring(start, i - start).Trim())
-                        start = i + 1
-                    End If
-            End Select
-        Next
+    Private Function ExtraerPrecedencia(expr As String) As Integer
 
-        If start < text.Length Then
-            res.Add(text.Substring(start).Trim())
-        End If
+        ' heurística simple (suficiente para tu caso actual)
+        If expr.Contains("+") OrElse expr.Contains("-") Then Return 2
+        If expr.Contains("*") OrElse expr.Contains("/") Then Return 3
+        If expr.Contains("^") Then Return 4
 
-        Return res.Where(Function(s) s <> "").ToList()
+        Return 5 ' literal o función
     End Function
-
-    Private Function ExtraerContenido(tk As String) As String
-        Dim p1 = tk.IndexOf(Constantes.C_PAR_APE)
-        Dim p2 = tk.LastIndexOf(Constantes.C_PAR_CIE)
-        Return tk.Substring(p1 + 1, p2 - p1 - 1)
-    End Function
-
 
     Private Function SplitTopLevel(text As String, separator As Char) As List(Of String)
         Dim result As New List(Of String)
@@ -397,6 +373,26 @@ Public Module RPN
         End If
 
         Return result
+    End Function
+
+    Public Function RPN_ToText(rpn As List(Of RPN.RPN_Node)) As String
+        Dim sb As New StringBuilder()
+        If rpn IsNot Nothing AndAlso rpn.Count <> 0 Then
+            For Each n In rpn
+                'La letra siempre se usará
+                sb.Append($"{GetKindLetter(n.Kind)}")
+                'El contenido depende de lo que esté definido
+                If (n.Value <> "" And n.Arity <> 0) Then
+                    sb.Append($"({n.Value},{n.Arity}) ")
+                ElseIf (n.Value = "" And n.Arity <> 0) Then
+                    sb.Append($"({n.Arity}) ")
+                ElseIf (n.Value <> "" And n.Arity = 0) Then
+                    sb.Append($"({n.Value}) ")
+                End If
+            Next
+        End If
+
+        Return sb.ToString().Trim()
     End Function
 
 End Module

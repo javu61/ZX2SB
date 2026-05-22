@@ -277,16 +277,15 @@ Public Module Lexer
             Return Nothing
         End If
 
-        Dim upper As String = lexeme.ToUpperInvariant()
         Dim id As TokenID
 
         ' Palabra reservada
-        If ReservedWords.GetTokenID(upper, id) Then
+        If Token.GetTokenID(lexeme, id) Then
             Return New Token(id, "", NroLineaFichero, col)
         End If
 
         ' Identificador normal
-        Return New Token(TokenID.TES_IDENT, upper.ToLowerInvariant(), NroLineaFichero, col)
+        Return New Token(TokenID.TES_IDENT, lexeme.ToLowerInvariant(), NroLineaFichero, col)
 
     End Function
 
@@ -328,7 +327,9 @@ Public Module Lexer
             Return New Token(TokenID.TCO_UNKNOWN, "", -1, -1)
         End If
 
-        Return New Token(TokenID.TES_STRING, sb.ToString(), NroLineaFichero, col)
+        Dim cadena As String = $":{sb.Length}:{Constantes.C_COMILLAS}{sb.ToString}{Constantes.C_COMILLAS}"
+
+        Return New Token(TokenID.TES_STRING, cadena, NroLineaFichero, col)
 
     End Function
 
@@ -354,7 +355,9 @@ Public Module Lexer
         Dim tRem As New Token(TokenID.TK_REM, "", NroLineaFichero, col)
 
         ' Token STRING con el texto del comentario
-        Dim tCom As New Token(TokenID.TES_STRING, texto, NroLineaFichero, pos + 1)
+        Dim cadena As String = $":{texto.Length}:{Constantes.C_COMILLAS}{texto.ToString}{Constantes.C_COMILLAS}"
+
+        Dim tCom As New Token(TokenID.TES_STRING, cadena, NroLineaFichero, pos + 1)
 
         GuardaToken(tRem)
         GuardaToken(tCom)
@@ -410,6 +413,8 @@ Public Module Lexer
             Case ","c : Return New Token(TokenID.TSP_COMA, "", NroLineaFichero, col)
             Case ";"c : Return New Token(TokenID.TSP_PUNTOYCOMA, "", NroLineaFichero, col)
             Case ":"c : Return New Token(TokenID.TSP_DOSPUNTOS, "", NroLineaFichero, col)
+
+            Case "#"c : Return New Token(TokenID.TK_CANAL, "", NroLineaFichero, col)
 
             Case Else
                 ErrorLexico(col, "Carácter no válido: '" & c & "'")
